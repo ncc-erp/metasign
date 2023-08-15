@@ -1,0 +1,87 @@
+.card {
+  height: 100%;
+  margin-bottom: 0;
+  box-shadow: none;
+
+}
+
+.card-header h2{
+    margin: 0 !important;
+}
+
+.card-header i {
+    font-size: 30px;
+}
+
+::ng-deep .mat-dialog-container{
+    padding: 0 !important;
+    box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2) !important;
+    border-radius: 10px;
+}
+
+#btn-download
+{
+    background-color: var(--primary-color) !important;
+    color: white;
+  
+}
+
+
+
+#btn-download + p{
+    font-size: 20px;
+    cursor: pointer;
+}
+
+::ng-deep .mat-button-wrapper
+{
+  font-size: 15px !important;
+}
+
+#btn-confim{
+    margin-left: auto;
+    display: block;
+    color: white;
+    background-color: var(--primary-color) !important;
+    margin-left: auto;
+}
+
+.card-header i{
+    margin-left: auto;
+}
+
+.card-header i:hover{
+    color: var(--primary-color) !important;
+    cursor: pointer;
+    transition: 0.4s;
+}
+
+.card-bottom{
+    padding: 0.75rem 1.25rem;
+    background-color: #f5f5f5;
+    justify-content: space-between;
+}
+
+.dialog_content{
+    font-size: 16px;
+}
+#btn-vaid{
+
+    background-color: #3498db;
+    padding: 8px;
+    border-radius: 5px;
+    color: #ffffff;
+    border: none;
+
+}
+
+#btn-vaid:hover{
+    background-color: #0688df;
+    transition: 0.3s;
+
+}
+
+.card_body--box{
+    
+    text-align: center;
+}

@@ -1,0 +1,293 @@
+<form
+  class="form-horizontal"
+  autocomplete="off"
+  #editRoleForm="ngForm"
+  id="edit-role-dialog"
+>
+  <!-- (ngSubmit)="onSaveClick()" -->
+  <abp-modal-header
+    [title]="'EditRole' | ecTranslate"
+    (onCloseClick)="bsModalRef.hide()"
+  ></abp-modal-header>
+  <div class="modal-body">
+    <tabset>
+      <tab [heading]="'Details' | ecTranslate" class="pt-3 px-2">
+        <div class="form-group row required">
+          <label class="col-md-3 col-form-label" for="name">
+            {{ "Name" | ecTranslate }}
+          </label>
+          <div class="col-md-9">
+            <input
+              type="text"
+              class="form-control"
+              name="name"
+              id="name"
+              required
+              minlength="2"
+              maxlength="32"
+              [(ngModel)]="role.name"
+              #nameModel="ngModel"
+              #nameEl
+            />
+            <abp-validation-summary
+              [control]="nameModel"
+              [controlEl]="nameEl"
+            ></abp-validation-summary>
+          </div>
+        </div>
+        <div class="form-group row required">
+          <label class="col-md-3 col-form-label" for="displayName">
+            {{ "DisplayName" | ecTranslate }}
+          </label>
+          <div class="col-md-9">
+            <input
+              type="text"
+              class="form-control"
+              name="displayName"
+              id="displayName"
+              required
+              minlength="2"
+              maxlength="32"
+              [(ngModel)]="role.displayName"
+              #displayNameModel="ngModel"
+              #displayNameEl
+            />
+            <abp-validation-summary
+              [control]="displayNameModel"
+              [controlEl]="displayNameEl"
+            ></abp-validation-summary>
+          </div>
+        </div>
+        <div class="form-group row mb-0">
+          <label class="col-md-3 col-form-label" for="description">
+            {{ "RoleDescription" | ecTranslate }}
+          </label>
+          <div class="col-md-9">
+            <textarea
+              type="text"
+              class="form-control"
+              name="description"
+              id="description"
+              [(ngModel)]="role.description"
+            >
+            </textarea>
+          </div>
+        </div>
+      </tab>
+      <!-- TAB PERMISSIONS -->
+      <tab [heading]="'Permissions' | ecTranslate" class="pt-3 px-2 test" sty>
+        <br />
+        <div class="row-fluid">
+          <div class="col-md-12">
+            <mat-tree
+              [dataSource]="dataSource"
+              [treeControl]="treeControl"
+              class="example-tree"
+            >
+              <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
+                <li class="mat-tree-node">
+                  <!-- <button mat-icon-button disabled></button> -->
+                  <div class="spinner" *ngIf="node.isTableLoading">
+                    <mat-spinner
+                      [diameter]="16"
+                      style="margin-right: 8px"
+                    ></mat-spinner
+                    >{{ node.displayName | ecTranslate }}
+                  </div>
+                  <mat-checkbox
+                    [ngClass]="node.childrens == null ? 'noChild' : ''"
+                    color="primary"
+                    *ngIf="!node.isTableLoading"
+                    [disabled]="isStatic"
+                    [checked]="isSelected(node)"
+                    (change)="todoLeafItemSelectionToggle(node)"
+                  >
+                    {{ node.displayName | ecTranslate }}</mat-checkbox
+                  >
+                </li>
+              </mat-tree-node>
+              <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+                <li>
+                  <div class="mat-tree-node">
+                    <button
+                      mat-icon-button
+                      matTreeNodeToggle
+                      [attr.aria-label]="'Toggle '"
+                    >
+                      <mat-icon class="mat-icon-rtl-mirror">
+                        {{
+                          !treeControl.isExpanded(node)
+                            ? "expand_more"
+                            : "chevron_right"
+                        }}
+                      </mat-icon>
+                    </button>
+                    <div class="spinner" *ngIf="node.isTableLoading">
+                      <mat-spinner
+                        [diameter]="16"
+                        style="margin-right: 8px"
+                      ></mat-spinner
+                      >{{ node.displayName | ecTranslate }}
+                    </div>
+                    <mat-checkbox
+                      color="primary"
+                      *ngIf="!node.isTableLoading"
+                      [disabled]="isStatic"
+                      [checked]="descendantsAllSelected(node)"
+                      [indeterminate]="descendantsPartiallySelected(node)"
+                      (change)="todoItemSelectionToggle(node)"
+                    >
+                      {{ node.displayName | ecTranslate }}</mat-checkbox
+                    >
+                  </div>
+                  <ul
+                    [class.example-tree-invisible]="
+                      treeControl.isExpanded(node)
+                    "
+                  >
+                    <ng-container matTreeNodeOutlet></ng-container>
+                  </ul>
+                </li>
+              </mat-nested-tree-node>
+            </mat-tree>
+          </div>
+        </div>
+      </tab>
+      <tab [heading]="'Users' | ecTranslate" class="pt-3 px-2">
+        <div>
+          <section class="row-fluid content-header">
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-6 text-left">
+                  <div *ngIf="!isAdding; else addTemp">
+                    <button class="btn bg-blue" (click)="onAdd()">
+                      <i class="fa fa-plus-square"></i>
+                      {{ "Create" | ecTranslate }}
+                    </button>
+                  </div>
+                  <ng-template class="select" #addTemp>
+                    <form autocomplete="off" #addUser="ngForm">
+                      <div class="d-flex">
+                        <!-- <mat-form-field appearance="outline" class="w-100"> -->
+                        <select
+                          id="selectUser"
+                          class="browser-default custom-select selectpicker"
+                          (change)="selectUser($event)"
+                          name="user"
+                          required
+                          aria-label="Default select example"
+                          default-option="abc"
+                        >
+                          <option value="" selected hidden>
+                            {{"SelectUser" | ecTranslate}}
+                          </option>
+                          <option
+                            *ngFor="let user of listUsersNotInRole"
+                            [value]="user.userId"
+                          >
+                            {{ user.userName }} a
+                          </option>
+                        </select>
+
+                        <!-- <select
+                          [(ngModel)]="inputToAddUser.userId"
+                          #userSelect="ngModel"
+                          name="user"
+                          placeholder="Chọn Người dùng"
+                          required
+                        >
+                          <option
+                            *ngFor="let user of listUsersNotInRole"
+                            [value]="user.userId"
+                          >
+                            {{ user.userName }}
+                          </option>
+                        </select> -->
+                        <!-- </mat-form-field> -->
+                        <div class="form-group row required ml-1 mb-0"></div>
+                        <div class="d-flex ml-3">
+                          <button
+                            class="btn px-0"
+                            [disabled]="isLoading || !addUser.valid"
+                            (click)="onAddToRole()"
+                          >
+                            <i
+                              class="fas fa-check text-success mr-2"
+                              style="font-size: 28px"
+                            ></i>
+                          </button>
+                          <button class="btn px-0" (click)="onCancel()">
+                            <i
+                              class="fas fa-times text-danger"
+                              style="font-size: 28px"
+                            ></i>
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  </ng-template>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="content px-2">
+            <div class="container-fluid">
+              <div class="card">
+                <div class="card-body table-responsive p-0 mb-0">
+                  <div class="fixedHeader mb-0">
+                    <table
+                      class="table table-hover text-nowrap mb-0"
+                      [busy]="isLoading"
+                    >
+                      <thead class="bg-light">
+                        <tr>
+                          <th style="width: 50px">{{ "No" | ecTranslate }}</th>
+                          <th>{{ "User" | ecTranslate }}</th>
+                          <th>
+                            {{ "Email" | ecTranslate }}
+                          </th>
+                          <th style="width: 150px; text-align: center">
+                            {{ "Actions" | ecTranslate }}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr
+                          *ngFor="let user of listUsersInRole; let ind = index"
+                        >
+                          <td class="text-center">{{ ind + 1 }}</td>
+                          <td>
+                            <span class="ml-2">{{ user.userName }}</span>
+                          </td>
+                          <td>
+                            <span class="">{{ user.emailAddress }}</span>
+                          </td>
+                          <td class="text-center">
+                            <button
+                              class="btn btn-danger my-2"
+                              (click)="onRemoveUserFromRole(user)"
+                              [disabled]="isLoading"
+                            >
+                            {{ "Remove" | ecTranslate }}
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </tab>
+    </tabset>
+    <abp-modal-footer
+      [cancelDisabled]="saving"
+      [saveDisabled]="!editRoleForm.form.valid || saving"
+      (onCancelClick)="bsModalRef.hide()"
+      (onSaveClick)="onSaveClick()"
+    >
+    </abp-modal-footer>
+  </div>
+</form>

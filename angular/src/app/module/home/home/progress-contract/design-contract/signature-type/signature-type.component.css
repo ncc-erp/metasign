@@ -1,0 +1,132 @@
+.signature_type {
+  border-radius: 7px;
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background-color: rgb(255, 214, 91);
+  border: 3px solid #d1cbcb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+}
+
+.text_type {
+  border-radius: 3px;
+  position: absolute;
+  background-color: transparent;
+  border: 2px solid #d1cbcb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+}
+
+.focus_Signature {
+  border: 3px solid #026351;
+  outline: none;
+}
+
+.text-area {
+  resize: none;
+  outline: none;
+  padding: 0;
+  height: auto;
+  overflow: hidden;
+  border: none;
+  padding: 8px 6px;
+  box-sizing: border-box;
+}
+
+.input-date {
+  padding: 0 6px;
+}
+
+.signature_type--delete {
+  cursor: pointer;
+  color: white;
+  padding: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  font-size: 12px;
+  position: absolute;
+  background-color: #026351;
+  width: 10px;
+  height: 10px;
+  width: 10px;
+  right: -17px;
+  top: -17px;
+}
+
+.signature_type--delete:hover {
+  transition: 0.3s;
+  background-color: #e74c3c;
+}
+
+.move_pointer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  cursor: move;
+  width: 24px;
+  height: 24px;
+}
+
+.signature_container {
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.signature_type--icon img {
+  width: 44px;
+}
+
+.tooltip_signer {
+  padding: 20px;
+  font-size: 15px;
+  color: #e74c3c;
+}
+
+mat-icon {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.bottom-right {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 16px;
+  height: 18px;
+}
+
+.bottom-right:hover {
+  cursor: nw-resize;
+}
+
+::ng-deep .mat-tooltip {
+  white-space: pre-line !important;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.input:focus {
+  outline: none;
+}
+
+::ng-deep .mat-icon-button {
+  width: 24px;
+  height: 24px;
+  transform: translate(-5px, -5px);
+}

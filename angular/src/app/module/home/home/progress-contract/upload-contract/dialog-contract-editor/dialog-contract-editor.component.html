@@ -1,0 +1,32 @@
+<ng-template #contractPreview>
+  <div class="wrapper_editor">
+    <abp-modal-header
+      title="Tạo mẫu hợp đồng"
+      (onCloseClick)="dialogRef.close()"
+    ></abp-modal-header>
+    <editor
+      id="wrapper_editor--content"
+      [init]="{
+        menubar: true,
+        resize: false,
+        plugins: ['table', 'code', 'preview', 'media', 'image', 'template'],
+        toolbars: ['image']
+      }"
+      [(ngModel)]="contractTemplate"
+    >
+    </editor>
+
+    <div class="editor_footer">
+      <button
+        (click)="handleSaveContractTemplate()"
+        type="button"
+        class="btn btn-primary btn_action--save"
+      >
+        Lưu
+      </button>
+    </div>
+  </div>
+</ng-template>
+<div *ngIf="loadingTemplate; else contractPreview" class="loadding_page">
+  <mat-spinner></mat-spinner>
+</div>

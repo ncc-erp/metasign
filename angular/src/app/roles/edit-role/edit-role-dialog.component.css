@@ -1,0 +1,182 @@
+.example-tree-invisible {
+  display: none;
+}
+
+.example-tree ul,
+.example-tree li {
+  margin-top: 0;
+  margin-bottom: 0;
+  list-style-type: none;
+}
+.example-tree button {
+  background: transparent;
+}
+.inline {
+  display: inline-block !important;
+}
+.tab-modal {
+  height: 70vh;
+}
+.mat-dialog-content {
+  max-height: 70vh;
+  width: 70vw;
+}
+.mat-tab {
+  width: 70vw;
+}
+
+.m-l-11i {
+  margin-left: 11px !important;
+}
+.mat-tab-body-content.ng-trigger.ng-trigger-translateTab {
+  overflow: inherit !important;
+}
+.mat-form-field-infix {
+  padding: 0.5em 0 1em 0;
+}
+.row-mar-0 {
+  margin-right: 0px;
+  margin-left: 0px;
+}
+.test{
+  height: 500px;
+  overflow-y: auto;
+}
+.spinner {
+  display: flex;
+  font-size: 14px;
+  font-weight: 700;
+  height: 25px;
+}
+
+.i-check {
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+.i-check input {
+  display: none;
+}
+.i-check span {
+  display: block;
+  position: relative;
+  padding: 10px;
+  border: solid 1px #c1c1c1;
+  width: 100%;
+  border-radius: 5px;
+}
+.i-check input:checked + span {
+  border-color: #f36c00;
+  background: #f36c00;
+  color: white;
+}
+
+.table tbody tr td {
+  padding: 5px 0px 0 0px !important;
+  vertical-align: middle;
+}
+
+.member-status-label {
+  margin-left: 10px;
+  vertical-align: text-top;
+  border-radius: 2px;
+}
+::ng-deep #edit-role-dialog .label {
+  margin: 0 !important;
+}
+.w-40vw {
+  width: 16vw !important;
+}
+
+.mr-left {
+  margin-left: 10px;
+}
+
+.btn-back {
+  position: absolute;
+  top: 10px;
+  right: 50px;
+  z-index: 1;
+}
+
+.user-table {
+  padding: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.title {
+  font-size: 20px;
+}
+
+@media (max-width: 990px) {
+  .mat-dialog-content {
+    max-height: 70vh;
+    width: 80vw;
+  }
+  .mat-tab {
+    width: 80vw;
+  }
+  .test {
+    font-size: 14px;
+  }
+}
+@media (max-width: 768px) {
+  .table-responsive > .table {
+    width: 550px !important;
+  }
+  .table-responsive .mat-expansion-panel {
+    width: 550px;
+  }
+}
+
+::ng-deep #edit-role-dialog mat-checkbox .mat-checkbox-layout {
+  white-space: normal !important;
+}
+
+::ng-deep #edit-role-dialog .modal {
+  z-index: 121;
+}
+::ng-deep #edit-role-dialog .modal-backdrop {
+  z-index: 120;
+}
+.left {
+  float: left;
+  cursor: pointer;
+}
+.right {
+  float: right;
+  cursor: pointer;
+}
+.noChild {
+  margin-left: 20px;
+}
+.modal-body {
+  max-height: 82vh !important;
+  overflow: auto;
+}
+.modal-open .modal {
+  overflow-x: hidden;
+}
+.center-y {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+.fixedHeader {
+  max-height: 60vh;
+}
+.fixedHeader thead {
+  position: sticky;
+  top: -1px;
+  z-index: 2;
+}
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-infix {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+.d-flex {
+  display: flex;
+}
+
+

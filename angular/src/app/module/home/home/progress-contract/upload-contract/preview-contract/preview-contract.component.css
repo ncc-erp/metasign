@@ -1,0 +1,60 @@
+::ng-deep #header .modal-header {
+  padding: 0 !important;
+}
+
+::ng-deep #header .modal-header .modal-title {
+  transform: translateY(-4px) !important;
+}
+::ng-deep #header .modal-header .close {
+  transform: translateY(-16px) !important;
+}
+
+.wrapper {
+  position: relative;
+  height: 77vh;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 2px 0px;
+  padding: 40px;
+  background-color: rgb(233, 233, 233);
+  overflow: auto;
+}
+
+.spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#design_viewer img {
+  width: 100%;
+  object-fit: cover;
+}
+
+.design_viewer--img:not(:first-child) {
+  margin-top: 20px;
+}
+
+::ng-deep .mat-dialog-container {
+  padding: 24px;
+}
+.preview-icon {
+  object-fit: contain !important;
+  border: 3px #026351 solid;
+  border-radius: 7px;
+  padding: 8px;
+}
+
+.text-area {
+  background-color: transparent;
+  overflow: hidden;
+}
+
+.value-date {
+  display: flex;
+  align-items: center;
+  padding: 4.5px 7px;
+}
+
+.value-input {
+  padding: 4px 7px;
+}

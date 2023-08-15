@@ -1,0 +1,115 @@
+<form
+  class="form-horizontal"
+  autocomplete="off"
+  #createEditContactForm="ngForm"
+  id="create-edit-contact-dialog"
+  (ngSubmit)="onSaveClick()"
+>
+  <abp-modal-header
+    [title]="
+      initContact
+        ? ('EditCustomerInformation' | ecTranslate)
+        : ('AddNewCustomer' | ecTranslate)
+    "
+    (onCloseClick)="bsModalRef.hide()"
+  ></abp-modal-header>
+  <div class="modal-body">
+    <div class="form-group row required">
+      <label class="col-md-3 col-form-label" for="name">
+        {{ "CustomerName" | ecTranslate }}
+      </label>
+      <div class="col-md-9">
+        <input
+          type="text"
+          class="form-control"
+          name="customerName"
+          id="customerName"
+          required
+          minlength="2"
+          #customerNameEl
+          [(ngModel)]="contact.customerName"
+          #customerNameModel="ngModel"
+          aria-required="Điền đầy đủ tên khách hàng!"
+        />
+        <abp-validation-summary
+          [control]="customerNameModel"
+          [controlEl]="customerNameEl"
+        ></abp-validation-summary>
+      </div>
+    </div>
+    <div class="form-group row required">
+      <label class="col-md-3 col-form-label" for="displayName">
+        {{ "Contact Number" | ecTranslate }}
+      </label>
+      <div class="col-md-9">
+        <input
+          type="tel"
+          class="form-control"
+          name="phone"
+          id="phone"
+          inputmode="numeric"
+          required
+          minlength="1"
+          #phoneEl
+          [(ngModel)]="contact.phone"
+          (keypress)="handlePhoneNumber($event)"
+          #phoneModel="ngModel"
+        />
+        <abp-validation-summary
+          [control]="phoneModel"
+          [controlEl]="phoneEl"
+        ></abp-validation-summary>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label class="col-md-3 col-form-label" for="displayName">
+        {{ "CompanyOrOrganization" | ecTranslate }}
+      </label>
+      <div class="col-md-9">
+        <input
+          type="text"
+          class="form-control"
+          name="companyName"
+          id="companyName"
+          minlength="1"
+          #companyNameEl
+          [(ngModel)]="contact.companyName"
+          #companyNameModel="ngModel"
+        />
+        <abp-validation-summary
+          [control]="companyNameModel"
+          [controlEl]="companyNameEl"
+        ></abp-validation-summary>
+      </div>
+    </div>
+    <div class="form-group row required">
+      <label class="col-md-3 col-form-label" for="displayName">
+        {{ "Email" | ecTranslate }}
+      </label>
+      <div class="col-md-9">
+        <input
+          class="form-control"
+          name="email"
+          id="email"
+          pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+          type="email"
+          required
+          minlength="2"
+          #emailEl
+          [(ngModel)]="contact.email"
+          #emailModel="ngModel"
+        />
+        <abp-validation-summary
+          [control]="emailModel"
+          [controlEl]="emailEl"
+        ></abp-validation-summary>
+      </div>
+    </div>
+  </div>
+  <abp-modal-footer
+    [cancelDisabled]="saving"
+    [saveDisabled]="!createEditContactForm.form.valid || saving"
+    (onCancelClick)="bsModalRef.hide()"
+    (onSaveClick)="onSaveClick()"
+  ></abp-modal-footer>
+</form>

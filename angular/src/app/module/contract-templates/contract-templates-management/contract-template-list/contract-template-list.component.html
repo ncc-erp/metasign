@@ -1,0 +1,177 @@
+<div [busy]="isTableLoading" id="table_wapper">
+  <header  class="header_content">
+    <div class="row">
+      <div class="col-md-6">
+        <h3>
+        {{titleContractTemplate | ecTranslate}}
+        </h3>
+      </div>
+      <div class="col-md-6">
+        <mat-form-field
+          id="search"
+          class="search-contract float-right"
+          appearance="outline"
+          style="width: 60%"
+        >
+          <span matPrefix>
+            <i
+              class="fa-solid fa-magnifying-glass icon-search pr-2"
+              style="transform: translateY(-5px)"
+            ></i
+          ></span>
+          <input
+            matInput
+            [placeholder]="'SreachByTemplateName' | ecTranslate "
+            [(ngModel)]="searchText"
+            (keyup.enter)="getDataPage(1)"
+          />
+        </mat-form-field>
+      </div>
+    </div>
+  </header>
+
+  <table class="table table_header">
+    <thead class="head-table bg-light">
+      <tr>
+        <th [style.width.px]="column.width"  *ngFor="let column of contractTemplateTableColumn" class="head-table-item text-color-title">
+          {{ column.name  | ecTranslate }}
+          <ng-container [ngSwitch]="column.status">
+            <span class="head_icon" *ngIf="column.isCheckedSort" (click)="handleSortTable(column.id)">
+              <i  *ngSwitchCase="checkTableSort.Default" class="fas fa-sort"></i>
+              <i  *ngSwitchCase="checkTableSort.Up" class="fas fa-sort-amount-up"></i>
+              <i  *ngSwitchCase="checkTableSort.Down" class="fas fa-sort-amount-down"></i>
+            </span>
+        </ng-container>
+        </th>
+        <th class="head-table-item text-color-title"></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr
+        *ngIf="contractTemplateList?.length === 0; else elseBlock"
+        class="w-100"
+      >
+        <td colspan="7" class="text-not-data text-center messTable">
+          <span>{{messTable | ecTranslate}}</span>
+        </td>
+      </tr>
+
+      <ng-template #elseBlock>
+        <tr
+          *ngFor="
+            let contractTemplate of contractTemplateList
+              | paginate
+                : {
+                    id: 'server',
+                    itemsPerPage: pageSize,
+                    currentPage: pageNumber,
+                    totalItems: totalItems
+                  };
+            let i = index
+          "
+          class="text-color"
+        >
+          <td>{{ contractTemplate.position }}</td>
+          <td >{{ contractTemplate.name }}</td>
+          <td>
+            {{ contractTemplate.creationTime | formatDateHourSeconds  }}
+          </td>
+          <td class="contract_name">
+            {{
+              contractTemplate.lastModifycationTime
+                | formatDateHourSeconds 
+            }}
+          </td>
+          <td>
+            <button id="btn_action" mat-icon-button [matMenuTriggerFor]="menu">
+              <i class="fa-solid fa-bars icon-menu"></i>
+            </button>
+
+            <mat-menu #menu="matMenu">
+              <ng-container [ngSwitch]="contractTemplate.type">
+                <ng-container *ngSwitchCase="contractCategory.Me">
+                  <button
+                  (click)="handleUseContractTemplate(contractTemplate.id)"
+                  mat-menu-item
+                  class="btn-actions-item row"
+                >
+                  <i class="fas fa-file-signature col-2"></i>
+                  <span class="col-10 ">{{'Use' | ecTranslate}}</span>
+                </button>
+                  <button
+                  (click)="handlePreviewContractTemplate(contractTemplate.id)"
+                  mat-menu-item
+                  class="btn-actions-item row"
+                >
+                  <i class="fas fa-eye col-2"></i>
+                  <span class="col-10 ">{{'Preview' | ecTranslate}}</span>
+                </button>
+                  <button
+                    [routerLink]="['templates-create/upload']"
+                    [queryParams]="{
+                      templateContract: true,
+                      templateContractId: contractTemplate.id
+                    }"
+                    mat-menu-item
+                    class="btn-actions-item row"
+                  >
+                    <i class="far fa-edit col-2"></i>
+                    <span class="col-10 ">{{'EditV2' | ecTranslate}}</span>
+                  </button>
+               
+                  <button
+                    (click)="handleDeleteContractTemplate(contractTemplate)"
+                    mat-menu-item
+                    class="btn-actions-item btn_delete row"
+                  >
+                    <i class="fas fa-trash-alt col-2"></i>
+
+                    <span class="col-10 ">{{'Delete' | ecTranslate}}</span>
+                  </button>
+                </ng-container>
+                <ng-container *ngSwitchCase="contractCategory.System">
+                  <button
+                  (click)="handleUseContractTemplate(contractTemplate.id)"
+                  mat-menu-item
+                  class="btn-actions-item row"
+                >
+                  <i class="fas fa-file-signature col-2"></i>
+                  <span class="col-10 ">{{'Use' | ecTranslate}}</span>
+                </button>
+                  <button
+                    (click)="handlePreviewContractTemplate(contractTemplate.id)"
+                    mat-menu-item
+                    class="btn-actions-item row"
+                  >
+                    <i class="fas fa-eye col-2"></i>
+                    <span class="col-10 ">{{'Preview' | ecTranslate}}</span>
+                  </button>
+                </ng-container>
+              </ng-container>
+            </mat-menu>
+          </td>
+        </tr>
+      </ng-template>
+    </tbody>
+  </table>
+</div>
+
+<footer class="footer card-footer table-card-footer bg-light border-top">
+  <div class="row">
+    <div class="col-sm-4 col-12 text-sm-left">
+      <button (click)="handleRefreshPage()" class="btn btn-secondary btn-refresh">
+        <i class="fas fa-redo-alt"></i>
+      </button>
+    </div>
+    <div class="col-sm-4 col-12 text-center">
+      <p class="mb-0 my-2">{{'TotalTemplateItems' | ecTranslate}}: {{ totalPage }}</p>
+    </div>
+    <div class="col-sm-4 col-12 float-right">
+      <div class="float-sm-right m-auto pagination" id="change-page">
+        <abp-pagination-controls (pageChange)="getDataPage($event)" id="server">
+        </abp-pagination-controls>
+      </div>
+    </div>
+  </div>
+</footer>

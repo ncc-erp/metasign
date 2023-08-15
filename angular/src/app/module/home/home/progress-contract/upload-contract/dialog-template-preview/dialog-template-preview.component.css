@@ -1,0 +1,85 @@
+:host ::ng-deep .modal-header {
+  padding: 0;
+}
+
+::ng-deep .templatepr_upload .mat-dialog-container {
+  padding: 0;
+}
+
+:host ::ng-deep .modal-header .close {
+  padding: 0;
+  margin: 0;
+}
+
+:host ::ng-deep .modal-header .close :hover {
+  color: red;
+  transition: 0.5s;
+}
+
+.btn_action--save {
+  background-color: var(--primary-color);
+}
+
+.loadding_page {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+::ng-deep .mat-progress-spinner circle,
+.mat-spinner circle {
+  stroke: var(--primary-color);
+}
+
+.email-content {
+  height: 700px;
+  overflow-y: auto;
+}
+
+html {
+  -moz-text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+}
+
+.upload_file:hover {
+  border: 3px dashed var(--primary-color);
+  transition: 0.4s;
+}
+
+.upload_file {
+  position: relative;
+  box-sizing: border-box;
+  border: 3px dashed silver;
+}
+
+.btn-upload {
+  margin: 0 auto;
+}
+
+#fileID {
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+::ng-deep .mat-progress-spinner circle,
+.mat-spinner circle {
+  stroke: var(--primary-color);
+}
+
+.loadding_page {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.contract_file {
+  text-align: center;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 10px;
+}

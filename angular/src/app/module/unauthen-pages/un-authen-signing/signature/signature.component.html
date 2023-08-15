@@ -1,0 +1,214 @@
+<div [ngSwitch]="signature.signatureType" *ngIf="signatureSetting.role != 3">
+  <div *ngSwitchCase="ContractSettingType.Text">
+    <div
+      *ngIf="!signature.isSigned"
+      class="position-relative"
+      [style.height.px]="height"
+      [style.width.px]="signature.width"
+    >
+      <textarea
+        id="myTextarea"
+        class="input text-area border-general"
+        [disabled]="!signature.isAllowSigning"
+        matInput
+        (input)="handleValue()"
+        [(ngModel)]="valueContractText"
+        [placeholder]="'EnterText' | ecTranslate"
+        [style.font-size.px]="signature.fontSize"
+        [style.font-family]="signature.fontFamily"
+        [style.color]="signature.fontColor"
+        [style.background-color]="
+          !valueContractText ? signature.color : 'transparent'
+        "
+        [style.width.px]="signature.width"
+        [style.height.px]="height"
+      ></textarea>
+      <div class="overlay-gray" *ngIf="!signature.isAllowSigning"></div>
+    </div>
+  </div>
+
+  <div *ngSwitchCase="ContractSettingType.Electronic">
+    <div *ngIf="!signature.isSigned">
+      <div
+        class="contractsettingtype-electronic"
+        [style.width.px]="signature.width"
+        [style.height.px]="signature.height"
+      >
+        <img
+          class="signature-img"
+          (click)="openDialog()"
+          *ngIf="
+             signatureDefaultElectronic?.contractBase64 && signature.isTemporarySigned;
+            else elseBlock
+          "
+          [src]="sanitizer.bypassSecurityTrustResourceUrl(signatureDefaultElectronic?.contractBase64)"
+          alt="signature"
+        />
+      </div>
+      <ng-template #elseBlock>
+        <button
+          [disabled]="!signature.isAllowSigning"
+          [ngStyle]="{
+            backgroundColor: signature.color,
+            width: signature.width + 'px',
+            height: signature.height + 'px'
+          }"
+          class="btn sign-btn p-0 signing border-general"
+          (click)="handleClickSignatureElectronic()"
+          style="border: none"
+        >
+          <div class="text-center sign-btn">
+            <div class="signature_type--icon">
+              <mat-icon svgIcon="electronic"></mat-icon>
+            </div>
+            <div class="signature_type--name">
+              <b>{{ "Signature" | ecTranslate }}</b>
+            </div>
+          </div>
+        </button>
+      </ng-template>
+    </div>
+  </div>
+
+  <div *ngSwitchCase="ContractSettingType.Digital">
+    <div *ngIf="!signature.isSigned">
+      <div
+        [style.width.px]="signature.width"
+        [style.height.px]="signature.height"
+        class="signature-digital border-general {{
+          !signature.isAllowSigning ? 'overlay-gray' : ''
+        }}"
+      >
+        <img
+          class="signature-img"
+          (click)="handleClickSignatureDigital()"
+          *ngIf="
+            imageSignatureDigital && signature.isTemporarySigned;
+            else elseBlock
+          "
+          [src]="
+            sanitizer.bypassSecurityTrustResourceUrl(imageSignatureDigital)
+          "
+          alt="signature"
+        />
+        <div
+          (click)="handleClickSignatureDigital()"
+          *ngIf="signature.isTemporarySigned"
+          class="signature_Digital"
+        >
+          <p>
+            Digitally signed by {{ signature.ownCA }} <br />Reason: digital
+            signature
+          </p>
+        </div>
+        <div class="overlay-gray" *ngIf="!signature.isAllowSigning"></div>
+      </div>
+      <ng-template #elseBlock>
+        <button
+          [disabled]="!signature.isAllowSigning || signature.loading"
+          [ngStyle]="{
+            backgroundColor: signature.color,
+            width: signature.width + 'px',
+            height: signature.height + 'px'
+          }"
+          class="btn sign-btn p-0 signing"
+          (click)="handleClickSignatureDigital()"
+          style="border: none"
+        >
+          <div *ngIf="signature.loading; else elseBlock" id="spinner">
+            <mat-spinner [diameter]="20"></mat-spinner>
+          </div>
+
+          <ng-template #elseBlock>
+            <div class="text-center sign-btn">
+              <div class="signature_type--icon">
+                <mat-icon svgIcon="digital"></mat-icon>
+              </div>
+              <div class="signature_type--name">
+                <b>{{ "USBToken" | ecTranslate }}</b>
+              </div>
+            </div>
+          </ng-template>
+        </button>
+      </ng-template>
+    </div>
+  </div>
+
+  <div *ngSwitchCase="ContractSettingType.DatePicker">
+    <div *ngIf="!signature.isSigned">
+      <mat-form-field
+        id="contract_date"
+        appearance="outline"
+        class="setting-input border-general"
+        [style.background-color]="
+          !valueContractText ? signature.color : 'transparent'
+        "
+        [style.height.px]="signature.height"
+        [style.width.px]="signature.width"
+      >
+        <input
+          [style.height.px]="signature.height"
+          [style.width.px]="signature.width"
+          readonly
+          [disabled]="!signature.isAllowSigning"
+          formatDateHandInputDirective
+          class="input value-date"
+          matInput
+          (dateChange)="onDate()"
+          [(ngModel)]="valueContractText"
+          [matDatepicker]="picker"
+          [placeholder]="'EnterDate' | ecTranslate"
+          [style.font-size.px]="signature.fontSize"
+          [style.font-family]="signature.fontFamily"
+          [style.color]="signature.fontColor"
+        />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker panelClass="datepickerTwo"></mat-datepicker>
+      </mat-form-field>
+      <div class="overlay-gray" *ngIf="!signature.isAllowSigning"></div>
+    </div>
+  </div>
+
+  <div *ngSwitchCase="ContractSettingType.Stamp">
+    <div *ngIf="!signature.isSigned">
+      <div
+        class="contractsettingtype-electronic"
+        [style.width.px]="signature.width"
+        [style.height.px]="signature.height"
+      >
+        <img
+          class="signature-img"
+          (click)="openDialog()"
+          *ngIf="
+          signatureDefaultStamp?.contractBase64 && signature.isTemporarySigned;
+            else elseBlock
+          "
+          [src]="sanitizer.bypassSecurityTrustResourceUrl(signatureDefaultStamp?.contractBase64)"
+          alt="signature"
+        />
+      </div>
+      <ng-template #elseBlock>
+        <button
+          [disabled]="!signature.isAllowSigning"
+          [ngStyle]="{
+            backgroundColor: signature.color,
+            width: signature.width + 'px',
+            height: signature.height + 'px'
+          }"
+          class="btn sign-btn p-0 signing border-general"
+          (click)="handleClickSignatureStamp()"
+          style="border: none"
+        >
+          <div class="text-center sign-btn">
+            <div class="signature_type--icon">
+              <mat-icon svgIcon="stamp"></mat-icon>
+            </div>
+            <div class="signature_type--name">
+              <b>{{ "Stamp" | ecTranslate }}</b>
+            </div>
+          </div>
+        </button>
+      </ng-template>
+    </div>
+  </div>
+</div>

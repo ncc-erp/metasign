@@ -1,0 +1,46 @@
+trigger:
+  branches:
+    include:
+      - dev
+      
+  paths:
+    include:
+      - aspnet-core
+      - pipelines-BE.yml
+      
+pool:
+  name: 'Devops'
+
+jobs:
+- job : BuildDotNet
+  steps:
+    - script: |
+        cd aspnet-core/src/EC.Migrator
+        echo "===Build Migrator==="
+        dotnet build
+        dotnet publish
+        cd bin/Debug/net6.0/publish/
+        echo "y" > input.txt
+        zip -r migrator.zip *
+      displayName: 'Dotnet Build Migrator'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'aspnet-core/src/EC.Migrator/bin/Debug/net6.0/publish/migrator.zip'
+        ArtifactName: 'migrator-dev-EC'
+        publishLocation: 'Container'
+      displayName: 'Publish Compress Migrator to Aritifact'
+
+    - script: |
+        cd aspnet-core/src/EC.Web.Host
+        echo "===Build Dotnet==="
+        dotnet build
+        dotnet publish
+        cd bin/Debug/net6.0/publish/
+        zip -r backend.zip *
+      displayName: 'Dotnet Build Host'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'aspnet-core/src/EC.Web.Host/bin/Debug/net6.0/publish/backend.zip'
+        ArtifactName: 'backend-dev-EC'
+        publishLocation: 'Container'
+      displayName: 'Publish Compress Backend to Aritifact'

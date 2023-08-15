@@ -1,0 +1,145 @@
+.content {
+  height: 78vh;
+}
+
+.overlay-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgb(242, 242, 242, 0.3);
+  z-index: 2;
+}
+
+.spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+::ng-deep #spinner .mat-progress-spinner circle,
+.mat-spinner circle {
+  stroke: var(--primary-color) !important;
+}
+
+.header {
+  justify-content: space-between;
+}
+
+.btn-add {
+  height: 48px;
+  transform: translateY(12.5%);
+}
+
+.icon-add {
+  transform: translateY(1px);
+}
+
+/* table */
+
+.table th {
+  color: rgb(59, 58, 58);
+  font-weight: 600;
+}
+
+table {
+  border-spacing: 0;
+  border-collapse: separate;
+  width: 100%;
+}
+
+.table-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.body-content {
+  transform: translateY(66px);
+  max-height: 68vh;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.head-table {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  border: 1px solid #ccc;
+  height: 66px;
+}
+
+table .table-content-body td {
+  height: 55px;
+}
+
+.activePdfSignersName:hover {
+  cursor: pointer;
+}
+
+.btn-view-details {
+  height: 36px;
+}
+
+.button-change-status {
+  height: 36px;
+}
+
+@media only screen and (max-height: 912px) {
+  .wrapper-table {
+    height: 72vh;
+    margin-top: 40px;
+    overflow: auto;
+  }
+
+  .wrapper {
+    height: 88.6vh;
+  }
+}
+
+@media only screen and (max-height: 849px) {
+  .wrapper-content {
+    height: 88vh;
+  }
+  .content {
+    height: 70vh;
+  }
+}
+
+@media only screen and (max-height: 749px) {
+  .content {
+    height: 66vh;
+  }
+}
+
+@media only screen and (min-height: 849.01px) and (max-height: 1024px) {
+  .wrapper-content {
+    height: 90vh;
+  }
+  .content {
+    height: 81vh;
+  }
+}
+
+@media only screen and (max-height: 1140px) {
+  .wrapper-content {
+    height: 91vh;
+  }
+  .content {
+    height: 81vh;
+  }
+}
+
+@media only screen and (min-height: 1140.01px) {
+  .wrapper-content {
+    height: 92vh;
+  }
+  .content {
+    height: 83vh;
+  }
+}

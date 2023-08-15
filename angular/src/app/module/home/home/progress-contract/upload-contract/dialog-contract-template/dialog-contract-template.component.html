@@ -1,0 +1,114 @@
+<div class="wapper">
+  <div class="wapper_body">
+    <div (click)="dialogRef.close()" class="contract_close">
+      <i class="fas fa-times"></i>
+    </div>
+    <div class="row h-100">
+      <div class="col-3 contract_category">
+        <mat-form-field appearance="outline" class="contract_category--search">
+          <input
+            matInput
+            [formControl]="seachContractTemplate"
+            [placeholder]="'SreachByTemplateName' | ecTranslate"
+          />
+        </mat-form-field>
+
+        <ul class="contract_category--list">
+          <li
+          [ngClass]="{
+            active:
+              contractTemplateCategory.ContractTemplateAll === currenCategory
+          }"
+          (click)="
+            handleChangeCategory(contractTemplateCategory.ContractTemplateAll)
+          "
+          class="contract_category--item"
+        >
+        {{'All' | ecTranslate}}
+        </li>
+          <li
+            [ngClass]="{
+              active:
+                contractTemplateCategory.ContractTemplateMy === currenCategory
+            }"
+            (click)="
+              handleChangeCategory(contractTemplateCategory.ContractTemplateMy)
+            "
+            class="contract_category--item"
+          >
+            {{'MyTemplates' | ecTranslate}}
+          </li>
+          <li
+            [ngClass]="{
+              active:
+                contractTemplateCategory.ContractTemplateSystem ===
+                currenCategory
+            }"
+            (click)="
+              handleChangeCategory(
+                contractTemplateCategory.ContractTemplateSystem
+              )
+            "
+            class="contract_category--item"
+          >
+            {{'TemplateGallery' | ecTranslate}}
+          </li>
+        </ul>
+      </div>
+      <div class="col-9 contract_template--container">
+        <h3 class="contract_template--title">{{ categoryName | ecTranslate }}</h3>
+        <div
+          *ngIf="loaddingContract; else contractTemplate"
+          class="d-flex justify-content-center align-items-center h-100"
+        >
+          <mat-spinner></mat-spinner>
+        </div>
+        <ng-template #contractTemplate>
+          <div class="contract_template--list">
+            <div *ngIf="contractTemplateList?.length === 0" class="mess">{{messTable | ecTranslate}}</div>
+            <div class="row p-5">
+              <div
+                *ngFor="let contractTemplate of contractTemplateList"
+                class="col-4 m-1 text-center text-break"
+              >
+                <div class="contract_template-item">
+                  <div class="card">
+                    <img
+                      class="card-img-top"
+                      src="../../../../../../../assets/img/contract/contract_template.png"
+                      alt="Card image cap"
+                    />
+                  </div>
+                  <div class="contract_template--coating">
+                    <div class="contract_template--action">
+                      <button
+                        (click)="
+                          handlePreviewContractTemplate(contractTemplate.id)
+                        "
+                        type="button"
+                        class="btn btn-secondary contract_template--btn"
+                      >
+                        <i class="fa-solid fa-eye"></i>
+                        {{'Preview' | ecTranslate}}
+                      </button>
+                      <button
+                        (click)="handleUseContractTemplate(contractTemplate.id)"
+                        type="button"
+                        class="btn btn-success contract_template--btn"
+                      >
+                        {{'Use' | ecTranslate}}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <p class="contract_template--name">
+                  {{ contractTemplate.name }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>

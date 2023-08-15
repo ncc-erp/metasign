@@ -1,0 +1,120 @@
+<div class="wrapper px-4">
+  <div class="wrapper-content container-fluid po">
+    <header class="position-relative row mb-2">
+      <h3 class="col-6 pb-2 name-worker">{{ workerName }}</h3>
+      <div class="col-6">
+        <button
+          class="button float-right btn-close ml-2"
+          (click)="dialogRef.close()"
+        >
+          {{ "Close" | ecTranslate }}
+        </button>
+        <button
+          *ngIf="
+            isDisabledForm &&
+            statusWorker === 'ACTIVE' &&
+            isAction &&
+            !currentTabIndex
+          "
+          class="button btn-edit float-right ml-2"
+          (click)="editFormPropertiesWorker()"
+        >
+          {{ "EditOrUpdate" | ecTranslate }}
+        </button>
+        <button
+          *ngIf="statusWorker === 'ACTIVE' && isAction && !currentTabIndex"
+          class="button btn-add float-right"
+          (click)="addProperties()"
+          [disabled]="!tempPropertiesCanBeAdded?.length"
+          mat-raised-button
+        >
+          <span style="color: #fbf7ec">{{
+            "AddProperties" | ecTranslate
+          }}</span>
+        </button>
+      </div>
+    </header>
+    <div
+      class="
+        position-relative content {{
+        !isDisabledForm ? 'include-footer' : 'non-include-footer'
+      }}
+      "
+    >
+      <div class="overlay-loading" *ngIf="isLoadingProperties; else elseBlock">
+        <mat-spinner class="spinner"></mat-spinner>
+      </div>
+      <ng-template #elseBlock>
+        <div class="{{ isDisabledForm ? 'tabs' : 'tabs-include-footer' }}">
+          <mat-tab-group
+            mat-stretch-tabs="false"
+            mat-align-tabs="start"
+            id="tab_detail_worker"
+            (selectedTabChange)="handleTabChange($event)"
+          >
+            <mat-tab label="Properties" class="tab-item">
+              <form
+                id="formProperties"
+                [formGroup]="formPropertiesWorker"
+                (ngSubmit)="saveChangeForm(formPropertiesWorker.value)"
+              >
+                <div *ngFor="let formItem of dataForm" class="property-item">
+                  <mat-form-field class="form-item">
+                    <mat-label>{{ formItem.label }}</mat-label>
+                    <input
+                      matInput
+                      formControlName="{{ formItem.formControlName }}"
+                    />
+                  </mat-form-field>
+                  <i
+                    *ngIf="!isDisabledForm && formItem.editable"
+                    [matTooltip]="'DeleteProperty' | ecTranslate"
+                    class="fa-solid fa-trash icon-trash"
+                    (click)="removeProperty(formItem.label)"
+                  ></i>
+                </div></form
+            ></mat-tab>
+            <mat-tab
+              label="Certificate"
+              class="tab-item"
+              *ngIf="isTabCertificate"
+            >
+              <form
+                id="formCertificate"
+                [formGroup]="formCertificateInfo"
+                (ngSubmit)="saveChangeForm(formCertificateInfo.value)"
+              >
+                <div
+                  *ngFor="let formItem of dataFormCertificateInfo"
+                  class="property-item"
+                >
+                  <mat-form-field class="form-item">
+                    <mat-label style="font-size: 15px">{{
+                      formItem.label
+                    }}</mat-label>
+                    <input
+                      matInput
+                      formControlName="{{ formItem.formControlName }}"
+                    />
+                  </mat-form-field>
+                </div></form
+            ></mat-tab>
+          </mat-tab-group>
+        </div>
+      </ng-template>
+    </div>
+    <footer class="footer" *ngIf="!isDisabledForm">
+      <button mat-raised-button color="secondary" (click)="cancelChangeForm()">
+        {{ "Cancel" | ecTranslate }}
+      </button>
+      <button
+        form="formProperties"
+        mat-raised-button
+        type="submit"
+        class="btn-primary button"
+      >
+        {{ "Save" | ecTranslate }}
+      </button>
+    </footer>
+  </div>
+</div>

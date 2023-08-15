@@ -1,0 +1,42 @@
+.wrapper {
+  height: 180px;
+}
+
+.header {
+  font-size: 18px;
+  font-weight: 500;
+  transform: translateY(-8px);
+}
+
+.btn-action {
+  height: 36px;
+}
+
+.footer {
+  width: 100%;
+  position: absolute;
+  bottom: -8px;
+  left: 0px;
+}
+.btn-add {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+.btn-disabled {
+  background-color: #ccc;
+}
+
+::ng-deep #form-create-properties mat-form-field {
+  width: 100% !important;
+  line-height: 1.7 !important;
+}
+
+::ng-deep #selectProperties .mat-form-field-flex > .mat-form-field-infix {
+  padding: 0.5em 0px !important;
+}
+
+::ng-deep .mat-select-panel {
+  transform: translateY(31px) !important;
+}

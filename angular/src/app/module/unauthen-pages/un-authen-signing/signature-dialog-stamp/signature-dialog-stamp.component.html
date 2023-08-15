@@ -1,0 +1,126 @@
+<div class="dialog">
+  <div class="wrapper-content">
+    <div class="card-header row mt-2">
+      <div class="col-10">
+        <h3>{{ "Thêm mới con dấu" | ecTranslate }}</h3>
+      </div>
+      <div class="col-2 text-right">
+        <i class="fa-solid fa-x fa-lg pointer" mat-dialog-close></i>
+      </div>
+    </div>
+    <div class="card-body content">
+      <div class="signature_tab" mat-dialog-content>
+        <mat-tab-group
+          fitInkBarToContent
+          id="tab"
+          (selectedTabChange)="onTabChanged($event)"
+        >
+          <mat-tab *ngIf="isLoggedIn" [label]="'MySignatures' | ecTranslate">
+            <table class="table m-0">
+              <thead class="head-table-signature head-table">
+                <tr style="background-color: #f1f3f5">
+                  <th class="head-item" style="width: 4%"></th>
+                  <th class="text-center">{{ "Signature" | ecTranslate }}</th>
+                </tr>
+              </thead>
+            </table>
+
+            <div class="select">
+              <table class="table table-signature table-hover">
+                <tbody>
+                  <tr *ngIf="!signatureUser?.length">
+                    {{
+                      "YouCurrentlyDoNotHaveAnySignatures" | ecTranslate
+                    }}
+                  </tr>
+                  <tr
+                    *ngFor="let signature of signatureUser"
+                    class="mb-3 signature-tr"
+                    [ngClass]="{
+                      active_signature: signatureUserValue === signature.id
+                    }"
+                    (click)="clickSignature(signature.id)"
+                  >
+                    <td style="width: 10%">
+                      <mat-radio-button
+                        [checked]="signatureUserValue === signature.id"
+                        [value]="signatureUserValue"
+                      ></mat-radio-button>
+                    </td>
+                    <td class="text-center">
+                      <img width="120" [src]="signature.fileBase64" />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </mat-tab>
+
+          <mat-tab [label]="'Upload' | ecTranslate">
+            <div #uploadSignature class="signature_tab--upload">
+              <div class="upload_signature">
+                <input
+                  (change)="handleValueFile($event)"
+                  id="upload"
+                  type="file"
+                  #inputFile
+                />
+                <div
+                  class="upload_signature--cropper"
+                  style="width: 550px"
+                  *ngIf="cropImg; else uploadContent"
+                >
+                  <image-cropper
+                    [resizeToWidth]="responsiveResizeToWidth"
+                    [maintainAspectRatio]="true"
+                    [containWithinAspectRatio]="true"
+                    [imageChangedEvent]="cropImg"
+                    [aspectRatio]="
+                      sizeBoxSignature.width / sizeBoxSignature.height
+                    "
+                    format="png"
+                    (imageCropped)="imageCropped($event)"
+                  ></image-cropper>
+
+                  <div class="upload_signature--success">
+                    <label class="upload_label btn-action" for="upload">
+                      {{ "Replace" | ecTranslate }}
+                    </label>
+                    <div
+                      (click)="handleRemove()"
+                      class="upload_label btn-action"
+                    >
+                      {{ "Delete" | ecTranslate }}
+                    </div>
+                  </div>
+                </div>
+                <ng-template #uploadContent>
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                  <label class="upload_label" for="upload">
+                    {{ "UploadSignature" | ecTranslate }}
+                  </label>
+                </ng-template>
+                <p class="upload_signature--note">Định dạng được hỗ trợ: jpg, jpeg ,png, kích thước tệp tối đa {{maximumSizeofSignatureImage}}kb</p>
+              </div>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+        <mat-checkbox
+          *ngIf="isLoggedIn && this.indexTab !== 0"
+          [(ngModel)]="setDefaultSignature"
+          class="mt-2"
+          >{{ "SetAsDefaultSignature" | ecTranslate }}</mat-checkbox
+        >
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog_btn" mat-dialog-actions>
+    <button mat-dialog-close  mat-raised-button>
+      {{ "Cancel" | ecTranslate }}
+    </button>
+    <button (click)="handleSave()" mat-raised-button class="button">
+      {{ "Save" | ecTranslate }}
+    </button>
+  </div>
+</div>

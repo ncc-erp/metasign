@@ -1,0 +1,17 @@
+.email-content {
+    max-height: 600px;
+    overflow-y: scroll;
+}
+
+:host ::ng-deep abp-modal-header h4 {
+    margin-bottom: 0px !important;
+}
+
+.email-content th,tr,td {
+    border: 0px;
+}
+
+.background-card {
+    background-color: rgb(242, 245, 245);
+}
+

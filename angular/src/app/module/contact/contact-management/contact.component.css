@@ -1,0 +1,74 @@
+.wrapper {
+  height: 90vh;
+}
+
+.wrapper_content {
+  height: 100%;
+}
+
+.content {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.content-header {
+  padding: 0;
+}
+
+.table-content {
+  max-height: 53vh;
+  overflow: auto;
+}
+
+.head-table {
+  height: 66px;
+}
+
+::ng-deep #search input.mat-input-element {
+  transform: translateY(-10%);
+}
+
+::ng-deep #change-page .page-item.active .page-link {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.btn-refresh {
+  background-color: var(--primary-color);
+}
+
+@media only screen and (max-height: 912px) {
+  .wrapper-table {
+    height: 72vh;
+    margin-top: 40px;
+    overflow: auto;
+  }
+
+  .wrapper {
+    height: 88.6vh;
+  }
+}
+
+@media only screen and (min-height: 912.01px) and (max-height: 1024px) {
+  .wrapper {
+    height: 90vh;
+  }
+}
+
+@media only screen and (min-height: 1140.01px) {
+  .wrapper {
+    height: 92vh;
+  }
+
+  .wrapper-table {
+    height: 79vh;
+    margin-top: 40px;
+    overflow: auto;
+  }
+}
+
+@media only screen and (min-height: 1290.01px) {
+  .wrapper {
+    height: 93vh;
+  }
+}

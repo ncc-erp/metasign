@@ -1,0 +1,54 @@
+<div class="wrapper position-relative">
+  <header class="pb-3 position-relative">
+    <h4>{{ "ContractHistory" | ecTranslate }}</h4>
+    <i class="fa-solid fa-x icon-x" (click)="dialogRef.close()"></i>
+  </header>
+  <div class="wrapper-content">
+    <table class="table table-header">
+      <thead class="head-table bg-light">
+        <tr>
+          <th style="width: 20%">{{ "Email" | ecTranslate }}</th>
+          <th style="width: 15%">{{ "Action" | ecTranslate }}</th>
+          <th style="width: 18%">{{ "Time" | ecTranslate }}</th>
+          <th style="width: 15%">{{ "Status" | ecTranslate }}</th>
+          <th style="width: 32%">{{ "Note" | ecTranslate }}</th>
+        </tr>
+      </thead>
+    </table>
+    <div class="content">
+      <table class="table">
+        <tbody class="content-table">
+          <tr *ngFor="let history of listHistory">
+            <td style="width: 20%">{{ history?.authorEmail }}</td>
+            <td style="width: 15%">
+              {{ listActions[history?.action - 1].name | ecTranslate }}
+            </td>
+            <td style="width: 18%">
+              {{ history?.timeAt | formatDateHour24h }}
+            </td>
+            <td style="width: 15%">
+              <span
+                class="status-label {{
+                  listStatusContract[history.contractStatus]?.color
+                }}"
+                >{{
+                  listStatusContract[history.contractStatus]?.name | ecTranslate
+                }}</span
+              >
+            </td>
+            <td style="width: 32%">{{ history?.note | ecTranslate }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <footer class="footer">
+    <button
+      mat-raised-button
+      class="btn-close button"
+      (click)="dialogRef.close()"
+    >
+      {{ "Close" | ecTranslate }}
+    </button>
+  </footer>
+</div>

@@ -1,0 +1,67 @@
+trigger: 
+- dev
+
+pool:
+  name: 'XS'
+
+jobs:
+- job : BuildDotNet
+  steps:
+    - script: |
+        cd aspnet-core
+        zip -r migrator.zip *
+      displayName: 'Compress Migrator'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'aspnet-core/migrator.zip'
+        ArtifactName: 'migrator-dev-EC'
+        publishLocation: 'Container'
+      displayName: 'Publish Compress Migrator to Aritifact'
+
+    - script: |
+        cd aspnet-core/src/EC.Web.Host
+        echo "===Build Dotnet==="
+        dotnet build
+        dotnet publish
+        cd bin/Debug/net6.0/publish/
+        zip -r backend.zip *
+      displayName: 'Dotnet Build Host'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'aspnet-core/src/EC.Web.Host/bin/Debug/net6.0/publish/backend.zip'
+        ArtifactName: 'backend-dev-EC'
+        publishLocation: 'Container'
+      displayName: 'Publish Compress Backend to Aritifact'
+
+- job: BuildAngular
+  steps:
+    - script: |
+        cd angular 
+        export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
+        nvm use 14.17
+        node -v
+        echo "===Install package==="
+        npm i
+      displayName: 'Install Package'
+
+    - script: |
+        export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
+        nvm use 14.17
+        cd angular
+        echo "===Build node==="
+        ng build --prod
+      displayName: 'Build Frontend'
+
+    - script: |
+        export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
+        nvm use 14.17
+        cd angular/dist
+        zip -r frontend.zip *
+      displayName: 'Compress Build'
+        
+    - task: PublishBuildArtifacts@1
+      inputs: 
+        PathtoPublish: 'angular/dist/frontend.zip'
+        ArtifactName: 'frontend-dev-EC' 
+        publishLocation: 'Container'
+      displayName: 'Publish Compress Frontend to Aritifact'

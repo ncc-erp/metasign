@@ -1,0 +1,379 @@
+<div cdkDropListGroup class="contract_design">
+  <div class="contract_design--left">
+    <h5 class="design_left--title mt-2">
+      {{ "SignatureTypes" | ecTranslate }}
+    </h5>
+    <div>
+      <mat-form-field appearance="outline">
+        <mat-select
+          disableOptionCentering
+          (selectionChange)="handleChangesigner()"
+          [(ngModel)]="valueSignerContract"
+        >
+          <mat-option *ngFor="let signer of signerContract" [value]="signer.id">
+            <div class="design_right--select">
+              <div
+                [style.background-color]="signer.color"
+                class="select_dot"
+              ></div>
+              <span>
+                {{ contractId ? signer.signerName : signer.role }}
+              </span>
+            </div>
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="design_left--signature">
+      <div
+        [style.display]="onDrag ? 'none' : ''"
+        [cdkDropListData]="signatureTypeList"
+        cdkDropList
+        (cdkDropListDropped)="drop($event)"
+        cdkDropListSortingDisabled
+        class="signature_list"
+      >
+        <div
+          [cdkDropListData]="item"
+          (cdkDragStarted)="onDrag = true"
+          (cdkDragEnded)="onDrag = false"
+          class="signature_list--item"
+          cdkDrag
+          *ngFor="let item of signatureTypeList"
+          [data]="item.id"
+        >
+          <mat-icon
+            [style.background-color]="fieldsColor"
+            [svgIcon]="item.icon"
+          ></mat-icon>
+          <div>
+            {{ item.label | ecTranslate }}
+            <div class="line" *cdkDragPlaceholder></div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        [style.display]="!onDrag ? 'none' : ''"
+        class="signature_list"
+        cdkDropList
+        cdkDropListSortingDisabled="false"
+        cdkDrag
+      >
+        <div
+          class="signature_list--item"
+          *ngFor="let item of signatureTypeList"
+          [data]="item.id"
+        >
+          <mat-icon
+            [style.background-color]="fieldsColor"
+            [svgIcon]="item.icon"
+          ></mat-icon>
+          <div>
+            {{ item.label | ecTranslate }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="contract_other">
+      <div
+        [style.display]="onDrag ? 'none' : ''"
+        [cdkDropListData]="signatureTypeList"
+        cdkDropList
+        (cdkDropListDropped)="drop($event)"
+        cdkDropListSortingDisabled
+        class="signature_list"
+      >
+        <div
+          [cdkDropListData]="item"
+          (cdkDragStarted)="onDrag = true"
+          (cdkDragEnded)="handleDragEnd(item)"
+          class="signature_list--item"
+          cdkDrag
+          *ngFor="let item of otherTypeList"
+          [data]="item.id"
+        >
+          <mat-icon
+            [style.background-color]="fieldsColor"
+            [svgIcon]="item.icon"
+          ></mat-icon>
+          <div>
+            {{ item.label | ecTranslate }}
+            <div class="line" *cdkDragPlaceholder></div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        [style.display]="!onDrag ? 'none' : ''"
+        class="signature_list"
+        cdkDropList
+        cdkDropListSortingDisabled="false"
+        cdkDrag
+      >
+        <div
+          class="signature_list--item"
+          *ngFor="let item of otherTypeList"
+          [data]="item.id"
+        >
+          <mat-icon
+            [style.background-color]="fieldsColor"
+            [svgIcon]="item.icon"
+          ></mat-icon>
+          <div>
+            {{ item.label | ecTranslate }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="contract_design--viewer">
+    <mat-spinner *ngIf="contractLoadding; else elseBlock"></mat-spinner>
+
+    <ng-template #elseBlock>
+      <div #dropZone id="design_viewer">
+        <div
+          id="design"
+          style="position: relative"
+          *ngFor="let contractPage of contractFile; let i = index"
+          [ngStyle]="{
+            width: contractPage.width + 'px',
+            height: contractPage.height + 'px'
+          }"
+        >
+          <div
+            #page
+            cdkDropList
+            (cdkDropListDropped)="drop($event)"
+            (click)="handleBlurcontract()"
+            [ngClass]="i > 0 ? 'mt-5' : ''"
+            [id]="contractPage.contractPage"
+          >
+            <img class="design_viewer--img" [src]="contractPage.fileBase64" />
+          </div>
+          <div *ngFor="let signature of contractPage.signatureSettings">
+            <app-signature-type
+              (updatePositionSignature)="valueUpdateSignature($event)"
+              (deletePositionSignature)="valueDeleteSignature($event)"
+              (signatureFocusId)="valueSignatureFocusId($event)"
+              [focusSignatureId]="focusSignatureId"
+              [signatureValue]="signature"
+              [initSizeTextArea]="initSizeTextArea"
+            >
+            </app-signature-type>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+
+  <div class="contract_design--right">
+    <div class="contract_design--page">
+      <header>
+        <h5 class="mt-2">{{ contractName }}</h5>
+        <p class="mt-3">
+          {{ "Pages" | ecTranslate }}: {{ contractFile?.length }}
+        </p>
+      </header>
+
+      <div class="content">
+        <div
+          (click)="handleScrollPage(contract.contractPage)"
+          *ngFor="let contract of contractFile; let i = index"
+          class="page"
+          [ngClass]="{ page_active: contract.contractPage === indexPdf }"
+        >
+          <img [src]="contract.fileBase64" alt="img_contract" />
+          <div class="page_view--bottom">
+            <div class="page_view--index">{{ i + 1 }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      [@contractSelect]="focusSignatureId ? 'open' : 'closed'"
+      *ngIf="focusSignatureId"
+      class="contract_design--select"
+    >
+      <div class="design_right--signer">
+        <h5 class="mt-2">{{ contractInput.lable | ecTranslate }}</h5>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ "Recipient" | ecTranslate }}</mat-label>
+          <mat-select
+            disableOptionCentering
+            [disabled]="!isAllowEditSignature()"
+            (selectionChange)="handleChangesignerEdit()"
+            [(ngModel)]="valueSignerContractEdit"
+          >
+            <mat-option
+              *ngFor="let signer of signerContract"
+              [value]="signer.id"
+            >
+              <div class="design_right--select">
+                <div
+                  [style.background-color]="signer.color"
+                  class="select_dot"
+                ></div>
+                <span>
+                  {{ contractId ? signer.signerName : signer.role }}
+                </span>
+              </div>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div [formGroup]="signerActionForm" class="design_right--position">
+        <h5 class="position_signer">{{ "Location" | ecTranslate }}</h5>
+        <div class="position_signer">
+          {{ "CoordinatesX" | ecTranslate }}
+          <mat-form-field appearance="outline">
+            <input
+              [readonly]="!isAllowEditSignature()"
+              type="number"
+              [min]="0"
+              [max]="1544"
+              (input)="changeContractInput($event.target.value)"
+              formControlName="left"
+              class="position_signer--input"
+              matInput
+            />
+          </mat-form-field>
+        </div>
+        <div class="position_signer">
+          {{ "CoordinatesY" | ecTranslate }}
+          <mat-form-field appearance="outline">
+            <input
+              [readonly]="!isAllowEditSignature()"
+              type="number"
+              min="0"
+              max="1544"
+              (input)="changeContractInput($event.target.value)"
+              formControlName="top"
+              class="position_signer--input"
+              matInput
+            />
+          </mat-form-field>
+        </div>
+        <div
+          *ngIf="this.currentSigner.signatureType !== signatureType.Digital"
+          class="position_signer"
+        >
+          {{ "Width" | ecTranslate }}
+          <mat-form-field appearance="outline">
+            <input
+              [readonly]="!isAllowEditSignature()"
+              type="number"
+              min="0"
+              max="1544"
+              (input)="changeContractInput($event.target.value)"
+              formControlName="width"
+              class="position_signer--input"
+              matInput
+            />
+          </mat-form-field>
+          {{ "Height" | ecTranslate }}
+          <mat-form-field appearance="outline">
+            <input
+              [readonly]="!isAllowEditSignature()"
+              type="number"
+              min="0"
+              max="1544"
+              (input)="changeContractInput($event.target.value)"
+              formControlName="height"
+              class="position_signer--input"
+              matInput
+            />
+          </mat-form-field>
+        </div>
+        <div
+          *ngIf="
+            contractInput.value === signatureType.Text ||
+            contractInput.value === signatureType.DatePicker
+          "
+        >
+          <h5 class="mt-3">{{ "Formatting" | ecTranslate }}</h5>
+          <div class="mt-1">
+            <mat-form-field appearance="outline">
+              <mat-select
+                disableOptionCentering
+                [disabled]="!isAllowEditSignature()"
+                (selectionChange)="handlechangeFontSize($event)"
+                [(value)]="fontSize"
+              >
+                <mat-option *ngFor="let font of fontSizeList" [value]="font">
+                  {{ font }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-select
+                disableOptionCentering
+                [disabled]="!isAllowEditSignature()"
+                (selectionChange)="handlechangeFontFamily($event)"
+                [(value)]="fontFamily"
+              >
+                <mat-option *ngFor="let font of fontList" [value]="font">
+                  {{ font }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="mt-1 d-flex align-items-center">
+            <div class="p-0 col-5">
+              <mat-form-field appearance="outline">
+                <mat-select
+                  disableOptionCentering
+                  [disabled]="!isAllowEditSignature()"
+                  (selectionChange)="handleChangeColor()"
+                  [(value)]="fontColor"
+                >
+                  <mat-option
+                    *ngFor="let font of fontColorlist"
+                    [value]="font.value"
+                  >
+                    {{ font.name | ecTranslate }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn_step">
+    <button
+      (click)="handleBack()"
+      class="btn-back"
+      color="secondary"
+      mat-button
+    >
+      {{ "Back" | ecTranslate }}
+    </button>
+    <div class="row">
+      <button
+        class="button btn-right mr-3 py-2 px-3"
+        (click)="previewContract()"
+        [matTooltip]="'PreviewContractResults' | ecTranslate"
+      >
+        <i class="fa-solid fa-eye pr-2 pt-1"></i> {{ "Preview" | ecTranslate }}
+      </button>
+      <button
+        class="btn-continue button mr-4 btn-right py-2 px-3"
+        (click)="handleNext()"
+      >
+        {{
+          templateContract
+            ? ("Complete" | ecTranslate)
+            : ("Continue" | ecTranslate)
+        }}
+      </button>
+    </div>
+  </div>
+</div>

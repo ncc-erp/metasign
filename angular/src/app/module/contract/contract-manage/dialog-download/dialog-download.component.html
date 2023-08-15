@@ -1,0 +1,40 @@
+<div class="download-container">
+    <header class="download-main">
+        <h4>{{'Download' | ecTranslate}}</h4>
+    </header>
+
+    <mat-divider></mat-divider>
+
+    <div class="download-main">
+        <p>{{'SelectWhichFilesYouWantToDownload' | ecTranslate}}:</p>
+        <ul>
+            <li *ngFor="let subtask of subtasks; let i = index">
+                <mat-checkbox 
+                color="primary" 
+                [(ngModel)]="subtask.completed" 
+                (change)="updateAll2FilesState(subtask)">
+                    {{subtask.name | ecTranslate}}
+                </mat-checkbox>
+            </li>
+        </ul>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <div class="btn-download ">
+        <button 
+        (click)='sendDataToServer()' 
+        mat-raised-button 
+        class="button">
+            {{'Download' | ecTranslate}}
+        </button>
+        <button 
+        class="btn-cancel"
+        mat-dialog-close
+        mat-raised-button>
+           {{'Cancel' | ecTranslate}}
+        </button>
+    </div>
+
+
+</div>

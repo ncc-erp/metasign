@@ -1,0 +1,38 @@
+.download-main{
+    padding: 24px;
+}
+.btn-cancel{
+    float: right !important;
+}
+
+.download-select{
+    margin-top: 40px;
+}
+
+.btn-download{
+    padding: 20px 24px;
+}
+
+ul{
+    padding: 0;
+    list-style: none;
+}
+
+li, .select-title {
+    margin-bottom:  20px ;
+}
+
+:host ::ng-deep .mat-checkbox-layout{
+    font-weight: unset !important;
+}
+:host ::ng-deep .mat-checkbox-label{
+    font-size: 15px !important
+}
+
+::ng-deep .download-dialog .mat-dialog-container{
+    padding: 0;
+}
+
+::ng-deep .mat-checkbox-checked.mat-primary .mat-checkbox-background{
+    background-color: var(--primary-color);
+}

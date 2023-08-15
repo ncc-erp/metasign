@@ -1,0 +1,201 @@
+<div class="page-wrapper">
+  <!-- Email Setting -->
+  <div class="wrapper not-full-width">
+    <header class="header position-relative">
+      <div class="label-header">Email Setting</div>
+      <button
+        mat-raised-button
+        (click)="handleClickEdit('EmailSetting')"
+        class="button button-edit"
+        *ngIf="isDisabledFormEmail && isGrandEdit()"
+      >
+        <i class="fa-sharp fa-solid fa-pen-to-square"></i>
+        {{ "Edit" | ecTranslate }}
+      </button>
+    </header>
+    <div class="content card">
+      <form
+        id="formEmailSetting"
+        class="card-body"
+        [formGroup]="formEmailSetting"
+        (ngSubmit)="saveChangeEmail(formEmailSetting.value)"
+      >
+        <mat-checkbox
+          [checked]="emailSetting['enableSsl'] === 'true'"
+          (change)="checkEnableSsl($event)"
+          formControlName="enableSsl"
+          >Enable SSL</mat-checkbox
+        >
+        <div *ngFor="let formItem of dataForm">
+          <mat-form-field class="form-item">
+            <mat-label>{{ formItem.label }}</mat-label>
+            <input matInput formControlName="{{ formItem.formControlName }}" />
+          </mat-form-field>
+        </div>
+        <mat-checkbox
+          class="checkbox-use-default"
+          formControlName="useDefaultCredentials"
+          [checked]="emailSetting['useDefaultCredentials'] === 'true'"
+          (change)="checkUseDefaultCredentials($event)"
+        >
+          {{ "UseDefaultCredentials" | ecTranslate }}
+        </mat-checkbox>
+      </form>
+      <footer *ngIf="!isDisabledFormEmail" class="footer">
+        <button
+          mat-raised-button
+          color="secondary"
+          (click)="cancelChange('EmailSetting')"
+        >
+          {{ "Cancel" | ecTranslate }}
+        </button>
+        <button
+          form="formEmailSetting"
+          mat-raised-button
+          type="submit"
+          class="btn-primary button"
+        >
+          {{ "Save" | ecTranslate }}
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- GoogleClientID -->
+  <div class="wrapper not-full-width">
+    <header class="header">
+      <div class="label-header">Google Client ID</div>
+      <button
+        mat-raised-button
+        (click)="handleClickEdit('GoogleClientId')"
+        class="button button-edit"
+        *ngIf="isDisabledFormGoogleId"
+      >
+        <i class="fa-sharp fa-solid fa-pen-to-square"></i>
+        {{ "Edit" | ecTranslate }}
+      </button>
+    </header>
+    <div class="content card">
+      <form
+        id="formGoogleClientIdSetting"
+        class="card-body"
+        [formGroup]="formGoogleClientIdSetting"
+        (ngSubmit)="saveChangeGoogleId(formGoogleClientIdSetting.value)"
+      >
+        <div *ngFor="let formItem of dataFormGoogleClientId">
+          <mat-form-field class="form-item">
+            <mat-label>{{ formItem.label }}</mat-label>
+            <input matInput formControlName="{{ formItem.formControlName }}" />
+          </mat-form-field>
+        </div>
+        <mat-checkbox
+          class="checkbox-enable-login-username pt-2"
+          formControlName="enableLoginByUsername"
+          [checked]="isEnableLoginByUsername"
+          (change)="checkEnableLoginByUsername($event)"
+          >{{ "IsAllowNormalLogin" | ecTranslate }}</mat-checkbox
+        >
+      </form>
+      <footer *ngIf="!isDisabledFormGoogleId" class="footer">
+        <button
+          mat-raised-button
+          color="secondary"
+          (click)="cancelChange('GoogleClientId')"
+        >
+          {{ "Cancel" | ecTranslate }}
+        </button>
+        <button
+          form="formGoogleClientIdSetting"
+          mat-raised-button
+          type="submit"
+          class="btn-primary button"
+        >
+          {{ "Save" | ecTranslate }}
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- AWS S3 Credential -->
+  <div class="wrapper not-full-width">
+    <header class="header">
+      <div class="label-header">AWS S3 Credential</div>
+      <button
+        mat-raised-button
+        (click)="handleClickEdit('fromS3')"
+        class="button button-edit"
+        *ngIf="isDisabledFormS3"
+      >
+        <i class="fa-sharp fa-solid fa-pen-to-square"></i>
+        {{ "Edit" | ecTranslate }}
+      </button>
+    </header>
+    <div class="content card">
+      <form
+        class="card-body"
+        [formGroup]="formAwsS3Credential"
+        (ngSubmit)="saveChangeFromS3(formAwsS3Credential.value)"
+        id="fromS3"
+      >
+        <div *ngFor="let formItem of dataFormAwsS3Credential">
+          <mat-form-field class="form-item">
+            <mat-label>{{ formItem.label }}</mat-label>
+            <input matInput formControlName="{{ formItem.formControlName }}" />
+          </mat-form-field>
+        </div>
+      </form>
+      <footer 
+      *ngIf="!isDisabledFormS3"
+       class="footer">
+        <button
+          mat-raised-button
+          color="secondary"
+          (click)="cancelChange('fromS3')"
+        >
+          {{ "Cancel" | ecTranslate }}
+        </button>
+        <button
+          mat-raised-button
+          type="submit"
+          class="btn-primary button"
+          form="fromS3" 
+        >
+          {{ "Save" | ecTranslate }}
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Expried Time -->
+  <div class="wrapper not-full-width">
+    <header class="header">
+      <div class="label-header">Reminders About Contract Term</div>
+      <button mat-raised-button (click)="handleClickEdit('RemiderContractTerm')" class="button button-edit"
+        *ngIf="isDisabledRemiderExpriedTime">
+        <i class="fa-sharp fa-solid fa-pen-to-square"></i>
+        {{ "Edit" | ecTranslate }}
+      </button>
+    </header>
+    <div class="content card" id="remider">
+      <div class="row content-expried-time">
+        <mat-form-field appearance="outline">
+          <input matInput [(ngModel)]="remiderExpriedTime" class="text-center" [disabled]="isDisabledRemiderExpriedTime"
+            type="number" (keypress)="handleExpriedTime($event)" />
+        </mat-form-field>
+        <p class="p-3 {{
+              isDisabledRemiderExpriedTime ? 'unit-expried-time' : ''
+            }}" style="transform: translateY(-3px)">
+          days
+        </p>
+      </div>
+      <footer *ngIf="!isDisabledRemiderExpriedTime" class="footer footer-expried-time">
+        <button mat-raised-button color="secondary" (click)="cancelChange('RemiderContractTerm')">
+          {{ "Cancel" | ecTranslate }}
+        </button>
+        <button mat-raised-button class="btn-primary button" (click)="setNotiExprireTime()">
+          {{ "Save" | ecTranslate }}
+        </button>
+      </footer>
+    </div>
+  </div>
+</div>

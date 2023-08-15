@@ -1,0 +1,88 @@
+mat-stepper {
+  border-radius: 0.25rem;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 2px 0px;
+}
+
+::ng-deep #step .mat-horizontal-stepper-header-container {
+  max-width: 1170px;
+  margin: auto;
+}
+::ng-deep #step .mat-horizontal-stepper-content {
+  cursor: default;
+}
+::ng-deep #step .mat-horizontal-stepper-header {
+  pointer-events: none !important;
+}
+
+::ng-deep #step .mat-horizontal-stepper-header .mat-step-icon-selected,
+::ng-deep #step .mat-horizontal-stepper-header .mat-step-icon-state-edit {
+  color: var(--text-white-color) !important;
+  background-color: var(--primary-color) !important;
+}
+
+::ng-deep #step .mat-horizontal-stepper-header .mat-step-icon {
+  color: var(--primary-color);
+  background-color: var(--text-white-color);
+  border: 1px solid var(--text-selected);
+}
+
+::ng-deep #step .mat-horizontal-stepper-header .mat-step-label {
+  color: var(--primary-color);
+}
+
+::ng-deep #step .mat-horizontal-content-container {
+  padding: 0 !important;
+}
+
+@media only screen and (max-height: 912px) {
+  .wrapper {
+    height: 88.6vh;
+  }
+
+  .stepper {
+    height: 8vh;
+  }
+
+  ::ng-deep #step .mat-horizontal-stepper-header-container {
+    max-width: 1170px;
+    margin: auto;
+    height: 8vh;
+  }
+
+  .drop_box {
+    padding: 8px;
+  }
+}
+
+@media only screen and (max-height: 795px) {
+  .wrapper {
+    height: 87vh;
+  }
+}
+
+@media only screen and (max-height: 699px) {
+  .wrapper {
+    height: 85vh;
+  }
+}
+
+@media only screen and (min-height: 912.01px) and (max-height: 1024px) {
+  .wrapper {
+    height: 90vh;
+  }
+}
+
+@media only screen and (min-height: 1140.01px) {
+  .wrapper {
+    height: 92vh;
+  }
+}
+
+@media only screen and (min-height: 1290.01px) {
+  .wrapper {
+    height: 93vh;
+  }
+}

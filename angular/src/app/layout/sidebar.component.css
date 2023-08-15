@@ -1,0 +1,23 @@
+.content {
+  width: 95%;
+  margin: 0 auto;
+}
+
+.logo {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.item-header-right {
+  list-style: none;
+  padding: 20px 0 20px 20px;
+}
+
+sidebar-logo {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+header-user-menu {
+  padding-left: 4px !important;
+}

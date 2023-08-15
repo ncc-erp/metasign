@@ -1,0 +1,75 @@
+<div class="container-fluid" [ngClass]="isNotFullWidth()">
+  <div class="height-91vh wrapper card">
+    <mat-stepper
+      class="stepper"
+      id="step"
+      [linear]="true"
+      #stepper
+      [selectedIndex]="step"
+    >
+      <ng-template matStepperIcon="edit">
+        <mat-icon>check</mat-icon>
+      </ng-template>
+      <ng-template matStepperIcon="done">
+        <mat-icon>check</mat-icon>
+      </ng-template>
+      <mat-step
+        *ngIf="handleCompletedStep(0)"
+        [completed]="handleCompletedStep(0)"
+      >
+        <ng-template matStepLabel>{{
+          "UploadDocument " | ecTranslate
+        }}</ng-template>
+      </mat-step>
+      <mat-step *ngIf="!handleCompletedStep(0)">
+        <ng-template matStepLabel>{{
+          "UploadDocument" | ecTranslate
+        }}</ng-template>
+      </mat-step>
+
+      <mat-step
+        *ngIf="handleCompletedStep(1)"
+        [completed]="handleCompletedStep(1)"
+      >
+        <ng-template matStepLabel>{{
+          "AddRecipients" | ecTranslate
+        }}</ng-template>
+      </mat-step>
+      <mat-step *ngIf="!handleCompletedStep(1)">
+        <ng-template matStepLabel>{{
+          "AddRecipients" | ecTranslate
+        }}</ng-template>
+      </mat-step>
+
+      <mat-step
+        *ngIf="handleCompletedStep(2)"
+        [completed]="handleCompletedStep(2)"
+      >
+        <ng-template matStepLabel>{{
+          "SetSignatureLocations" | ecTranslate
+        }}</ng-template>
+      </mat-step>
+      <mat-step *ngIf="!handleCompletedStep(2)">
+        <ng-template matStepLabel>{{
+          "SetSignatureLocations" | ecTranslate
+        }}</ng-template>
+      </mat-step>
+
+      <mat-step
+        *ngIf="handleCompletedStep(3)"
+        [completed]="handleCompletedStep(3)"
+      >
+        <ng-template matStepLabel>{{
+          "ConfirmAndSendMail" | ecTranslate
+        }}</ng-template>
+      </mat-step>
+      <mat-step *ngIf="!handleCompletedStep(3)">
+        <ng-template matStepLabel>{{
+          "ConfirmAndSendMail" | ecTranslate
+        }}</ng-template>
+      </mat-step>
+    </mat-stepper>
+
+    <router-outlet></router-outlet>
+  </div>
+</div>

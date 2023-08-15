@@ -1,0 +1,31 @@
+.header {
+  width: 100%;
+  height: 80px;
+}
+
+.title {
+  line-height: 80px;
+  padding-left: 10%;
+}
+
+.img-success {
+  display: block;
+  margin: 1% auto;
+  height: 25%;
+  width: 25%;
+}
+
+.noti-success {
+  text-align: center;
+}
+.wrapper {
+  padding-bottom: 20%;
+}
+.signUrl {
+  cursor: pointer;
+  height: fit-content;
+}
+
+.button {
+  cursor: pointer;
+}

@@ -1,0 +1,95 @@
+<abp-modal-header
+  id="header"
+  [title]="contractFileName"
+  (onCloseClick)="dialogRef.close()"
+></abp-modal-header>
+<div class="wrapper">
+  <mat-spinner
+    *ngIf="contractLoading; else elseBlock"
+    class="spinner"
+  ></mat-spinner>
+  <ng-template #elseBlock>
+    <div id="design_viewer">
+      <div
+        id="design"
+        style="position: relative"
+        *ngFor="let contractPage of contractFile; let i = index"
+        [ngStyle]="{
+          width: contractPage.width + 'px',
+          height: contractPage.height + 'px'
+        }"
+      >
+        <div
+          #page
+          cdkDropList
+          [ngClass]="i > 0 ? 'mt-5' : ''"
+          [id]="contractPage.contractPage"
+        >
+          <img class="design_viewer--img" [src]="contractPage.fileBase64" />
+        </div>
+        <div
+          *ngFor="let signature of contractPage.signatureSettings"
+          [style.top.px]="signature.positionY"
+          [style.left.px]="signature.positionX"
+          style="position: absolute"
+          [style.width.px]="signature.width"
+          [style.height.px]="signature.height"
+        >
+          <img
+            class="preview-icon"
+            matTooltip="{{ signature.signerEmail }}"
+            [style.width.px]="signature.width"
+            [style.height.px]="signature.height"
+            *ngIf="
+              signature?.signatureType === listSignatureTypeId?.electronic ||
+              signature?.signatureType === listSignatureTypeId?.digital
+            "
+            src="{{
+              signature.value ||
+                '../../../../../../../assets/img/signature-icon.jpg'
+            }}"
+          />
+          <textarea
+            class="text-area"
+            [ngClass]="
+              signature?.signatureType === listSignatureTypeId?.datePicker
+                ? 'value-date'
+                : 'value-input'
+            "
+            matTooltip="{{ signature.signerEmail }}"
+            readonly
+            style="border: none; outline: none; resize: none"
+            [style.color]="signature.fontColor"
+            [style.font-size.px]="signature.fontSize"
+            [style.min-width.px]="30"
+            [style.font-family]="signature.fontFamily"
+            [style.width.px]="signature.width"
+            [style.height.px]="signature.height"
+            *ngIf="
+              signature?.signatureType === listSignatureTypeId?.text ||
+              signature?.signatureType === listSignatureTypeId?.datePicker
+            "
+            value="{{
+              signature?.signatureType === listSignatureTypeId?.text
+                ? signature.valueInput || 'MetaSign'
+                : (signature.valueInput | formatDate) || '07/03/2001'
+            }}"
+          >
+          </textarea>
+
+          <img
+            class="preview-icon"
+            matTooltip="{{ signature.signerEmail }}"
+            [style.width.px]="signature.width"
+            [style.height.px]="signature.height"
+            *ngIf="signature?.signatureType === listSignatureTypeId?.stamp"
+            src="{{
+              signature.value ||
+                '../../../../../../../assets/img/signature/stamp.svg'
+            }}"
+          />
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</div>

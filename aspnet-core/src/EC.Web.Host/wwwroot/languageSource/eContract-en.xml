@@ -1,0 +1,557 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<localizationDictionary culture="en">
+	<texts>
+		<text name="Home" value="Home" />
+		<text name="MyContract" value="List to sign" />
+		<text name="WaitForOther" value="Wait for other" />
+		<text name="DropOrUploadDocument" value="Drop or upload document here to get stared" />
+		<text name="SupportedFormats" value="Supported formats" />
+		<text name="CreateNewContract" value="Create new contract" />
+		<text name="UploadContract" value="Upload Contract" />
+		<text name="ChooseAFile" value="Choose a file" />
+		<text name="ContractTitle" value="Title" />
+		<text name="Preview" value="Preview" />
+		<text name="Continue" value="Continue" />
+		<text name="DeclareSigner" value="Declare signer" />
+		<text name="UploadAContractSuccessfully" value="Upload a contract successfully" />
+		<text name="Signer" value="Signer" />
+		<text name="FullName" value="Full Name" />
+		<text name="Email" value="Email" />
+		<text name="ThisFieldIsRequired" value="This field is required" />
+		<text name="AddNewSigner" value="Add new signer" />
+		<text name="AddNewCopyRecipient" value="Add new copy recipients" />
+		<text name="Back" value="Back" />
+		<text name="SetUpSignaturePosition" value="Set up signature position" />
+		<text name="ESignature" value="E-Signature" />
+		<text name="Text" value="Text" />
+		<text name="Date" value="Date" />
+		<text name="Day" value="days" />
+		<text name="Pages" value="Pages" />
+		<text name="MissingSignaturePositionsForExistedSigners" value="Missing signature’s positions for existed signers" />
+		<text name="SetUpSendingEmail" value="Set up sending email" />
+		<text name="MailContent" value="Mail content" />
+		<text name="Edit" value="Edit" />
+		<text name="EditV2" value="Edit" />
+		<text name="From" value="From" />
+		<text name="ViewContract" value="View contract" />
+		<text name="Contract" value="Contract" />
+		<text name="ToOrSendTo" value="Send to" />
+		<text name="Signers" value="Signers" />
+		<text name="SendEmailSuccessfully" value="Email sent successfully" />
+		<text name="ContractSasBeenSent" value="Contract has been sent" />
+		<text name="ContractManagement" value="Contract Management" />
+		<text name="ESign" value="E-sign" />
+		<text name="TheDocumentOrContractHasBeenSignedSuccessfully" value="The contract has been signed successfully" />
+		<text name="Admin" value="Admin" />
+		<text name="EditRole" value="Edit role" />
+		<text name="View" value="View" />
+		<text name="Create" value="Create" />
+		<text name="Update" value="Update" />
+		<text name="ChangeRole" value="Change role" />
+		<text name="Delete" value="Delete" />
+		<text name="Update" value="Update" />
+		<text name="Company" value="Company" />
+		<text name="ConfigEmail" value="Config email" />
+		<text name="TestSendEmail" value="Test send email" />
+		<text name="ViewStatistics" value="View Statistics" />
+		<text name="ViewDefaultSignature" value="View default signature" />
+		<text name="CreateNewContract" value="Create new contract" />
+		<text name="StepsToSetUpContract" value="Steps to set up contract" />
+		<text name="StepToUpload" value="Step to upload" />
+		<text name="ViewOrPreview" value="Preview" />
+		<text name="StepToSetUpSigner" value="Step to set up signer" />
+		<text name="AddNewCopyRecipients" value="Add new copy recipients" />
+		<text name="StepToSetUpPosition" value="Step to set up position" />
+		<text name="StepToSendEmail" value="Step to send email" />
+		<text name="SetUpDefaultSignature" value="Set up default signature" />
+		<text name="CreateNewContract" value="Create new contract" />
+		<text name="ViewHistory" value="View history" />
+		<text name="Sign" value="Sign" />
+		<text name="ContractDetails" value="Contract details" />
+		<text name="SendEmail" value="Send email" />
+		<text name="ViewHistory" value="View history" />
+		<text name="Print" value="Print" />
+		<text name="Cancel" value="Cancel" />
+		<text name="CancelDocument" value="Cancel document" />
+		<text name="AddNew" value="Add new" />
+		<text name="No" value="No." />
+		<text name="WorkerName" value="Worker Name" />
+		<text name="Status" value="Status" />
+		<text name="Actions" value="Actions" />
+		<text name="Action" value="Action" />
+		<text name="ViewOrDetail" value="Detail" />
+		<text name="AddProperties" value="Add properties" />
+		<text name="DeleteProperty" value="Delete property" />
+		<text name="AreYouSureYouWantToDeleteProperty" value="Are you sure you want to delete property…?" />
+		<text name="DeletePropertySuccessfully" value="Delete property successfully" />
+		<text name="EditOrUpdate" value="Edit" />
+		<text name="AreYouSureYouWantToChangeTheStatusOfPdfWorker" value="Are you sure you want to change the status of Pdf Worker?" />
+		<text name="SignatureManagement" value="Signature Management" />
+		<text name="CreationTime" value="Creation Time" />
+		<text name="UpdateTime" value="Update Time" />
+		<text name="YouHaveNotHadAnySignatureYet" value="You have not had any signature yet" />
+		<text name="AddNewSignature" value="Add new signature" />
+		<text name="UploadSignature" value="Upload signature" />
+		<text name="DrawSignature" value="Draw signature" />
+		<text name="SignatureType" value="Signature type" />
+		<text name="ESignature" value="E-signature" />
+		<text name="SetAsDefaultSignature" value="Set as default signature" />
+		<text name="PleaseProvideYourSignature" value="Please provide your signature!" />
+		<text name="EditSignature" value="Edit your signature" />
+		<text name="AreYouSureYouWantToDeleteThisSignature" value="Are you sure you want to delete this signature?" />
+		<text name="Contract" value="Contract" />
+		<text name="CreateNewContract" value="Create new contract" />
+		<text name="WaitToSign" value="Wait to sign" />
+		<text name="Complete" value="Complete" />
+		<text name="QuickFilters" value="Quick filters" />
+		<text name="ContractsNeedMySignature" value="Contracts need my signature" />
+		<text name="WaitForOthers" value="Wait for others" />
+		<text name="ContractsNeedOtherSignatures" value="Contracts need other signatures" />
+		<text name="CompletedContracts" value="Completed Contracts" />
+		<text name="SearchByContractCodeOrContractTitle" value="Search by contract code, contract title" />
+		<text name="ContractTitle" value="Contract title" />
+		<text name="FileName" value="File name" />
+		<text name="Status" value="Status" />
+		<text name="CreationTime" value="Creation time" />
+		<text name="UpdateTime" value="Update time" />
+		<text name="By" value="by" />
+		<text name="NoMatchingResults" value="No matching results" />
+		<text name="History" value="History" />
+		<text name="Email" value="Email" />
+		<text name="Actions" value="Actions" />
+		<text name="Created" value="Created" />
+		<text name="Sented" value="Sented" />
+		<text name="ReSented" value="resented" />
+		<text name="DocumentTo" value="document to" />
+		<text name="ACopyDocumentTo" value="a copy document to" />
+		<text name="Close" value="Close" />
+		<text name="Resend" value="Resend" />
+		<text name="AreYouSureYouWantToResendEmail" value="Are you sure you want to resend email?" />
+		<text name="CancelContract" value="Cancel document" />
+		<text name="AreYouSureYouWantToDeleteTheContract" value="Are you sure you want to delete the contract…?" />
+		<text name="CreatedBy" value="Created by" />
+		<text name="LastUpdate" value="Last update" />
+		<text name="ResendAll" value="Resend all" />
+		<text name="WaitToSign" value="Wait to sign" />
+		<text name="ViewHistory" value="View history" />
+		<text name="Contact" value="Contact" />
+		<text name="AddNew" value="Add new" />
+		<text name="SearchByCustomerNameOrEmail" value="Search by customer name, email" />
+		<text name="CustomerName" value="Customer name" />
+		<text name="ContactNumber" value="Contact number" />
+		<text name="CompanyOrOrganization" value="Company/Organization" />
+		<text name="EditCustomerInformation" value="Edit customer information" />
+		<text name="UpdateCustomerInformationSuccessfully" value="Update customer information successfully!" />
+		<text name="ContractTemplates" value="Contract Templates" />
+		<text name="SearchTemplateByName" value="Search template by name" />
+		<text name="UploadTemplate" value="Upload template" />
+		<text name="DropOrUploadDocumentHereToGetStarted" value="Drop or Upload file here to get started" />
+		<text name="DropOrUploadFileHereToGetStarted" value="Drop or Upload file here to get started" />
+		<text name="SetUpSignaturePosition" value="Set up signature position" />
+		<text name="CreatedNewContractTemplateSuccessfully" value="Created new contract template successfully" />
+		<text name="AllContractTemplates" value="All contract templates" />
+		<text name="AvailableTemplatesOrSharedWithMe" value="Available templates/Shared with me?" />
+		<text name="TemplateTitle" value="Template title" />
+		<text name="CreationTime" value="Creation time" />
+		<text name="LastUpdate" value="Last update" />
+		<text name="AreYouSureYouWantToDeleteThisTemplate" value="Are you sure you want to delete this template?" />
+		<text name="TotalTemplates" value="Total templates" />
+		<text name="Save" value="Save" />
+		<text name="AddNewPdfWorker" value="Add new pdf worker" />
+		<text name="SuccessfullyAddNewWorker" value="Add worker successfully" />
+		<text name="Roles" value="Roles" />
+		<text name="RoleName" value="Role name" />
+		<text name="DisplayName" value="Dislay name" />
+		<text name="Name" value="Name" />
+		<text name="RoleDescription" value="Role description" />
+		<text name="Permissions" value="Permissions" />
+		<text name="Details" value="Details" />
+		<text name="Users" value="Users" />
+		<text name="SelectUser" value="Select user" />
+		<text name="User" value="User" />
+		<text name="Remove" value="Remove" />
+		<text name="AreYouSure" value="Are you sure?" />
+		<text name="DoYouWantToRemove" value="Do you want to remove" />
+		<text name="FromThisRole" value="from this role" />
+		<text name="LogOut" value="Log out" />
+		<text name="FromTheRoleSuccessfully" value="from the role successfully" />
+		<text name="SuccessfullyAddNew" value="Add new successfully" />
+		<text name="PleaseEnterContractCode" value="Please enter contract code" />
+		<text name="DeleteContractSuccessfully" value="Delete contract successfully" />
+		<text name="AreYouSureYouWanttoDeleteTheContract" value="Are you sure you want to delete the contract?" />
+		<text name="AContractUploadFailed" value="Upload contract failed" />
+		<text name="PleaseEnterYourContractName" value="Please enter your contract name" />
+		<text name="PleaseEnterYourFullName" value="Please enter your full name" />
+		<text name="PleaseEnterYourContractCode" value="Please enter your contract code" />
+		<text name="YourEmailIsNotFormattedCorrectly" value="Your email is not formatted correctly" />
+		<text name="PleaseEnterYourEmail" value="Please enter your email" />
+		<text name="YouHaveNotSetUpASigner" value="You have not set up signer" />
+		<text name="YouHaveNotSetUpAContractParticipant" value="You have not set up contract participant" />
+		<text name="DeleteTheSignerSuccessfully" value="Delete signer successfully" />
+		<text name="Receiver" value="Receiver" />
+		<text name="Width" value="Width" />
+		<text name="Height" value="Height" />
+		<text name="FontOption" value="Font option" />
+		<text name="FillInTheText" value="Fill text" />
+		<text name="FillInTheDate" value="Fill date" />
+		<text name="SignToken" value="Sign token" />
+		<text name="UpdateContractFormSuccessfully" value="Update contract form successfully" />
+		<text name="DeletedCopyRecipientSuccessfully" value="Deleted copy recipient successfully" />
+		<text name="DeleteSignatureSuccessfully" value="Delete signature successfully" />
+		<text name="SetupDefaultSignature" value="Setup default signature?" />
+		<text name="SetupDefaultSignatureSuccessfully" value="Setup default signature successfully" />
+		<text name="UpdateSignatureSuccessfully" value="Update signature successfully" />
+		<text name="Configuration" value="Configuration" />
+		<text name="EmailTemplate" value="Email template" />
+		<text name="Sent" value="Sent" />
+		<text name="ViewStats" value="View stats" />
+		<text name="ViewDefaultSignature" value="View default signature" />
+		<text name="SetUpContract" value="Set up contract" />
+		<text name="AddSignBox" value="Add sign box" />
+		<text name="MoreTypesOfBoxes" value="More types of boxes" />
+		<text name="EditSignBox" value="Edit sign box" />
+		<text name="DeleteSignBox" value="Delete sign box" />
+		<text name="PreviewTemplate" value="Preview template" />
+		<text name="Change" value="Change" />
+		<text name="NoResultsFound" value="No results found" />
+		<text name="Search" value="Search" />
+		<text name="GetACopy" value="Get a copy" />
+		<text name="YouHaveNoContactYet" value="You have no contact yet" />
+		<text name="AddNewCustomer" value="Add new customer" />
+		<text name="Tenant" value="Tenant" />
+		<text name="Configuration" value="Configuration" />
+		<text name="SignServer" value="Sign server" />
+		<text name="Disabled" value="Disabled" />
+		<text name="Using" value="Using" />
+		<text name="SelectTypeWorker" value="Select type worker" />
+		<text name="UseDefaultCredentials" value="Use default credentials" />
+		<text name="IsAllowNormalLogin" value="Is allow normal login" />
+		<text name="IsActive" value="Is active" />
+		<text name="Active" value="Active" />
+		<text name="Yes" value="Yes" />
+		<text name="No1" value="No" />
+		<text name="Search" value="Search" />
+		<text name="Clear" value="Clear" />
+		<text name="TenancyName" value="Tenancy name" />
+		<text name="EditTenant" value="Edit tenant" />
+		<text name="CreateNewTenant" value="Create new tenant" />
+		<text name="DatabaseConnectionString" value="Database connection string" />
+		<text name="AdminEmailAddress" value="Admin email address" />
+		<text name="DefaultPasswordIs" value="Default passwordIs" />
+		<text name="SearchNameFullNameEmail" value="Search name, fullname, email" />
+		<text name="UserName" value="User name" />
+		<text name="EmailAddress" value="Email address" />
+		<text name="EditUser" value="Edit user" />
+		<text name="Surname" value="Surname" />
+		<text name="UserRoles" value="User roles" />
+		<text name="UserDetails" value="User details" />
+		<text name="NormalUser" value="Normal user" />
+		<text name="CreateNewUser" value="Create new user" />
+		<text name="UpdatePassword" value="Update password" />
+		<text name="NewPassword" value="New password" />
+		<text name="ConfirmNewPassword" value="Confirm new password" />
+		<text name="ResetPassword" value="Reset password" />
+		<text name="AdminPassword" value="Admin password" />
+		<text name="ResetPasswordStepOneInfo" value="Reset password step one info" />
+		<text name="ResetPasswordStepTwoInfo" value="Reset password step two info" />
+		<text name="Type" value="Type" />
+		<text name="To" value="To" />
+		<text name="Cc" value="Cc" />
+		<text name="Subject" value="Subject" />
+		<text name="TestSendMail" value="Test send mail" />
+		<text name="Message" value="Message" />
+		<text name="SignUrl" value="Sign url" />
+		<text name="SendToEmail" value="Send to email" />
+		<text name="AuthorEmail" value="Author email" />
+		<text name="ContractSettingId" value="Contract setting id" />
+		<text name="ContractRole" value="Contract role" />
+		<text name="PropertiesSupport" value="Properties support" />
+		<text name="Me" value="Me" />
+		<text name="CreateEmailTeamplate" value="Create email template" />
+		<text name="CannelContract" value="Canned contract" />
+		<text name="CannelContractAt" value="Contract cannel at" />
+		<text name="SetSigningOrde" value="Set signing order" />
+		<text name="SignDocument" value="Ký tài liệu" />
+		<text name="ACopyDocument" value="A copy document" />
+		<text name="YouHadDocumentNeedSign" value="You had document need sign" />
+		<text name="CoordinatesX" value="Coordinates X" />
+		<text name="CoordinatesY" value="Coordinates Y" />
+		<text name="YouHaveReceivedACopyOfTheDocument" value="You have received a copy of the document" />
+		<text name="Viewer" value="Viewer" />
+		<text name="ApprovedBy" value="Approved by" />
+		<text name="ContractHasBeenSent" value="Contract has been sent" />
+		<text name="SignedDocument" value="Signed document" />
+		<text name="SigningInProgress" value="Signing in progress" />
+		<text name="ContractCompeled" value="Contract is compeled" />
+		<text name="SelectSignature" value="Select signature" />
+		<text name="StartSigning" value="Start signing" />
+		<text name="FillText" value="Fill text" />
+		<text name="FillDate" value="Fill date" />
+		<text name="DownloadPlugin" value="Download plugin" />
+		<text name="PleaseConnectPluginOrDownloadPluginIfNotAlready" value="Please connect plugin or download plugin if not already" />
+		<text name="DigitalSignatureInformation" value="Digital signature information" />
+		<text name="ChangeDigitalCertificate" value="Change digital certificate" />
+		<text name="ContractCompled" value="Contract compled" />
+		<text name="CreatedContract" value="created contract" />
+		<text name="SearchByContractCodeContractTitle" value="Search by contract code, contract title" />
+		<text name="SendMail" value="Send mail" />
+		<text name="WelcomeToMetaSign" value="Welcome To MetaSign" />
+		<text name="ToGetStartedPleaseSignIn" value="To get started, please sign in" />
+		<text name="SearchByCustomerNameEmail" value="Search By Customer Name, Email" />
+		<text name="EditGoogleClientIDSuccessfully" value="Edit google client id successfully" />
+		<text name="WorkerAttributeAddedSuccessfully" value="Worker attribute added successfully" />
+		<text name="Successfully" value="Successfully" />
+		<text name="UpdatePropertiesSuccessfully" value="Update properties successfully" />
+		<text name="UserDeleteWarningMessage" value="User delete warning message" />
+		<text name="AreYouSureYouWantToDelete" value="Are you sure you want to delete?" />
+		<text name="DeleteCustomerSuccessfully" value="Delete customer successfully!" />
+		<text name="AddedNewCustomersSuccessfully" value="Added new customers successfully" />
+		<text name="ContractHasBeenCanceled" value="Contract has been canceled" />
+		<text name="AreYouSureToDeleteTheContract" value="Are you sure to delete the contract?" />
+		<text name="DeleteSuccessful" value="Delete successful" />
+		<text name="AreYouSureYouWantToResendTheEmail" value="Are you sure you want to resend the email?" />
+		<text name="SendEmailFailed" value="Send email failed" />
+		<text name="AreYouSureYouWantToCancelTheContract" value="Are you sure you want to cancel the contract?" />
+		<text name="SigningFailedPleaseRecheckUSB" value="Signing failed please recheck USB" />
+		<text name="PleaseProvideSignature" value="Please provide signature" />
+		<text name="TenantDeleteWarningMessage" value="Tenant delete warning message" />
+		<text name="SavedSuccessfully" value="Saved successfully" />
+		<text name="SuccessfullyDeleted" value="Successfully deleted" />
+		<text name="ResetPasswordSuccessfully" value="Reset password successfully" />
+		<text name="PasswordChangedSuccessfully" value="Password changed successfully" />
+		<text name="Success" value="Success" />
+		<text name="SearchWithThreeDot" value="Find data" />
+		<text name="RoleDeleteWarningMessage" value="Role delete warning message" />
+		<text name="MissingSignaturesPositionsForExistedSigners" value="Missing signatures positions for existed signers" />
+		<text name="LoginEmailToViewDocuments" value="Login email to view documents" />
+		<text name="EmailDoesNotHavePermissionToViewTheDocumentPleaseCheckAgain" value="Email does not have permission to view the document, please check again" />
+		<text name="PleaseCompleteTheSignatureBeforeCompleting" value="Please complete the signature before completing" />
+		<text name="PleaseFillInTheInputCompletelyBeforeCompleting" value="Please fill in the input completely before completing" />
+		<text name="SuccessfullyEditedCustomerInformation" value="Successfully edited customer information!" />
+		<text name="AddedSignatureSuccessfully" value="Added signature successfully" />
+		<text name="Code" value="Code" />
+		<text name="Title" value="Title" />
+		<text name="Error" value="Error" />
+		<text name="TitleTemplate" value="Title template" />
+		<text name="EditEmailContent" value="Edit email content" />
+		<text name="OnlyThePersonWithTheFirstOrderOfSigningCanAddContractInformation" value="Only the person with the first order of signing can add contract information" />
+		<text name="OnlyTheFirstSignerCanAddContractInformation" value="Only the person with the first order of signing can add contract information" />
+		<text name="Font" value="Font" />
+		<text name="FontSize" value="Size" />
+		<text name="DoubleClickToFillText" value="Double click to fill text" />
+		<text name="DoubleClickToEditText" value="Double click to edit text" />
+		<text name="Send" value="Send" />
+		<text name="Enable" value="Enable" />
+		<text name="RemoveDefaultSignature" value="Remove default signature?" />
+		<text name="RemoveDefaultSignatureSuccessfully" value="Remove default signature successfully" />
+		<text name="Download" value="Download" />
+		<text name="DownloadContract" value="Download" />
+		<text name="SelectTheFilesYouWantToDownload" value="Select the files you want to download" />
+		<text name="All2Files" value="All" />
+		<text name="Document1PDF" value="Contract" />
+		<text name="CertificateOfAchievement1PDF" value="Certificate" />
+		<text name="DownloadDocument" value="Download document" />
+		<text name="Signatures" value="Signatures" />
+		<text name="Contracts" value="Contracts" />
+		<text name="Contacts" value="Contacts" />
+		<text name="Templates" value="Templates" />
+		<text name="DefaultSignature" value="Default signature" />
+		<text name="StartNow" value="Start now" />
+		<text name="UploadDocument" value="Upload document" />
+		<text name="EnterContractName" value="Enter contract name" />
+		<text name="ContractNameIsRequired" value="ContractNameIsRequired" />
+		<text name="ContractCode" value="Contract code" />
+		<text name="DropYourDocumentsHereToGetStarted" value="Drop documents here to get started" />
+		<text name="EnterContractCode" value="Enter contract code" />
+		<text name="DocumentUploadedSuccessfully" value="Document uploaded successfully" />
+		<text name="DocumentUpdatedSuccessfully" value="Document updated successfully" />
+		<text name="AddSigner" value="Add signer" />
+		<text name="CopyRecipients" value="Copy recipients" />
+		<text name="AddCopyRecipients" value="Add copy recipients" />
+		<text name="SetSigningOrder" value="Set signing order" />
+		<text name="EnterYourFullName" value="Enter your full name" />
+		<text name="EnterYourEmail" value="Enter your email" />
+		<text name="FullNameIsRequired" value="Full name is required." />
+		<text name="EmailIsRequired" value="Email is required" />
+		<text name="EmailIsNotValid" value="Email is not valid" />
+		<text name="TheSignerHasBeenRemovedSuccessfully" value="The signer has been removed successfully" />
+		<text name="PleaseAddASinger" value="Please add a singer" />
+		<text name="SetSignatureLocations" value="Set signature locations" />
+		<text name="SignatureTypes" value="Signature types" />
+		<text name="Signature" value="Signature" />
+		<text name="USBToken" value="USB Token" />
+		<text name="Recipient" value="Recipient" />
+		<text name="Location" value="Location" />
+		<text name="Formatting" value="Formatting" />
+		<text name="PreviewContractResults" value="Preview contract results " />
+		<text name="MissingSignatureLocationForRecipients" value="Missing signature location for recipients" />
+		<text name="CreateContract" value="Create contract" />
+		<text name="UseTemplate" value="Use template" />
+		<text name="All" value="All" />
+		<text name="Draft" value="Draft" />
+		<text name="Drafts" value="Draft" />
+		<text name="Cancelled" value="Cancelled" />
+		<text name="Completed" value="Completed" />
+		<text name="NeedToSign" value="Need to sign" />
+		<text name="WaitingToOthers" value="Waiting for others" />
+		<text name="ContractsNeedOthersSignatures" value="Contracts need others signatures" />
+		<text name="ContractsWillExpireWithin" value="Contracts will expire within" />
+		<text name="ContractName" value="Contract name" />
+		<text name="CreatedTime" value="Created time" />
+		<text name="UpdatedTime" value="Updated time" />
+		<text name="TotalItems" value="Total items" />
+		<text name="WaitingToSign" value="Waiting to sign" />
+		<text name="AreYouSureYouWantToDeleteContract" value="Are you sure you want to delete" />
+		<text name="AreYouSureYouWantToCancelContract" value="Are you sure you want to cancel" />
+		<text name="ContractOrNo" value="contract?" />
+		<text name="SignNow" value="Sign now" />
+		<text name="ContractHistory" value="Contract history" />
+		<text name="CreatedDocument" value="Created document" />
+		<text name="SentMail" value="Sent mail" />
+		<text name="Signed" value="Signed" />
+		<text name="Note" value="Note" />
+		<text name="createdTheDocument" value="created the document" />
+		<text name="sentACopyOfTheDocumentTo" value="sent a copy of the document to" />
+		<text name="sentTheDocumentTo" value="sent the document to" />
+		<text name="resentTheDocumentTo" value="resent the document to" />
+		<text name="signedTheDocument" value="signed the document" />
+		<text name="cancelledtheDocument" value="cancelled the document [Reason: " />
+		<text name="declinedtheDocument" value="declined the document [Reason: " />
+		<text name="TheDocumentHasBeenCompleted" value="The document has been completed" />
+		<text name="me" value="me" />
+		<text name="Sreach" value="Search" />
+		<text name="SearchByContractCodeContractName" value="Search by contract code, contract name" />
+		<text name="YouCurrentlyDoNotHaveAnyContracts" value="You currently do not have any contracts" />
+		<text name="MyTemplates" value="My templates" />
+		<text name="TemplateGallery" value="Template gallery" />
+		<text name="Use" value="Use" />
+		<text name="ResendToAll" value="Resend to all" />
+		<text name="SentOn" value="Sent on" />
+		<text name="SignedOn" value="Signed on" />
+		<text name="VoidOn" value="Voided on" />
+		<text name="Signatures" value="Signatures" />
+		<text name="YouCurrentlyDoNotHaveAnySignatures" value="You currently do not have any signatures" />
+		<text name="AddSignature" value="Add signature" />
+		<text name="AreYouSureYouWantToDeleteThisSignature" value="Are you sure you want to delete this signature?" />
+		<text name="SignatureDeletedSuccessfully" value="Signature deleted successfully" />
+		<text name="SetAsDefaultSignature" value="Set as default signature" />
+		<text name="CreateYourSignature" value="Create your signature" />
+		<text name="EmptyOrInvalidSignature" value="Empty or invalid signature" />
+		<text name="SignatureCreatedSuccessfully" value="Signature created successfully" />
+		<text name="Upload" value="Upload" />
+		<text name="UploadSignature" value="Upload signature" />
+		<text name="Replace" value="Replace" />
+		<text name="Draw" value="Draw" />
+		<text name="Text" value="Text" />
+		<text name="EnterText" value="Enter text" />
+		<text name="EditYourSignature" value="Edit your signature" />
+		<text name="SignatureUpdatedSuccessfully" value="Signature updated successfully" />
+		<text name="AllTemplates" value="All templates" />
+		<text name="TemplatesGallery" value="Templates gallery" />
+		<text name="CreateTemplate" value="Create template" />
+		<text name="TemplateName" value="Template name" />
+		<text name="YouCurrentlyDoNotHaveAnyTemplates" value="You currently do not have any templates" />
+		<text name="AreYouSureYouWantToDeleteTemplate" value="Are you sure you want to delete" />
+		<text name="TemplateOrNo" value="template?" />
+		<text name="SreachByTemplateName" value="Search by template name" />
+		<text name="NoMatchingSearchResults" value="No matching search results" />
+		<text name="EnterTemplateName" value="Enter template name" />
+		<text name="TemplateNameIsRequired" value="Template name is required" />
+		<text name="ThisDocumentFormatIsNotSupported" value="This document format is not supported" />
+		<text name="AreYouSureYouWantToDeleteThisDocument" value="Are you sure you want to delete this document?" />
+		<text name="Role" value="Role" />
+		<text name="EnterRole" value="Enter role" />
+		<text name="RoleIsRequired" value="Role is required." />
+		<text name="TemplateCreatedSuccessfully" value="Template created successfully" />
+		<text name="TemplateUpdatedSuccessfully" value="Template updated successfully" />
+		<text name="ToGetStartedPleaseLogIn" value="To get started, please log in" />
+		<text name="LogInToViewDocument" value="Log in to view document" />
+		<text name="EditSuccessfully" value="Edit successfully" />
+		<text name="sent" value="sent" />
+		<text name="reSent" value="resent" />
+		<text name="theDocumentTo" value="the document to" />
+		<text name="aCopyOfTheDocumentTo" value="a copy of the document to" />
+		<text name="signedTheDocument" value="signed the document" />
+		<text name="TheDocumentHasBeenCompleted" value="The document has been completed" />
+		<text name="createdTheDocument" value="created the document" />
+		<text name="cannelTheDocument" value="cancelled the document" />
+		<text name="FillOrText" value="Fill" />
+		<text name="FillOrDate" value="Fill" />
+		<text name="AddRecipients" value="Add recipients" />
+		<text name="ConfirmAndSendMail" value="Confirm and send mail" />
+		<text name="EnterDate" value="Enter date" />
+		<text name="ChooseDate" value="Choose date" />
+		<text name="MySignatures" value="My signatures" />
+		<text name="Text" value="Text" />
+		<text name="ChosesDocument" value="Choses document" />
+		<text name="UploadFile" value="Upload file" />
+		<text name="UseTemplate" value="Use template" />
+		<text name="PleaseFillOutAllFields" value="Please fill out all fields" />
+		<text name="SelectFile" value="Select file" />
+		<text name="YouCurrentlyDoNotHaveAnyContarctTemplates" value="You currently do not have any contarct templates" />
+		<text name="Confirm" value="Confirm" />
+		<text name="ContractCancelledSuccessfully" value="Contract cancelled successfully" />
+		<text name="black" value="black" />
+		<text name="red" value="red" />
+		<text name="green" value="green" />
+		<text name="blue" value="blue" />
+		<text name="yellow" value="yellow" />
+		<text name="MissingSignatureLocationForRecipients" value="Missing signature location for recipients" />
+		<text name="AreYouSureYouWantToContinue" value="Are you sure you want to continue?" />
+		<text name="OtherSignersWillReceiveAnEmailAfter" value="The signers will receive an email after all parties complete the content of the contract." />
+		<text name="completesTheContract" value="completes the contract." />
+		<text name="willReceiveAnEmailAfterTheOtherSignersCompleteTheContract" value="will receive an email after the other signers complete the contract." />
+		<text name="AreYouSureYouToDeleteContract" value="Are you sure you want to delete" />
+		<text name="ContractDeletedSuccessfully" value="Contract deleted successfully." />
+		<text name="CancelledDocument" value="Cancelled document" />
+		<text name="TotalTemplateItems" value="Total items" />
+		<text name="ContractTemplateDeletedSuccessfully" value="Contract template deleted successfully" />
+		<text name="EmptyOrInvalidContent" value="Empty or invalid content" />
+		<text name="TemplateCreatedSuccessfully" value="Template created successfully" />
+		<text name="TemplateUpdatedSuccessfully" value="Template updated successfully" />
+		<text name="TemplateSavedSuccessfully" value="Template saved successfully" />
+		<text name="Start" value="Start" />
+		<text name="SelectWhichFilesYouWantToDownload" value="Select which files you want to download" />
+		<text name="Document" value="Document" />
+		<text name="CertificateOfCompletion" value="Certificate of Completion" />
+		<text name="TheCopyRecipientHasBeenRemovedSuccessfully" value="The copy recipient has been removed successfully" />
+		<text name="PleaseAddASigner" value="Please add a signer" />
+		<text name="IAgreeToUseElectronicSignatureToMakeTransactions" value="I agree to use electronic signature to make transactions" />
+		<text name="Comfirm" value="Confirm" />
+		<text name="ExpriedTime" value="Expried time" />
+		<text name="EnterExpriedTime" value="Enter expried time" />
+		<text name="DocumentDeletedSuccessfully" value="Document deleted successfully" />
+		<text name="SignOrSignature" value="Sign" />
+		<text name="SignOrUSBToken" value="Sign" />
+		<text name="ExpirationSoon" value="Expiration soon" />
+		<text name="AddMe" value="Add me" />
+		<text name="AddMeAsCopyRecipient" value="Add me as copy recipient" />
+		<text name="VoidToSign" value="Declined" />
+		<text name="NoticeVoidToSign" value="By canceling this document, recipients can no longer view it or sign the document. Recipients will receive an email notification, which includes your reason for canceling the document." />
+		<text name="ReasonVoidToSign" value="Reason for canceling"/>
+		<text name="CharacterRemain" value="characters remaining"/>
+		<text name="Caution" value="Caution"/>
+		<text name="CautionVoidToSign" value="If you select "/>
+		<text name="CautionVoidToSign2" value=", this document will be cancelled."/>
+		<text name="CautionVoidToSign3" value=" To request changes to this document, please select "/>
+		<text name="CautionVoidToSign4" value=" and contact the sender directly with your request."/>
+		<text name="DeclineToSign" value="Decline to Sign"/>
+		<text name="ResonDeclineToSign" value="Please provide a reason for declining"/>
+		<text name="SuccessDeclineToSign" value="You declined to sign"/>
+		<text name="SuccessDeclineToSign2" value="We've notified the sender. If you have any questions, please contact them."/>
+		<text name="ConfirmContinue" value="Are you sure you want to continue?"/>
+		<text name="ConfirmContinueHaveInputSignature" value="The signers will receive an email after all parties complete the content of the contract"/>
+		<text name="ExpiredTimeContract" value="Expired time"/>
+		<text name="ExpiredSoonContract" value="Expired soon"/>
+		<text name="ExpiredContractTooltip" value="Contracts will expire"/>
+		<text name="EnterExpiredTime" value="Enter expired time"/>
+		<text name="ExpiredRemainDay" value=" days left"/>
+		<text name="VoidedOn" value=" Voided at"/>
+		<text name="ContractId" value=" ID"/>
+		<text name="ContractIdCopy" value=" has been copied"/>
+		<text name="Copy" value=" Copy"/>
+		<text name="Time" value=" Time"/>
+		<text name="ExpiredContractMailContent" value=" Contract had been expired"/>
+		
+	</texts>
+</localizationDictionary>

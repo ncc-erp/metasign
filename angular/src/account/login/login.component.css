@@ -1,0 +1,139 @@
+::ng-deep #google-login-button iframe {
+  /* margin: 0 auto !important; */
+}
+
+.wrapper-btn-google {
+  display: block;
+  margin: 0 auto;
+}
+
+/* #google-login-button {
+  transform: translateX(-6%);
+} */
+.wrapper_login{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.wrapper {
+  background-color: #fbf7ec;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.abc {
+  margin: 0 auto;
+}
+
+.wrapper-content {
+  margin: 0 auto;
+  /* text-align: center; */
+}
+
+.logo {
+  padding-top: 60px;
+  /* width: 100%; */
+}
+
+.logo svg {
+  transform: translateX(10%);
+}
+
+.welcome {
+  color: #004037;
+  font-weight: 600;
+  font-size: 48px;
+  line-height: 120%;
+  transform: translateY(-25%);
+  margin: 0;
+  text-align: center;
+}
+
+.desc {
+  color: #026351;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 140%;
+}
+
+.button-login {
+  height: 38px;
+}
+
+.button-login:hover {
+  cursor: pointer;
+}
+
+.btn-login-google {
+  position: absolute;
+  top: 50%;
+  left: 34%;
+}
+
+.img_logo svg{
+  width: 100%;
+
+}
+
+
+:host ::ng-deep .google-login-button{
+  position: relative;
+  z-index: 9999;
+}
+
+:host ::ng-deep .mx-auto{
+  position: relative;
+
+}
+
+:host ::ng-deep .nav-item{
+  margin-right: 10px;
+
+}
+
+@media only screen and (max-width: 900px) {
+  :host ::ng-deep .nav-link span{
+    display: inline-block !important;
+  
+  }
+}
+
+@media only screen and (max-width: 600px) {
+
+  .img_logo svg{
+    height: 100%;
+  }
+  
+}
+/* @media only screen and (max-width: 1569.99px) {
+  #google-login-button {
+    transform: translateX(-12%);
+  }
+  .btn-login-google {
+    position: absolute;
+    top: 50%;
+    left: 35.3%;
+  }
+}
+
+@media only screen and (max-width: 1439.99px) {
+  #google-login-button {
+    transform: translateX(-24%);
+  }
+
+  .btn-login-google {
+    position: absolute;
+    top: 50%;
+    left: 37.5%;
+  }
+}
+
+@media only screen and (max-width: 1199.99px) {
+  .btn-login-google {
+    position: absolute;
+    top: 50%;
+    left: 38%;
+  }
+} */

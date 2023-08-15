@@ -1,0 +1,338 @@
+<div class="dialog" #dialog>
+  <div>
+    <div class="card-header row mt-2">
+      <div class="col-10">
+        <h3 *ngIf="lableDialog; else elseBlock">
+          {{ "EditSignature" | ecTranslate }}
+        </h3>
+        <ng-template #elseBlock>
+          <h3>{{ "CreateYourSignature" | ecTranslate }}</h3>
+        </ng-template>
+      </div>
+      <div class="col-2 text-right">
+        <i class="fa-solid fa-x fa-lg pointer" mat-dialog-close></i>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="signature_tab" mat-dialog-content>
+        <mat-tab-group
+          [selectedIndex]="indexTab"
+          (selectedTabChange)="onTabChanged($event)"
+          id="tab_signature"
+        >
+          <mat-tab [label]="'Type' | ecTranslate">
+            <div class="signature_tab--type">
+              <mat-form-field class="select-font-family" #tabType>
+                <mat-label>Choose font</mat-label>
+                <mat-select
+                  disableOptionCentering
+                  [(value)]="fontFamilyTabType"
+                  (selectionChange)="save()"
+                >
+                  <mat-option
+                    value="{{ fontFamilyItem }}"
+                    *ngFor="let fontFamilyItem of fontFamily"
+                    ><span
+                      [style.font-family]="fontFamilyItem"
+                      [style.font-size.px]="26"
+                      >{{ fontFamilyItem }}</span
+                    ></mat-option
+                  >
+                </mat-select>
+              </mat-form-field>
+              <div class="list-color--tab-type">
+                <button
+                  *ngFor="let colorItem of fontColor"
+                  class="btn-color-item ml-3 {{
+                    colorItem === textColorTabType && 'btn-color-selected'
+                  }}"
+                  [style.background-color]="colorItem"
+                  (click)="setColorTextTabType(colorItem)"
+                >
+                  <i
+                    *ngIf="colorItem === textColorTabType"
+                    class="fa-solid fa-check icon-check"
+                  ></i>
+                </button>
+              </div>
+              <input
+                class="input-signature text-center"
+                [style.font-size.px]="fontSizeTabType"
+                [style.color]="textColorTabType"
+                [style.font-family]="fontFamilyTabType"
+                [(ngModel)]="valueTextTabType"
+                (change)="save()"
+                (input)="save()"
+                maxlength="24"
+              />
+            </div>
+          </mat-tab>
+          <mat-tab [label]="'Upload' | ecTranslate">
+            <div #uploadSignature class="signature_tab--upload">
+              <div class="upload_signature">
+                <input
+                  #inputFile
+                  (change)="handleValueFile($event)"
+                  id="upload"
+                  type="file"
+                />
+                <div
+                  style="width: 500px"
+                  *ngIf="cropImg || isNeedUpload; else uploadContent"
+                >
+                  <image-cropper
+                    [autoCrop]="true"
+                    [maintainAspectRatio]="true"
+                    [containWithinAspectRatio]="true"
+                    [resizeToWidth]="500"
+                    [imageChangedEvent]="cropImg"
+                    [aspectRatio]="
+                      sizeBoxSignature.width / sizeBoxSignature.height
+                    "
+                    format="png"
+                    [imageBase64]="signaturePayload"
+                    (imageCropped)="imageCropped($event)"
+                  ></image-cropper>
+
+                  <div class="upload_signature--success">
+                    <label class="upload_label" for="upload">
+                      {{ "Replace" | ecTranslate }}
+                    </label>
+                    <div (click)="handleRemove()" class="upload_label">
+                      {{ "Delete" | ecTranslate }}
+                    </div>
+                  </div>
+                </div>
+                <ng-template #uploadContent>
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                  <label class="upload_label" for="upload">
+                    {{ "UploadSignature" | ecTranslate }}
+                  </label>
+                </ng-template>
+                <p class="upload_signature--note">Định dạng được hỗ trợ: jpg, jpeg ,png, kích thước tệp tối đa {{maximumSizeofSignatureImage}}kb</p>
+              </div>
+            </div>
+          </mat-tab>
+          <mat-tab [label]="'Draw' | ecTranslate">
+            <div class="signature_tab--draw" #signatureContainer>
+              <div
+                style="position: absolute"
+                cdkDropList
+                cdkDropListSortingDisabled
+                (cdkDropListDropped)="drop($event)"
+                [style.top.px]="initInputTop"
+                [style.left.px]="initInputLeft"
+              >
+                <button
+                  cdkDrag
+                  (cdkDragStarted)="onDrag = true"
+                  (cdkDragEnded)="onDrag = false"
+                  class="text_type"
+                  tooltipClass="tooltip_signer"
+                >
+                  <div style="position: relative" class="signature_container">
+                    <div class="text-center">
+                      <div class="signature_type--name">
+                        <i class="fa-sharp fa-regular fa-pen-to-square"></i>
+                        {{ "Text" | ecTranslate }}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              </div>
+              <div
+                matTooltip="{{ 'Delete' | ecTranslate }}"
+                (click)="handleClearSignature()"
+                class="tab_draw--icon-trash"
+              >
+                <i class="fas fa-trash" style="font-size: 1.4rem"></i>
+              </div>
+              <div class="list-tools" *ngIf="listInput?.length" #listTool>
+                <span class="wrapper-select-font-family position-relative">
+                  <mat-form-field class="select-item" id="selectFontFamily">
+                    <mat-select
+                      matTooltip="{{ 'Font' | ecTranslate }}"
+                      disableOptionCentering
+                      [(value)]="currentFontFamily"
+                      (selectionChange)="changeFontFamily()"
+                      [disabled]="!(currentInputSelected + 1)"
+                    >
+                      <mat-option
+                        *ngFor="let fontFamilyItem of fontFamily"
+                        value="{{ fontFamilyItem }}"
+                        ><span
+                          [style.font-family]="fontFamilyItem"
+                          [style.font-size.px]="24"
+                          >{{ fontFamilyItem }}</span
+                        ></mat-option
+                      >
+                    </mat-select>
+                  </mat-form-field>
+                </span>
+                <span class="wrapper-select-font-size position-relative">
+                  <select
+                    matTooltip="{{ 'FontSize' | ecTranslate }}"
+                    class="select-item select-font-size ml-1"
+                    [(ngModel)]="currentFontSize"
+                    (change)="changeFontSize()"
+                    [disabled]="!(currentInputSelected + 1)"
+                  >
+                    <option
+                      value="{{ fontSizeItem }}"
+                      *ngFor="let fontSizeItem of fontSize"
+                    >
+                      {{ fontSizeItem }}
+                    </option>
+                  </select>
+                </span>
+              </div>
+              <div class="list-color">
+                <button
+                  *ngFor="let colorItem of fontColor"
+                  class="btn-color-item ml-3 {{
+                    colorItem === currentTextColor && 'btn-color-selected'
+                  }}"
+                  [style.background-color]="colorItem"
+                  (click)="setCurrentColor(colorItem)"
+                >
+                  <i
+                    *ngIf="colorItem === currentTextColor"
+                    class="fa-solid fa-check icon-check"
+                  ></i>
+                </button>
+              </div>
+
+              <div id="container" class="position-relative">
+                <div cdkDropList (cdkDropListDropped)="drop($event)">
+                  <canvas #canvas></canvas>
+                </div>
+                <div
+                  style="position: absolute"
+                  *ngFor="let inputItem of listInput; let i = index"
+                  cdkDropList
+                  cdkDropListSortingDisabled
+                  [style.top.px]="inputItem.positionY"
+                  [style.left.px]="inputItem.positionX"
+                  [style.display]="inputItem.onDrag ? 'none' : ''"
+                  [style.height.px]="listInput[i].height"
+                >
+                  <div
+                    cdkDrag
+                    (cdkDragStarted)="onDrag = true; inputItem.onDrag = true"
+                    (cdkDragEnded)="handleDragEnd($event, i)"
+                    cdkDragBoundary="#container"
+                    (click)="handleCanFillInput(i)"
+                    *ngIf="!inputItem.canFillInput && !inputItem.value"
+                    class="text_type"
+                    tooltipClass="tooltip_signer"
+                    [style.width.px]="listInput[i].width"
+                    [style.min-height.px]="listInput[i].height"
+                    [style.min-height.px]="listInput[i].height"
+                  >
+                    <div style="position: relative" class="signature_container">
+                      <div class="text-center" *ngIf="!inputItem.value">
+                        <div
+                          class="signature_type--name"
+                          [style.font-size.px]="listInput[i].fontSize"
+                          [style.color]="currentTextColor"
+                        >
+                          <i
+                            class="fa-sharp fa-regular fa-pen-to-square"
+                            [style.font-size.px]="listInput[i].fontSize"
+                            [style.color]="currentTextColor"
+                          ></i>
+                          {{ "Text" | ecTranslate }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <textarea
+                    *ngIf="inputItem.canFillInput"
+                    class="input-drag {{
+                      currentInputSelected === i ? 'add-outline' : ''
+                    }}"
+                    [placeholder]="'EnterText' | ecTranslate"
+                    #inputDrag
+                    type="text"
+                    [(ngModel)]="inputItem.value"
+                    [style.color]="currentTextColor"
+                    [style.font-size.px]="inputItem.fontSize"
+                    [style.font-family]="inputItem.fontFamily"
+                    cdkTextareaAutosize
+                    #autosize="cdkTextareaAutosize"
+                    cdkAutosizeMinRows="1"
+                    [style.width.px]="listInput[i].width"
+                    [style.min-height.px]="listInput[i].height"
+                    (change)="getTextarea($event)"
+                    (mousedown)="mouseDownTextarea(i)"
+                    [style.background-color]="
+                      !inputItem.canFillInput ? 'red' : ''
+                    "
+                  ></textarea>
+                  <div cdkDropList cdkDropListSortingDisabled id="valueInput">
+                    <!-- [style.min-height.px]="listInput[i].height" -->
+                    <span
+                      *ngIf="!inputItem.canFillInput && inputItem.value"
+                      class="overlay-input"
+                      (click)="handleCanFillInput(i)"
+                      [style.display]="inputItem.onDrag ? 'none' : ''"
+                      [style.width.px]="listInput[i].width"
+                      cdkDrag
+                      (cdkDragStarted)="
+                        onDrag = true;
+                        inputItem.onDrag = true;
+                        currentInputSelected = i
+                      "
+                      (cdkDragEnded)="handleDragEnd($event, i)"
+                      cdkDragBoundary="#container"
+                    >
+                      <span
+                        class="wrapper-value-input"
+                        [style.color]="currentTextColor"
+                        [style.font-size.px]="inputItem.fontSize"
+                        [style.font-family]="inputItem.fontFamily"
+                        [innerHTML]="getDisplayContent(inputItem.value)"
+                        [style.width.px]="listInput[i].width"
+                      ></span>
+                    </span>
+                  </div>
+                  <div class="signature_type--delete" (click)="removeInput(i)">
+                    <i class="fa-solid fa-trash"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+        <!-- <div class="signature_tab--select">
+          <mat-form-field appearance="outline" id="selectType">
+            <mat-label>{{ "SignatureType" | ecTranslate }}</mat-label>
+            <mat-select [(ngModel)]="selectedValue" name="food">
+              <mat-option
+                *ngFor="let signature of signaturelist"
+                [value]="signature.value"
+              >
+                {{ signature.lable | ecTranslate }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div> -->
+        <div>
+          <input type="checkbox" [(ngModel)]="isDefault" class="mt-2 mr-2" />
+          <span style="transform: translateY(-50%)"
+            ><b>{{ "SetAsDefaultSignature" | ecTranslate }}</b></span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog_btn" mat-dialog-actions>
+    <button (click)="onNoClick()" mat-raised-button>
+      {{ "Cancel" | ecTranslate }}
+    </button>
+    <button (click)="handleSave()" mat-raised-button class="button">
+      {{ "Save" | ecTranslate }}
+    </button>
+  </div>
+</div>
