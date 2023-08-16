@@ -70,7 +70,7 @@ Your BE default URL is: ```http:\\localhost:44311```
 
 then run ```ng s -open ``` to start Frond-End
 
-Your BE default URL is: ```http:\\localhost:4200```
+Your FE default URL is: ```http:\\localhost:4200```
 
   
 
