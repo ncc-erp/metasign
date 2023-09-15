@@ -1,0 +1,126 @@
+<abp-modal-header
+  *ngIf="showDialogHeader"
+  [title]="title + ' Template'"
+  (onCloseClick)="dialogRef.close()"
+></abp-modal-header>
+<abp-modal-header
+  *ngIf="!isEditTemplate"
+  [title]="'EditEmailContent' | ecTranslate"
+  (onCloseClick)="dialogRef.close()"
+></abp-modal-header>
+
+<div class="p-3 background-card">
+  <div class="card mb-0">
+    <div class="table table-responsive w-100 mb-0">
+      <table class="w-100">
+        <thead>
+          <tr>
+            <th *ngIf="isEditTemplate">
+              <span *ngIf="isShowHeaderSendMail()">Mail</span>
+            </th>
+            <th></th>
+            <th *ngIf="mailInfo?.propertiesSupport?.length">
+              {{ "PropertiesSupport" | ecTranslate }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div
+                class="d-flex px-3 align-items-center py-1"
+                *ngIf="isShowHeaderSendMail()"
+              >
+                <div class="col-6">
+                  <div class="form-group row mb-1">
+                    <label
+                      class="col-2 col-form-label d-flex align-items-center"
+                    >
+                      {{ "To" | ecTranslate }}:
+                    </label>
+                    <div class="col-10">
+                      <input
+                        class="form-control"
+                        #emailAdress="ngModel"
+                        #emailEl
+                        [(ngModel)]="mailInfo.sendToEmail"
+                        placeholder="Email Address"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                  <div class="form-group row align-items-center mb-1">
+                    <label class="col-2 p-0 col-form-label">
+                      {{ "Subject" | ecTranslate }}:
+                    </label>
+                    <div class="col-10">
+                      <input
+                        class="form-control my-1"
+                        required
+                        [(ngModel)]="mailInfo.subject"
+                        placeholder="Subject"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="px-2 mb-1">
+                <div class="col-12">
+                  <editor
+                    class="w-100"
+                    [init]="{
+                      height: 580,
+                      class: 'w-100',
+                      menubar: true,
+                      plugins: [
+                        'table',
+                        'code',
+                        'preview',
+                        'media',
+                        'image',
+                        'template'
+                      ],
+                      toolbars: ['image']
+                    }"
+                    [(ngModel)]="mailInfo.bodyMessage"
+                  >
+                  </editor>
+                </div>
+              </div>
+            </td>
+            <td
+              style="max-width: 200px"
+              *ngIf="mailInfo?.propertiesSupport?.length"
+            >
+              <div class="property-support">
+                <ul>
+                  <li *ngFor="let property of mailInfo.propertiesSupport">
+                    {{ property | ecTranslate }}
+                  </li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button
+    type="button"
+    class="btn btn-secondary btn-action mr-2"
+    [disabled]="cancelDisabled"
+    (click)="dialogRef.close()"
+  >
+    Close
+  </button>
+  <button
+    (click)="handleSaveTemplate()"
+    type="button"
+    class="btn button btn-action btn-save"
+    [disabled]="saveDisabled"
+  >
+    Save
+  </button>
+</div>

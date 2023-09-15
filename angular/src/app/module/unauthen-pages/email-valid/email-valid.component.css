@@ -1,0 +1,152 @@
+.wapper_valid{
+  height: 100vh;
+  background-color: #FBF7EC;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.container_logo{
+  margin-top: 84px;
+  margin-bottom: 80px;
+  text-align: center;
+}
+
+.container_login{
+  display: flex;
+  align-items: center;
+  gap: 0 64px;
+}
+
+.container_login--content{
+  width: 456px;
+}
+
+.container_login--title{
+  color: #004037;
+  font-size: 48px;
+  line-height:calc(67.2/48);
+}
+
+.container_login--reject{
+  color: #004037;
+  font-size: 45px;
+  line-height:calc(67.2/48);
+}
+
+.container_login--text{
+  margin-top: 20px;
+  font-size: 16px;
+  line-height:calc(22.4/16);
+  color: #026351;
+  margin-bottom: 40px;
+}
+
+#google_button--parent{
+  width: 384px;
+}
+
+.btn_login--wapper{
+  display: flex;
+  gap: 10px 20px;
+  flex-wrap: wrap;
+
+}
+
+.btn_login { 
+  cursor: pointer;
+  background-color: #026351;
+  width: 185px;
+  height: 46px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  color: white;
+  gap: 0 5px;
+}
+
+.btn_login:hover{
+  background-color: #043b32;
+  transition: 0.3s;
+}
+
+@media only screen and (max-width: 1280px) {
+  .container_logo{
+    margin: 40px 0;
+  }
+  .container_login--reject{
+    font-size: 30px;
+  }
+}
+
+@media only screen and (max-width: 1024px) {
+  .btn_login--wapper{
+    justify-content: center;
+  }
+
+  .container_login--reject{
+    text-align: center;
+  }
+
+  .wapper_valid--container{
+    padding: 0 10px;
+  }
+
+  #google_button--parent{
+    width: 300px;
+    margin: 0 auto;
+  }
+  
+  .container_logo{
+    margin-bottom: 40px;
+  }
+
+  .container_login{
+   flex-wrap: wrap;
+   justify-content: center;
+  }
+
+  .container_login--title{
+    text-align: center;
+  }
+  .container_login--text{
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  #google-button{
+   margin-top: 20px;
+   margin-bottom: 20px;
+   display: flex;
+   justify-content:center;
+  }
+}
+
+@media only screen and (max-width: 550px) {
+
+  .btn_login{
+    margin-top: 10px;
+  }
+
+  .container_image{
+    width: 100%;
+    height: 100%;
+    padding: 50px 50px;
+   }
+
+  .container_image svg{
+    width: 100%;
+    height: 100%;
+  }
+
+  .container_login--title{
+    font-size: 30px;
+  }
+  .container_login--text{
+    font-size: 14px;
+  }
+  .container_login--content{
+    width: auto;
+  }
+}

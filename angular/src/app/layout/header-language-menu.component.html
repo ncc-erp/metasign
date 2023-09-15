@@ -1,0 +1,34 @@
+<div class="nav-item dropdown mt-2 test" dropdown>
+  <a
+    href="javascript:;"
+    class="nav-link pr-0"
+    dropdownToggle
+    style="transform: translateY(-4px)"
+  >
+    <i class="d-inline-block {{ currentLanguageIcon }}"></i>
+    <span class="d-none d-md-inline-block ml-1">
+      {{ currentLanguageDisplayName }}
+    </span>
+    <i
+      style="font-size: 9px; transform: translateY(-2px)"
+      class="fas fa-chevron-down icon-down ml-1"
+    ></i>
+  </a>
+  <div
+    class="dropdown-menu p-0"
+    *dropdownMenu
+    [style.min-width.px]="isMobile && 50"
+  >
+    <ng-container *ngFor="let language of languages">
+      <a
+        *ngIf="language.name != currentLanguageName"
+        class="dropdown-item"
+        href="javascript:;"
+        (click)="changeLanguage(language.name)"
+      >
+        <i class="d-inline-block {{ language.icon }} mr-1"></i>
+        <span *ngIf="!isMobile">{{ language.displayName }}</span>
+      </a>
+    </ng-container>
+  </div>
+</div>

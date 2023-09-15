@@ -1,0 +1,69 @@
+<div class="d-flex nav-user-menu justify-content-end mr-3">
+  <div class="info-user">
+    <b style="margin: 0">
+      {{ user?.name + " " + user?.surname }}
+    </b>
+    <p style="margin: 0">
+      {{ user?.emailAddress }}
+    </p>
+  </div>
+  <div class="nav-item dropdown" dropdown>
+    <svg
+      dropdownToggle
+      xmlns="http://www.w3.org/2000/svg"
+      width="40"
+      height="40"
+      viewBox="0 0 80 80"
+      fill="none"
+      role="button"
+      class="ml-3"
+    >
+      <circle
+        cx="40"
+        cy="40"
+        r="38.9873"
+        fill="#004037"
+        stroke="url(#paint0_linear_217_4343)"
+        stroke-width="2.02532"
+      />
+      <path
+        d="M19.2406 59.4515C24.7597 53.5976 32.2529 50 40.5064 50C48.7598 50 56.253 53.5976 61.7722 59.4515M51.1393 29.9156C51.1393 35.788 46.3788 40.5485 40.5064 40.5485C34.634 40.5485 29.8735 35.788 29.8735 29.9156C29.8735 24.0432 34.634 19.2827 40.5064 19.2827C46.3788 19.2827 51.1393 24.0432 51.1393 29.9156Z"
+        stroke="url(#paint1_linear_217_4343)"
+        stroke-width="3.03797"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <defs>
+        <linearGradient
+          id="paint0_linear_217_4343"
+          x1="40"
+          y1="0"
+          x2="40"
+          y2="80"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stop-color="white" />
+          <stop offset="1" stop-color="#21CC33" />
+        </linearGradient>
+        <linearGradient
+          id="paint1_linear_217_4343"
+          x1="40.5064"
+          y1="19.2827"
+          x2="40.5064"
+          y2="59.4515"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stop-color="white" />
+          <stop offset="1" stop-color="#21CC33" />
+        </linearGradient>
+      </defs>
+    </svg>
+    <div class="dropdown-menu p-2" *dropdownMenu>
+      <a class="dropdown-item" href="javascript:;" (click)="logout()">
+        <i class="fas fa-sign-out-alt"></i> {{ "LogOut" | ecTranslate }}
+      </a>
+    </div>
+  </div>
+
+  <header-language-menu class="header-language-menu"> </header-language-menu>
+</div>

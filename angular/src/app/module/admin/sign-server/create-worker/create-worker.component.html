@@ -1,0 +1,35 @@
+<div class="wrapper">
+  <abp-modal-header
+    id="header"
+    [title]="'AddNewPdfWorker' | ecTranslate"
+    (onCloseClick)="dialogRef.close()"
+  ></abp-modal-header>
+  <div class="content">
+    <mat-form-field appearance="outline" id="selectType">
+      <mat-label>{{ "SelectTypeWorker" | ecTranslate }}</mat-label>
+      <mat-select [(value)]="typeWorkerSelected" disableOptionCentering>
+        <mat-option
+          *ngFor="let typeWorker of listTypeWorker"
+          [value]="typeWorker"
+          >{{ typeWorker }}</mat-option
+        >
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div class="footer mt-3">
+    <button
+      type="button"
+      class="btn btn-secondary btn-action mr-2"
+      (click)="dialogRef.close()"
+    >
+      {{ "Cancel" | ecTranslate }}
+    </button>
+    <button
+      type="button"
+      class="btn button btn-action btn-save"
+      (click)="addNewWorker()"
+    >
+      {{ "AddNew" | ecTranslate }}
+    </button>
+  </div>
+</div>

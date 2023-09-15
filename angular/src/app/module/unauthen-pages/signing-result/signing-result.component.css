@@ -1,0 +1,79 @@
+.header {
+  width: 100%;
+  height: 80px;
+}
+
+.title {
+  line-height: 80px;
+  padding-left: 10%;
+}
+
+.img-success {
+  display: block;
+  margin: 2% auto 0 auto;
+  height: 25%;
+  width: 25%;
+}
+
+.btn-download{
+  text-align: center;
+}
+.noti-success {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.btn{
+  background: var(--primary-color);
+  color: white;
+}
+.btn:hover{
+  background: #2d8d43;
+  
+}
+
+
+@media (max-width: 768px) {
+
+  .title {
+    line-height: 48px;
+    padding-left: 6%;
+  }
+ 
+.noti-success{
+    font-size: 20px;
+  }
+
+.sgv-signing {
+  width: 113px;
+  height: 52px;
+}
+
+
+.img-success {
+  height: 50%;
+  width: 88%;
+}
+}
+
+@media (width: 280px) {
+  .noti-success{
+    font-size: 16px;
+  }
+}
+@media (max-width: 900px) and (min-width: 768px){
+  .noti-success{
+    font-size: 30px !important;
+  }
+
+  .title{
+    line-height: 78px;
+    padding-left: 6%;
+  }
+
+
+  .img-success {
+    height: 50%;
+    width: 65%;
+  }
+}

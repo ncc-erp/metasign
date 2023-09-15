@@ -1,0 +1,266 @@
+.wrapper {
+  background-color: #fbf7ec;
+  width: 100vw;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* header */
+.wrapper-header {
+  background-color: #004037;
+  height: 30vh;
+  width: 100vw;
+  text-align: center;
+}
+
+.title-header {
+  font-size: 48px;
+  font-weight: 600;
+  color: #fbf7ec;
+  padding: 80px 0 48px 0;
+  margin: 0;
+}
+
+.title-header span {
+  color: #21cc33;
+}
+
+.search {
+  height: 48px;
+  justify-content: center;
+}
+
+.form-search {
+  width: 60vw;
+  height: 48px;
+  margin-right: 8px;
+  border-radius: 8px;
+  border: none;
+  background-color: #ffff;
+  padding: 0 7px;
+}
+
+input[type="text"]:focus {
+  caret-color: #21cc33;
+}
+
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-flex {
+  margin: 0 !important;
+}
+
+:host ::ng-deep input.mat-input-element {
+  transform: translateY(-2px);
+}
+
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
+  display: none;
+}
+
+.button-search {
+  background-color: #fbf7ec;
+  color: #004037;
+  height: 100%;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+:host
+  ::ng-deep
+  .mat-form-field-appearance-outline
+  .mat-form-field-subscript-wrapper {
+  transform: translateY(27px);
+}
+/* content */
+
+.content-empty {
+  position: absolute;
+  width: 30vw;
+  height: 50vh;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  top: 90px;
+}
+
+.noti_result-search {
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 28px;
+  color: #004037;
+}
+
+.content-contract {
+  position: absolute;
+  width: 75vw;
+  top: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.info-contract {
+  background-color: #fff;
+  width: 100%;
+  padding: 24px;
+  margin-bottom: 24px;
+  border-radius: 12px;
+  border: 1px solid #e5e5e5;
+}
+
+.info-signer,
+.info-copy-recipient {
+  background-color: #fff;
+  width: 100%;
+  padding: 24px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid #e5e5e5;
+}
+
+.button-download {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.signer-item {
+  display: flex;
+  padding-bottom: 4px;
+}
+
+.info-item,
+.info-signer-item {
+  display: block;
+  display: -webkit-box;
+  max-width: 100%;
+  font-size: 14px;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+}
+
+.title-field {
+  color: #004037;
+  font-weight: 500;
+}
+
+.title-info-contract,
+.title-info-signer,
+.title-info-copy-recipient {
+  color: #004037;
+  font-weight: 600;
+  margin-bottom: 16px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.process-order {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+}
+
+/* responsive */
+/* Mobile */
+@media only screen and (min-width: 320px) and (max-width: 480px) {
+  .title-header {
+    font-size: 34px;
+    padding: 36px 0 22px 0;
+  }
+
+  .form-search {
+    width: 77vw;
+    height: 42px;
+    margin-right: 0;
+    border-radius: 8px 0px 0px 8px;
+  }
+
+  .button-search {
+    height: 42px;
+    border-radius: 0px 8px 8px 0px;
+    min-width: 48px;
+  }
+
+  .noti_result-search {
+    font-size: 16px;
+  }
+
+  .content-empty {
+    width: 80vw;
+  }
+
+  .info-contract,
+  .info-signer,
+  .info-copy-recipient {
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+
+  .content-contract {
+    width: 90vw;
+    top: 24px;
+  }
+
+  .title-info-contract,
+  .title-info-signer,
+  .title-info-copy-recipient {
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .info-item,
+  .info-signer-item,
+  .title-field {
+    font-size: 13px;
+  }
+
+  :host ::ng-deep input.mat-input-element {
+    transform: translateY(-6px);
+  }
+
+  :host
+    ::ng-deep
+    mat-form-field:not(.mat-form-field-appearance-legacy)
+    .mat-form-field-prefix
+    .mat-icon {
+    transform: translateY(-4px);
+  }
+
+  :host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-flex {
+    padding: 0 4px !important;
+  }
+}
+
+@media only screen and (min-width: 320px) and (max-width: 375.99px) {
+  .wrapper-header {
+    height: 27vh;
+  }
+}
+
+@media only screen and (min-width: 376px) and (max-width: 480px) {
+  .wrapper-header {
+    height: 23vh;
+  }
+}
+
+/* Tablet */
+@media only screen and (min-width: 480.01px) and (max-width: 768px) {
+  .wrapper-header {
+    height: 22vh;
+  }
+
+  .title-header {
+    font-size: 44px;
+    padding: 56px 0 32px 0;
+  }
+
+  .form-search {
+    width: 67vw;
+  }
+
+  .content-empty {
+    width: 80vw;
+  }
+}

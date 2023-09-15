@@ -1,0 +1,71 @@
+:host ::ng-deep .modal-header {
+  padding: 5px;
+}
+
+:host ::ng-deep .close:hover {
+  color: red;
+  transition: 0.4s;
+}
+
+textarea {
+  resize: none;
+  display: block;
+  width: 95%;
+  margin: 20px auto;
+  height: 150px;
+  border: 1px solid black;
+}
+
+::ng-deep .contract-dialog .mat-dialog-container {
+  padding: 10px !important;
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0.125), 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  border-radius: 10px;
+}
+
+:host ::ng-deep .mat-button-wrapper {
+  font-size: 15px !important;
+}
+
+.btn-confim {
+  margin-left: auto;
+  display: block;
+  color: white;
+  background-color: var(--primary-color);
+  margin-left: auto;
+}
+
+.card-bottom {
+  border-top: 1px solid #e9ecef;
+  margin-top: auto;
+  padding: 15px 15px 10px 15px;
+  justify-content: space-between;
+}
+
+.mat-raised-button.mat-button-disabled {
+  cursor: no-drop;
+}
+
+.dialog_content {
+  font-size: 16px;
+}
+#btn-vaid {
+  background-color: #3498db;
+  padding: 8px;
+  border-radius: 5px;
+  color: #ffffff;
+  border: none;
+}
+
+#btn-vaid:hover {
+  background-color: #0688df;
+  transition: 0.3s;
+}
+
+.wapper_contract--invalidate {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+p {
+  margin: 0;
+}

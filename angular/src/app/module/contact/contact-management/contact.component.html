@@ -1,0 +1,168 @@
+<div class="wrapper card container-fluid not-full-width">
+  <section class="wrapper_content">
+    <div class="content px-2">
+      <section class="content-header pb-2">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-6">
+              <h2>{{ "Contact" | ecTranslate }}</h2>
+            </div>
+            <div
+              class="col-6 text-right p-0"
+              style="transform: translateX(6px)"
+            >
+              <a
+                *ngIf="isShowCreateBtn()"
+                href="javascript:;"
+                class="button"
+                mat-raised-button
+                (click)="createContact()"
+                style="transform: translateX(-5%)"
+              >
+                <i class="fa fa-plus pr-2"></i>
+                {{ "AddNew" | ecTranslate }}
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="row">
+        <div class="col-md-6">&emsp;</div>
+        <div class="col-md-6">
+          <mat-form-field
+            id="search"
+            class="search-contract float-right"
+            appearance="outline"
+            style="width: 60%"
+          >
+            <span matPrefix>
+              <i
+                class="fa-solid fa-magnifying-glass icon-search pr-2"
+                style="transform: translateY(-5px)"
+              ></i
+            ></span>
+            <input
+              matInput
+              [placeholder]="'SearchByCustomerNameEmail' | ecTranslate"
+              [(ngModel)]="searchText"
+              (keyup.enter)="getDataPage(1)"
+            />
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="table-responsive pt-3">
+        <table class="table m-0" [busy]="isTableLoading">
+          <thead class="bg-light head-table">
+            <tr>
+              <th style="width: 5%; text-align: center">
+                {{ "No" | ecTranslate }}
+              </th>
+              <th style="width: 20%">{{ "CustomerName" | ecTranslate }}</th>
+              <th style="width: 15%">{{ "ContactNumber" | ecTranslate }}</th>
+              <th style="width: 20%">{{ "CompanyOrOrganization" | ecTranslate }}</th>
+              <th>{{ "Email" | ecTranslate }}</th>
+              <th style="width: 200px" class="text-center">
+                {{ "Actions" | ecTranslate }}
+              </th>
+            </tr>
+          </thead>
+        </table>
+        <div class="table-content">
+          <table class="table" [busy]="isTableLoading">
+            <tbody>
+              <tr
+                *ngIf="!listContact.length && !isTableLoading && !searchText"
+                class="w-100"
+              >
+                <td
+                  colspan="7"
+                  class="text-not-data text-center p-4"
+                  style="transform: translateY(5px)"
+                >
+                  <i style="color: rgb(94, 94, 94); font-size: 16px">
+                    {{ "YouHaveNoContactYet" | ecTranslate }}</i
+                  >
+                </td>
+              </tr>
+              <tr
+                *ngIf="!listContact.length && !isTableLoading && searchText"
+                class="w-100"
+              >
+                <td
+                  colspan="7"
+                  class="text-not-data text-center p-4"
+                  style="transform: translateY(5px)"
+                >
+                  <i style="color: rgb(94, 94, 94); font-size: 16px">
+                    {{ "NoMatchingSearchResults" | ecTranslate }}</i
+                  >
+                </td>
+              </tr>
+              <tr
+                *ngFor="
+                  let contact of listContact
+                    | paginate
+                      : {
+                          id: 'server',
+                          itemsPerPage: pageSize,
+                          currentPage: pageNumber,
+                          totalItems: totalItems
+                        }
+                "
+              >
+                <td style="width: 5%; text-align: center" class="text-center">
+                  {{ contact?.position }}
+                </td>
+                <td style="width: 20%">{{ contact?.customerName }}</td>
+                <td style="width: 15%">{{ contact?.phone }}</td>
+                <td style="width: 20%">{{ contact?.companyName }}</td>
+                <td>{{ contact?.email }}</td>
+                <td style="width: 200px" class="text-center">
+                  <button
+                    *ngIf="isShowEditBtn()"
+                    type="button"
+                    class="btn btn-sm bg-secondary px-2"
+                    (click)="updateContact(contact)"
+                  >
+                    <i class="fas fa-pencil-alt"></i>
+                    {{ "Edit" | ecTranslate }}
+                  </button>
+                  <button
+                    *ngIf="isShowDeleteBtn()"
+                    type="button"
+                    class="btn btn-sm bg-danger mx-2 px-2"
+                    (click)="deleteContract(contact?.id)"
+                  >
+                    <i class="fas fa-trash"></i>
+                    {{ "Delete" | ecTranslate }}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <footer class="footer card-footer table-card-footer bg-light border">
+        <div class="row">
+          <div class="col-sm-4 col-12 text-sm-left">
+            <button class="btn btn-secondary btn-refresh" (click)="refresh()">
+              <i class="fas fa-redo-alt"></i>
+            </button>
+          </div>
+          <div class="col-sm-4 col-12 text-center">
+            <p class="mb-0 my-2">{{ "TotalItems" | ecTranslate }}: {{ totalCount }}</p>
+          </div>
+          <div class="col-sm-4 col-12 float-right">
+            <div class="float-sm-right m-auto pagination" id="change-page">
+              <abp-pagination-controls
+                id="server"
+                (pageChange)="getDataPage($event)"
+              >
+              </abp-pagination-controls>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </section>
+</div>

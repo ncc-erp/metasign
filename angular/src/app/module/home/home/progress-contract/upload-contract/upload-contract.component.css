@@ -1,0 +1,293 @@
+.home {
+  height: 76vh;
+}
+
+.container {
+  height: 100%;
+}
+
+.file {
+  opacity: 0;
+}
+
+.contract-uploaded {
+  transform: translate(-5px, 81px);
+}
+
+.home_upload {
+  height: 300px;
+  border: 2px dashed var(--primary-color);
+  background-color: rgb(237, 242, 255);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.home_upload--success {
+  width: 80%;
+  height: 300px;
+  border: 2px dashed var(--primary-color);
+  background-color: rgb(237, 242, 255);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.contract-uploaded {
+  width: 130px;
+  height: 169px;
+}
+
+.contract-uploaded:hover {
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 2px 0px;
+}
+
+.upload_input {
+  text-align: center;
+}
+
+.img-preview {
+  width: 128px;
+  height: 135px;
+  box-shadow: rgba(100, 100, 100, 0.2) 0px 1px 1px 0px;
+}
+
+.file-name-preview {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 10px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.fileName i {
+  transform: translateY(11px);
+}
+
+.img-preview-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 135px;
+  z-index: 2;
+}
+
+.img-preview-overlay:hover {
+  background-color: rgba(30, 30, 30, 0.65);
+}
+
+.img-preview-overlay:hover .button-preview,
+.contract-uploaded:hover .icon-x {
+  display: inline-block;
+  z-index: 3;
+}
+
+.button-preview {
+  border: 1px solid #f0f0f0;
+  color: #f0f0f0;
+  border-radius: 2px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80px;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px;
+  display: none;
+}
+
+.button-preview:hover {
+  cursor: pointer;
+  border-radius: 2px;
+  background-color: #f0f0f0;
+  color: #2c2c2c;
+}
+
+.fileName h4 {
+  width: 90%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.icon-x {
+  cursor: pointer;
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  font-size: 22px;
+  display: none;
+  z-index: 3;
+}
+
+.icon-x:hover {
+  font-size: 24px;
+}
+
+.box_file {
+  display: none;
+}
+
+.fa-file-upload {
+  font-size: 50px;
+  color: rgb(157, 164, 180);
+}
+
+.description_file {
+  color: rgb(173, 173, 173);
+}
+
+.mat-stepper-horizontal {
+  margin-top: 8px;
+}
+
+.mat-mdc-form-field {
+  margin-top: 16px;
+}
+
+.u {
+  width: 500px;
+}
+.image-upload > input {
+  display: none;
+}
+.fileName {
+  font-size: 20px;
+  margin-top: 10px;
+}
+.btn-preview {
+  height: 36px;
+  transform: translateY(-4px);
+}
+
+.card {
+  border-radius: 10px;
+  box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.3);
+  width: 600px;
+  height: 260px;
+  background-color: #ffffff;
+  padding: 10px 30px 40px;
+}
+
+.card h3 {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.border:hover .drop_box {
+  border: 1.8px dashed var(--primary-color);
+}
+
+.drop_box {
+  position: relative;
+  height: 300px;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border: 1.8px dashed #e1e5ed;
+}
+
+#fileID {
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+::ng-deep #upload-form .mat-form-field-flex > .mat-form-field-infix {
+  padding: 0.6rem 0 !important;
+}
+
+.contract-input-date {
+  height: 40px;
+}
+
+::ng-deep
+  #upload-form
+  .mat-form-field-appearance-outline
+  .mat-form-field-wrapper {
+  width: 400px !important;
+}
+
+:host
+  ::ng-deep
+  #upload-form
+  .mat-form-field-appearance-outline
+  .mat-form-field-flex {
+  height: 50px !important;
+}
+
+.drop_box h4 {
+  font-size: 16px;
+  font-weight: 400;
+  color: #2e2e2e;
+}
+
+.drop_box p {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  color: #7c7c7c;
+}
+
+.form input {
+  margin: 10px 0;
+  width: 100%;
+  background-color: #e2e2e2;
+  border: none;
+  outline: none;
+  padding: 12px 20px;
+  border-radius: 4px;
+}
+
+.progress-bar {
+  background-color: var(--primary-color);
+}
+.mat-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+::ng-deep .mat-progress-spinner circle,
+.mat-spinner circle {
+  stroke: var(--primary-color);
+}
+
+@media only screen and (max-height: 749px) {
+  .drop_box {
+    padding: 0;
+    height: 250px;
+  }
+
+  .home {
+    padding: 8px !important;
+  }
+
+  .info-contract {
+    transform: translateY(-10px);
+  }
+
+  #upload-form {
+    transform: translateY(-16px);
+  }
+}
+
+.download_contract--excel{
+  padding: 10px;
+  border-left: 5px solid;
+  margin-bottom: 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

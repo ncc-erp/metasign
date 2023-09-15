@@ -1,0 +1,157 @@
+.wapper_header {
+  height: 8%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  border-bottom: 1px solid #ded4d4;
+}
+/* .wapper_header h5 {
+  font-size: 22px;
+  margin: 0;
+  padding: 0;
+} */
+
+.header-close h4 {
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.wapper_header i {
+  font-size: 30px;
+}
+
+.wapper_header i:hover {
+  color: red;
+}
+
+::ng-deep .mail_dialog .mat-dialog-container {
+  padding: 0;
+}
+
+:host ::ng-deep .header {
+  display: none !important;
+}
+:host ::ng-deep .contract {
+  background-color: rgb(233, 233, 233) !important;
+}
+
+:host ::ng-deep .wrapper_contract {
+  height: 100% !important;
+}
+
+.button_send--mail {
+  width: 60px;
+  height: 35px;
+  background-color: var(--primary-color);
+  border-radius: 5px;
+  border: none;
+  font-weight: 400;
+  color: white;
+}
+
+.wapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.wapper_send--mail {
+  display: flex;
+  width: 100%;
+  height: 84%;
+}
+
+.send_mail--signer {
+  width: 70%;
+  height: 100%;
+  padding: 10px;
+  overflow: auto;
+}
+.send_mail--signer h4 {
+  margin-top: 5px;
+  font-size: 18px;
+  margin-left: 10px;
+}
+
+.send_mail--signer h5 {
+  padding: 0;
+  margin: 0;
+  font-size: 20px;
+}
+
+.send_mail--contract {
+  width: 30%;
+}
+
+.send_mail--btn {
+  border-top: 1px solid #ded4d4;
+  height: 8%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 10px;
+}
+
+.signer_table {
+  width: 70%;
+  margin: 30px auto;
+}
+
+.send_mail--contract h4 {
+  font-size: 18px;
+}
+
+
+
+.contract_signer {
+  width: 90%;
+  margin: 10px auto 0 auto;
+}
+.signer_form--list {
+  border-left: 1px solid #e5e5e5;
+  border-bottom: 1px solid #e5e5e5;
+  border-right: 1px solid #e5e5e5;
+}
+
+.signer_form--name {
+  font-size: 16px;
+  padding: 5px;
+  background-color: rgb(240, 238, 237);
+  border-top: 5px solid #dbd9d9;
+}
+
+.contract_signer--form p {
+  margin: 0;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.form_group--input {
+  display: flex;
+  gap: 0 30px;
+  padding: 10px;
+}
+
+.loadding_page {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+::ng-deep .mat-progress-spinner circle,
+.mat-spinner circle {
+  stroke: var(--primary-color);
+}
+
+:host ::ng-deep #design_viewer {
+  transform: scale(0.3) !important;
+  transform-origin: top center;
+}
+@media (max-width: 1585px) {
+  :host ::ng-deep #design_viewer {
+    transform: scale(0.2) !important;
+    transform-origin: top center;
+  }
+}

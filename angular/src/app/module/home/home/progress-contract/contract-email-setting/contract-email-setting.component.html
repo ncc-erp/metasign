@@ -1,0 +1,108 @@
+<div class="setting_email px-5 mt-4">
+  <div class="col-7">
+    <div class="row">
+      <h4 class="email_text--input pr-3">{{'MailContent' | ecTranslate}}</h4>
+      <button class="btn-edit-mail button" (click)="editMailTemplate()">
+        {{'EditV2' | ecTranslate}}<i class="pl-2 fa-regular fa-pen-to-square"></i>
+      </button>
+    </div>
+    <div
+      class="wrapper-mail-content border w-100 h-100 px-5 pt-5 position-relative"
+      style="background-color: #e9e9e9"
+    >
+      <div
+        class="px-4 py-2 bg-white"
+        id="mail-content"
+        [innerHTML]="displayMailContent"
+      ></div>
+      <div class="overlay-content-mail"></div>
+    </div>
+  </div>
+  <div class="col-5 px-3">
+    <div class="email_contract--file">
+      <h4 class="email_contract--title mb-3">{{'Contract' | ecTranslate}}</h4>
+      <p>
+        <i class="fa-light fa-files"></i><i class="fa-regular fa-file"></i>
+        <strong style="font-size: 18px">
+          {{ nameFile }}
+        </strong>
+      </p>
+    </div>
+    <div class="email_contract--Send">
+      <h4 class="contract_Send--title">{{'To' | ecTranslate}}</h4>
+      <div class="email_contract--signer">
+        <h5 class="contract_signer--title">{{'Signers' | ecTranslate}}</h5>
+        <div
+          *ngFor="let signer of signers; let i = index"
+          class="contract_signer--box"
+        >
+          <div class="row">
+            <div *ngIf="isOrderSign" class="signer_form--order">
+              {{ signer.procesOrder }}
+            </div>
+            <div
+              class="col-8 signer-item"
+              [style.border-left-color]="signer.color"
+            >
+              <div class="p-3">
+                <b class="contract_name"> {{ signer.name }}</b>
+                <div class="contract_email">{{ signer.email }}</div>
+              </div>
+            </div>
+            <div
+              style="font-size: 17px"
+              class="col-3"
+              [ngClass]="
+                signer.contractRole == 1 ? 'text-success' : 'text-primary'
+              "
+            >
+              <span
+                class="badge mt-3"
+                style="
+                  color: #007e65;
+                  font-size: 16px;
+                  transform: translateY(15px);
+                "
+                >{{
+                  signer.contractRole == 1
+                    ? ("Signer" | ecTranslate)
+                    : signer.contractRole == 2
+                    ? ("ApprovedBy" | ecTranslate)
+                    : ("Viewers" | ecTranslate)
+                }}</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="email_contract--view" *ngIf="viewers?.length > 0">
+        <h5 class="contract_view--title">{{'CopyRecipients' | ecTranslate}}</h5>
+        <div *ngFor="let viewer of viewers" class="contract_view--box mt-2 p-3">
+          <b class="contract_name">{{ viewer.name }}</b>
+          <div class="contract_email">{{ viewer.email }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="btn_step px-5">
+    <button
+      (click)="handleBack()"
+      class="btn_back mr-2"
+      mat-raised-button
+      color="secondary"
+      mat-button
+    >
+      {{'Back' | ecTranslate}}
+    </button>
+    <button
+      *ngIf="isShowSendMailBtn()"
+      [disabled]="dbclick"
+      mat-raised-button
+      class="button"
+      (click)="onSendMail()"
+    >
+      {{'Send' | ecTranslate}}
+    </button>
+  </div>
+</div>

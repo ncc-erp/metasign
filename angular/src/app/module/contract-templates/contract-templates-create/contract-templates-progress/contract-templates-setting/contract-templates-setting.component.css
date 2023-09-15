@@ -1,0 +1,151 @@
+:host {
+  height: 100%;
+}
+
+.wapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 30px;
+}
+
+.wapper_signer {
+  height: 80%;
+  width: 100%;
+  position: relative;
+}
+
+.contract_signer--form:not(:first-child) {
+  margin-top: 20px;
+}
+
+.contract_signer {
+  width: 50%;
+  margin: 20px auto auto auto;
+  max-height: 50vh;
+  overflow: auto;
+}
+
+.signer_form--name {
+  display: flex;
+  justify-content: space-between;
+  font-size: 20px;
+  padding: 10px;
+  background-color: rgb(240, 238, 237);
+  border-top: 5px solid #db5d5d;
+}
+
+.form_group--input {
+  display: flex;
+  gap: 0 30px;
+  padding: 10px;
+}
+
+.form_group--delete i {
+  font-size: 18px;
+}
+
+.signer_form--add {
+  margin-left: 40px;
+}
+
+.signer_name > span,
+.signer_email > span {
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--primary-color);
+}
+.signer_name > p,
+.signer_email > p {
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  font-weight: 500;
+  font-size: 14px;
+  color: #4c4c4c;
+}
+
+.contract_signer--btn {
+  margin: auto auto 0 auto;
+  width: 80%;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+#btn_next {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.download_contract--excel {
+  padding: 10px;
+  border-left: 5px solid;
+  margin-bottom: 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 50%;
+  margin: 0 auto;
+}
+
+.box-upload {
+  width: 50%;
+  margin: 20px auto auto auto;
+}
+
+.border:hover .drop_box {
+  border: 1.8px dashed var(--primary-color);
+}
+
+.drop_box {
+  position: relative;
+  height: 300px;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border: 1.8px dashed #e1e5ed;
+}
+
+#fileID {
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.signer_change--file {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 50%;
+  margin: 0 auto;
+}
+
+.signer_change--file h5 {
+  margin: 0;
+}
+
+#change_file{
+  display: none;
+}
+
+.list_Batch--Signer{
+  margin: 0 auto !important;
+}
+
+.signer_form--list{
+  border-left: 1px solid #e5e5e5;
+  border-bottom: 1px solid #e5e5e5;
+  border-right: 1px solid #e5e5e5;
+}
+
+.name_role{
+  margin: 0;
+  padding: 0;
+}

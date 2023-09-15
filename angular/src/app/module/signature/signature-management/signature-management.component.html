@@ -1,0 +1,230 @@
+<div [@routerTransition] class="wrapper card container-fluid not-full-width">
+  <div class="wapper_content">
+    <section class="content px-2">
+      <section class="pb-3">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-6">
+              <h2>{{ "Signatures" | ecTranslate }}</h2>
+            </div>
+            <div class="col-6 text-right">
+              <button
+                *ngIf="isShowCreateBtn()"
+            
+                mat-raised-button
+                class="btn-add button"
+                [matMenuTriggerFor]="menu"
+              >
+                <i class="fa fa-plus pr-1"></i>
+                {{ "AddSignature" | ecTranslate }}
+              </button>
+              <mat-menu #menu="matMenu">
+                <button (click)="handleAddSignature()" mat-menu-item> {{ "ElectronicSignature" | ecTranslate }}</button>
+                <button (click)="handleAddSignatureStamp()" mat-menu-item>{{ "Stamp" | ecTranslate }}</button>
+              </mat-menu>              
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="position-relative">
+        <table class="table table-header">
+          <thead class="bg-light head-table">
+            <tr>
+              <th style="width: 60px">
+                {{ DisplayedColumnSignature.No.name | ecTranslate }}
+              </th>
+              <th>
+                {{ DisplayedColumnSignature.Signature.name | ecTranslate }}
+              </th>
+              <th style="width: 190px">
+                {{ 'SignatureType' | ecTranslate }}
+              </th>
+              <th style="width: 180px">
+                {{ DisplayedColumnSignature.CreationTime.name | ecTranslate }}
+                <i
+                  *ngIf="
+                    DisplayedColumnSignature.CreationTime.statusSort ===
+                    typeSort.Default
+                  "
+                  (click)="
+                    handleChangeSortSignature(
+                      DisplayedColumnSignature.CreationTime.name,
+                      typeSort.Down
+                    )
+                  "
+                  class="fas fa-sort icon-sort"
+                ></i>
+                <i
+                  *ngIf="
+                    DisplayedColumnSignature.CreationTime.statusSort ===
+                    typeSort.Down
+                  "
+                  (click)="
+                    handleChangeSortSignature(
+                      DisplayedColumnSignature.CreationTime.name,
+                      typeSort.Up
+                    )
+                  "
+                  class="fas fa-sort-amount-down icon-sort"
+                ></i>
+                <i
+                  *ngIf="
+                    DisplayedColumnSignature.CreationTime.statusSort ===
+                    typeSort.Up
+                  "
+                  (click)="
+                    handleChangeSortSignature(
+                      DisplayedColumnSignature.CreationTime.name,
+                      typeSort.Default
+                    )
+                  "
+                  class="fas fa-sort-amount-up icon-sort"
+                ></i>
+              </th>
+              <th style="width: 180px">
+                {{ DisplayedColumnSignature.UpdateTime.name | ecTranslate }}
+                <i
+                  *ngIf="
+                    DisplayedColumnSignature.UpdateTime.statusSort ===
+                    typeSort.Default
+                  "
+                  (click)="
+                    handleChangeSortSignature(
+                      DisplayedColumnSignature.UpdateTime.name,
+                      typeSort.Down
+                    )
+                  "
+                  class="fas fa-sort icon-sort"
+                ></i>
+                <i
+                  *ngIf="
+                    DisplayedColumnSignature.UpdateTime.statusSort ===
+                    typeSort.Down
+                  "
+                  (click)="
+                    handleChangeSortSignature(
+                      DisplayedColumnSignature.UpdateTime.name,
+                      typeSort.Up
+                    )
+                  "
+                  class="fas fa-sort-amount-down icon-sort"
+                ></i>
+                <i
+                  *ngIf="
+                    DisplayedColumnSignature.UpdateTime.statusSort ===
+                    typeSort.Up
+                  "
+                  (click)="
+                    handleChangeSortSignature(
+                      DisplayedColumnSignature.UpdateTime.name,
+                      typeSort.Default
+                    )
+                  "
+                  class="fas fa-sort-amount-up icon-sort"
+                ></i>
+              </th>
+              <th style="width: 180px">
+                {{
+                  DisplayedColumnSignature.DefaultSignature.name | ecTranslate
+                }}
+              </th>
+              <th style="width: 190px">
+                {{ DisplayedColumnSignature.Actions.name | ecTranslate }}
+              </th>
+            </tr>
+          </thead>
+        </table>
+        <div class="wrapper-table">
+          <table
+            class="table table-body"
+            [busy]="isTableLoading"
+            id="signature"
+          >
+            <tbody>
+              <tr *ngFor="let signature of listSignature; let i = index">
+                <td style="width: 60px">{{ i + 1 }}</td>
+                <td>
+                  <div class="wrapper-signature position-relative">
+                    <img
+                      class="signature-img trigger"
+                      [src]="signature.fileBase64"
+                      alt="signature"
+                      [matMenuTriggerFor]="menu"
+                    />
+                    <mat-menu
+                      #menu="matMenu"
+                      [class.my-panel-class]="true"
+                      class="menu-big-signature position-relative"
+                    >
+                      <img
+                        class="big-signature"
+                        [src]="signature.fileBase64"
+                        alt="big_signature"
+                      />
+                    </mat-menu>
+                  </div>
+                </td>
+                <td style="width: 180px">
+                  {{ signature.signatureType === signatureType.Stamp ? ("Stamp" | ecTranslate) : ("ElectronicSignature" | ecTranslate)   }} <br />
+                </td> 
+                <td style="width: 180px">
+                  {{ signature.creationTime | formatDate }} <br />
+                </td>
+                <td style="width: 180px">
+                  {{ signature.lastModificationTime | formatDate }} <br />
+                  <span
+                    *ngIf="signature.lastModifierUser"
+                    class="user-signature"
+                    ><i>{{ "By" | ecTranslate }}</i
+                    ><b> {{ signature.lastModifierUser }}</b></span
+                  >
+                </td>
+                <td class="position-relative" style="width: 180px">
+                  <input
+                    type="checkbox"
+                    class="disabled"
+                    [ngClass]="{ 'checkbox-signature': !signature.isDefault }"
+                    [(ngModel)]="signature.isDefault"
+                    (mousedown)="
+                      setDefaultSignature(signature, signature.isDefault)
+                    "
+                  />
+                  <!-- <div
+                    *ngIf="signature.isDefault"
+                    class="overlay-checkbox"
+                  ></div> -->
+                </td>
+                <td style="width: 190px">
+                  <button
+                    *ngIf="isShowEditBtn()"
+                    (click)="handleEditSignature(signature)"
+                    type="button"
+                    class="btn btn-sm bg-secondary ml-2"
+                  >
+                    <i class="fas fa-pencil-alt pr-2"></i>
+                    <span>{{ "Edit" | ecTranslate }}</span>
+                  </button>
+                  <button
+                    *ngIf="isShowDeleteBtn()"
+                    (click)="handleDeleteSignature(signature.id)"
+                    type="button"
+                    class="btn btn-sm bg-danger mx-2"
+                  >
+                    <i class="fas fa-trash pr-1"></i>
+                    <span>{{ "Delete" | ecTranslate }}</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <h4
+            class="text-center text-not-data p-4"
+            *ngIf="!listSignature?.length && !isTableLoading"
+          >
+            {{ "YouCurrentlyDoNotHaveAnySignatures" | ecTranslate }}
+          </h4>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

@@ -1,0 +1,152 @@
+.wrapper {
+  height: 75vh;
+  overflow: hidden;
+}
+
+.content {
+  height: 69vh;
+  overflow-y: auto;
+}
+
+.include-footer {
+  height: 63.3vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.non-include-footer {
+  height: 67vh;
+  overflow: hidden;
+}
+
+/* header */
+::ng-deep #header .modal-header {
+  padding: 0;
+}
+
+/* form */
+
+.form-item {
+  width: 100%;
+  margin-top: 8px;
+}
+
+::ng-deep #formProperties .mat-input-element {
+  width: 93%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.property-item:hover > .icon-trash {
+  display: inline-block;
+}
+
+.property-item {
+  position: relative;
+}
+
+.name-worker {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.overlay-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #f3f3f3;
+}
+
+.spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.tabs {
+  height: 69vh;
+  overflow: hidden;
+}
+
+.tabs-include-footer {
+  height: 63vh;
+  overflow: hidden;
+}
+
+::ng-deep #tab_detail_worker .mat-tab-body-wrapper {
+  margin-top: 15px !important;
+  height: 60vh !important;
+}
+
+::ng-deep #tab_detail_worker .mat-tab-labels {
+  max-width: 320px;
+}
+
+::ng-deep #tab_detail_worker .mat-tab-label {
+  max-width: 160px !important;
+  height: 35px;
+}
+
+.title-property {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.icon-trash {
+  position: absolute;
+  top: 8px;
+  padding: 8px;
+  right: 16px;
+  font-size: 17px;
+  display: none;
+}
+
+.icon-trash:hover {
+  cursor: pointer;
+  color: red;
+}
+
+/* n */
+.btn-edit,
+.btn-add,
+.btn-close {
+  height: 36px;
+}
+
+.btn-add span {
+  font-size: 16px;
+}
+
+/* footer */
+
+.footer {
+  margin-top: 18px;
+  display: flex;
+  justify-content: space-between;
+}
+
+@media only screen and (max-height: 849px) {
+  .wrapper {
+    height: 73vh;
+    overflow: hidden;
+  }
+
+  .include-footer {
+    height: 60vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
+@media only screen and (max-height: 749px) {
+  .include-footer {
+    height: 58vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}

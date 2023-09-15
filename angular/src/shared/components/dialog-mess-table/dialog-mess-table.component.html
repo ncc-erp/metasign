@@ -1,0 +1,26 @@
+<div class="dialog_table">
+  <div class="close_dialog">
+    <i (click)="handleCloseDialog()" class="fa-solid fa-xmark"></i>
+  </div>
+
+  <p class="failed_table">{{"UploadMassTemplateFailTitle" | ecTranslate}} : {{ dataSource.length }}</p>
+
+  <div>
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+      <!-- Position row -->
+      <ng-container matColumnDef="row">
+        <th mat-header-cell *matHeaderCellDef class="table_col">{{"Row"|ecTranslate}}</th>
+        <td mat-cell *matCellDef="let element">{{ element.row }}</td>
+      </ng-container>
+
+      <!-- Name reasonFail -->
+      <ng-container matColumnDef="reasonFail">
+        <th mat-header-cell *matHeaderCellDef class="table_col">{{"Error"|ecTranslate}}</th>
+        <td mat-cell *matCellDef="let element">{{ element.reasonFail }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </div>
+</div>

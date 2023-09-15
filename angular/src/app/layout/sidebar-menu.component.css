@@ -1,0 +1,96 @@
+.list-menu {
+  padding-left: 10px;
+}
+
+.nav-item {
+  text-align: center;
+}
+
+.nav-link {
+  width: 100%;
+  color: rgb(20, 20, 20);
+  margin: 0;
+}
+
+.nav-link-admin {
+  width: 200px;
+  text-align: left;
+}
+
+.nav-link-admin:hover {
+  cursor: pointer;
+  background-color: #e6e4e4;
+  color: var(--primary-color);
+  font-weight: 400;
+}
+
+ul {
+  transform: translateY(10%);
+}
+
+.nav-item:hover {
+  cursor: pointer;
+  background-color: #e6e4e4;
+  color: var(--primary-color);
+  font-weight: 400;
+}
+
+.nav-item:hover .menu-item {
+  color: var(--text-hover);
+}
+
+.active {
+  border-bottom: 3px solid var(--text-selected);
+  font-weight: 400;
+}
+
+.active .menu-item {
+  color: var(--text-selected);
+}
+
+.menu-admin {
+  list-style: none;
+  padding-left: 0;
+}
+
+.active-admin {
+  cursor: pointer;
+  background-color: #e6e4e4;
+  border: none;
+}
+
+.menu-item {
+  font-size: 1.1rem;
+  color: var(--primary-color);
+}
+
+.icon-down {
+  font-size: 0.95rem;
+  padding-left: 4px;
+}
+
+::ng-deep .mat-menu-content {
+  width: 200px !important;
+  max-height: 50vh;
+}
+
+::ng-deep .mat-menu-panel {
+  max-height: 50vh !important;
+  overflow: hidden !important;
+}
+
+@media only screen and (min-width: 992px) and (max-width: 1269.99px) {
+  .menu-item {
+    font-size: 1.14rem;
+    font-weight: 500;
+  }
+
+  .nav-item {
+    width: 120px;
+  }
+
+  .nav-link {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+}

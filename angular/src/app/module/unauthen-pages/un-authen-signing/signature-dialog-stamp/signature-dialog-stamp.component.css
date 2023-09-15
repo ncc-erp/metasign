@@ -1,0 +1,297 @@
+.dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.wrapper-content {
+  flex: 1;
+  height: 100%;
+}
+
+.content {
+  height: calc(100% - 100px);
+}
+
+.dialog_btn {
+  position: sticky;
+  bottom: 0;
+  background-color: #fff;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+}
+
+.signature_tab {
+  width: 90%;
+  margin: 0 auto;
+  height: 100%;
+}
+
+.signature_tab mat-tab-group {
+  height: 100%;
+}
+
+.signature_tab--upload {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+  width: 100%;
+  height: 54vh;
+  border: 2px dashed rgb(204, 204, 204);
+  background-color: #f9f9f9;
+}
+
+::ng-deep #tab .mat-tab-body-content {
+  overflow: hidden !important;
+}
+
+.upload_signature {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.upload_signature--success {
+  display: flex;
+  gap: 0 20px;
+}
+
+.upload_label {
+  width: 140px;
+  margin: 12px auto auto auto;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.66px;
+  text-align: center;
+  background-color: rgb(249, 249, 249);
+  border: 1px solid rgb(204, 204, 204);
+  color: rgb(30, 30, 30);
+  font-size: 12px;
+  padding: 4px 14px;
+}
+
+#upload {
+  display: none;
+}
+
+.upload_label:hover {
+  background-color: rgb(233, 233, 233);
+  transition: background-color 0.4s;
+}
+
+.upload_signature i {
+  font-size: 40px;
+}
+
+.upload_signature img {
+  margin: 0 auto;
+  width: 100px;
+  height: 100px;
+}
+
+.upload_signature button {
+  margin-top: 20px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 20px;
+}
+
+::ng-deep .mat-tab-group.mat-primary .mat-ink-bar {
+  background-color: var(--primary-color) !important;
+}
+
+::ng-deep .mat-dialog-actions {
+  border-top: 1px solid rgba(0, 0, 0, 0.125);
+  margin-bottom: 0;
+  padding: 8px 20px;
+}
+
+::ng-deep .dialog {
+  justify-content: space-between;
+}
+
+::ng-deep .signature-dialog .mat-dialog-container {
+  padding: 0;
+  overflow: hidden;
+}
+
+::ng-deep .signature-dialog .mat-dialog-content {
+  overflow: initial;
+}
+
+/* table  */
+table {
+  width: 100%;
+}
+
+table td {
+  padding: 8px;
+  height: 100px;
+}
+
+.head-table {
+  height: 40px;
+}
+
+.table td:hover {
+  cursor: pointer;
+}
+
+.select {
+  height: 85%;
+  overflow: auto;
+}
+
+.table-signature {
+  border-spacing: 0;
+  border-collapse: separate;
+  width: 100%;
+}
+
+.head-table-signature {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 1;
+}
+
+::ng-deep .mat-radio-button.mat-accent .mat-radio-ripple .mat-ripple-element {
+  background-color: var(--primary-color) !important;
+}
+
+::ng-deep .mat-radio-button.mat-accent .mat-radio-inner-circle {
+  background-color: var(
+    --primary-color
+  ) !important; /*inner circle color change*/
+}
+
+::ng-deep.mat-radio-button.mat-accent.mat-radio-checked
+  .mat-radio-outer-circle {
+  border-color: var(--primary-color) !important; /*outer ring color change*/
+}
+
+@media (max-width: 768px) {
+  ::ng-deep .cdk-overlay-pane {
+    max-width: 100vw !important;
+    width: 96% !important;
+    height: 98% !important;
+  }
+
+  ::ng-deep .mat-elevation-z4 {
+    display: none !important;
+  }
+
+  ::ng-deep .mat-tab-list {
+    width: 100% !important;
+  }
+
+  ::ng-deep .mat-tab-label-content {
+    font-size: 12px !important;
+  }
+
+  .upload_signature--cropper {
+    width: 250px;
+  }
+
+  .btn-action {
+    font-size: 10px;
+    padding: 3px 10px;
+    width: 86px;
+  }
+
+  .upload_signature--cropper {
+    width: 250px !important;
+  }
+
+  .head-item {
+    width: 0 !important;
+  }
+}
+
+@media only screen and (max-width: 413px) {
+  canvas {
+    width: 275px;
+    height: 339px;
+  }
+}
+
+/* tab-type */
+.signature_tab--type {
+  position: relative;
+  margin-top: 30px;
+  width: 100%;
+  height: 54vh;
+  border: 2px solid rgb(238 238 238);
+  background-color: #f9f9f9;
+}
+
+.list-color--tab-type {
+  position: absolute;
+  top: 10px;
+  right: 22px;
+}
+
+.input-signature {
+  width: 93%;
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0 auto;
+  background-color: #f9f9f9;
+  border: none;
+  border-bottom: 1px solid var(--primary-color);
+  outline: none;
+}
+
+.select-font-family {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  background-color: #f9f9f9;
+}
+
+::ng-deep .mat-select-panel {
+  transform: translateY(24px) !important;
+}
+
+/* Tablet  */
+@media only screen and (min-width: 480.01px) and (max-width: 768px) {
+  .signature_tab {
+    padding: 0;
+  }
+
+  :host ::ng-deep .mat-select-panel {
+    min-width: 150px !important;
+    transform: translate(92px, 22px) !important;
+  }
+}
+
+/* Mobile */
+@media only screen and (min-width: 320px) and (max-width: 480px) {
+  ::ng-deep .mat-select-panel {
+    min-width: 150px !important;
+    transform: translate(54px, 22px) !important;
+  }
+}
+
+:host ::ng-deep #selectFontFamily .mat-form-field-underline {
+  display: none !important;
+}
+
+:host ::ng-deep .mat-form-field-wrapper {
+  transform: translateY(-12px);
+}
+
+.upload_signature--note{
+  margin: 0;
+  padding: 0;
+  margin-top: 10px;
+  cursor: pointer;
+}

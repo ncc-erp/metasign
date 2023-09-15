@@ -1,0 +1,100 @@
+<div class="wapper">
+  <div *ngIf="loadingTemplate; else template" class="loadding_page">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <ng-template #template>
+    <div class="wapper_header">
+      <h4>{{ contractName }}</h4>
+      <i (click)="handleCloseDialog()" class="fa-solid fa-xmark"></i>
+    </div>
+
+    <div class="wapper_send--mail">
+      <div
+        [ngClass]="{ center_element: isSignerEmpty }"
+        class="send_mail--signer"
+      >
+        <h5 *ngIf="isSignerEmpty; else listSigner">
+          {{"ContractBatchNotHaveSigner"|ecTranslate}}
+        </h5>
+        <ng-template #listSigner>
+          <h4>{{"ListSigner"|ecTranslate}}:</h4>
+          <div class="contract_signer">
+            <div
+              *ngFor="let signerGroup of listBatchSigner"
+              class="contract_signer--form"
+            >
+              <p
+                *ngIf="
+                  signerGroup.contractRole === contractRole.Viewer;
+                  else sign
+                "
+              >
+                <i class="fa-regular fa-closed-captioning pr-2"></i>
+                {{ "CopyRecipients" | ecTranslate }}
+              </p>
+              <ng-template #sign>
+                <p>
+                  <i class="fa-solid fa-user pr-2"></i>
+                  {{ "Signers " | ecTranslate }}
+                </p>
+              </ng-template>
+              <div class="signer_form--list">
+                <div
+                  [style.border-top-color]="signerGroup.color"
+                  class="signer_form--name mt-3"
+                >
+                  {{ signerGroup.role }}
+                </div>
+
+                <div
+                  *ngFor="let signer of signerGroup.rowData"
+                  class="signer_form--group"
+                >
+                  <div class="form_group--input">
+                    <div class="signer_name">
+                      <mat-form-field appearance="outline">
+                        <mat-label>{{"FullName"|ecTranslate}}</mat-label>
+                        <input
+                          readonly
+                          [value]="
+                            signer.name ? signer.name : signer.signerName
+                          "
+                          matInput
+                          placeholder="Placeholder"
+                        />
+                      </mat-form-field>
+                    </div>
+                    <div class="signer_email">
+                      <mat-form-field appearance="outline">
+                        <mat-label>{{"Email"|ecTranslate}}</mat-label>
+                        <input
+                          readonly
+                          [value]="
+                            signer.email ? signer.email : signer.signerEmail
+                          "
+                          matInput
+                          placeholder="Placeholder"
+                        />
+                      </mat-form-field>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+      <div class="send_mail--contract">
+        <app-contract-preview
+          [contractName]="'contractName'"
+          [contractFile]="contractFile"
+          [contractSigner]="contractSigner"
+        ></app-contract-preview>
+      </div>
+    </div>
+    <div class="send_mail--btn">
+      <button (click)="handleSendMail()" class="button_send--mail">{{'Send' | ecTranslate}}</button>
+    </div>
+  </ng-template>
+</div>

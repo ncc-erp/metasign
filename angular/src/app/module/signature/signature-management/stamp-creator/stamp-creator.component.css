@@ -1,0 +1,131 @@
+.dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.dialog_btn {
+  display: flex;
+  justify-content: space-between;
+}
+
+.card-body {
+  height: 60vh;
+}
+
+.signature_tab {
+  height: 75vh;
+  overflow: hidden;
+  width: 90%;
+  margin: 0 auto;
+  max-height: 75vh;
+}
+
+.signature_tab--upload {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+  width: 100%;
+  height: 54vh;
+  border: 2px dashed rgb(204, 204, 204);
+  background-color: #f9f9f9;
+}
+
+.upload_signature {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.upload_signature--success {
+  display: flex;
+  gap: 0 20px;
+}
+#upload {
+  opacity: 0;
+}
+
+.upload_label {
+  width: 140px;
+  margin: 12px auto auto auto;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.66px;
+  text-align: center;
+  background-color: rgb(249, 249, 249);
+  border: 1px solid rgb(204, 204, 204);
+  color: rgb(30, 30, 30);
+  font-size: 12px;
+  padding: 4px 14px;
+}
+
+
+
+.upload_label:hover {
+  background-color: rgb(233, 233, 233);
+  transition: background-color 0.4s;
+}
+
+.upload_signature i {
+  font-size: 40px;
+}
+
+.upload_signature img {
+  margin: 0 auto;
+  width: 100px;
+  height: 100px;
+}
+
+.upload_signature button {
+  margin-top: 20px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 20px;
+}
+
+.card-header_icon {
+  font-size: 40px;
+}
+
+input[type="checkbox"] {
+  accent-color: var(--primary-color) !important;
+  width: 20px !important;
+  height: 20px !important;
+  transform: translateY(25%);
+}
+
+::ng-deep .mat-dialog-actions {
+  border-top: 1px solid rgba(0, 0, 0, 0.125);
+  margin-bottom: 0;
+  padding: 8px 20px;
+}
+
+::ng-deep .dialog {
+  justify-content: space-between;
+}
+
+::ng-deep .signature_dialog .mat-dialog-container {
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+#signature-pad input[type="text"] {
+  position: absolute;
+  border: 1px solid #000;
+  padding: 4px;
+  background-color: #fff;
+}
+
+input[type="text"]:hover {
+  cursor: pointer;
+}
+
+.upload_signature--note{
+  margin: 0;
+  padding: 0;
+  margin-top: 10px;
+  cursor: pointer;
+}

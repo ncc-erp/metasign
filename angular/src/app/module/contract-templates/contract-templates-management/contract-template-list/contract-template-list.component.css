@@ -1,0 +1,78 @@
+:host ::ng-deep .mat-menu-content {
+  width: 300px !important;
+  max-height: 50vh;
+}
+.header_content {
+  height: 60px;
+}
+
+::ng-deep #change-page .page-item.active .page-link {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+#btn_action i {
+  font-size: 23px !important;
+}
+
+.head_icon {
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.head_icon:hover {
+  color: #3f51b5;
+}
+.head-table {
+  height: 60px;
+}
+
+.footer {
+  border: 1px solid #dee2e6;
+}
+
+.btn-refresh {
+  background-color: var(--primary-color);
+}
+
+.btn-actions-item i {
+  padding-right: 4px;
+}
+
+.btn_delete i {
+  margin-left: 3px;
+}
+
+.btn_delete span {
+  margin-left: -3px;
+}
+
+.color-select {
+  background-color: #dedfe0;
+}
+
+.text-color-title {
+  color: #2f3136 !important;
+}
+
+.text-not-data {
+  color: #949494;
+  font-style: italic;
+  padding: 24px 0 10px;
+}
+
+.text-not-data span {
+  font-size: 1.05rem !important;
+}
+
+.text-color {
+  color: #43464f !important;
+}
+
+.contract-name {
+  font-size: 16px !important;
+}
+
+/* .messTable {
+  height: 560px;
+} */

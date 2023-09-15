@@ -1,0 +1,18 @@
+<div class="modal-footer justify-content-between" style="height: 70.75px">
+  <button
+    type="button"
+    class="btn btn-default"
+    [disabled]="cancelDisabled"
+    (click)="onCancelClick.emit()"
+  >
+    {{ cancelLabel | ecTranslate }}
+  </button>
+  <button
+    type="submit"
+    class="button"
+    style="color: #fbf7ec; background-color: #004037; height: 36px"
+    [disabled]="saveDisabled"
+  >
+    {{ saveLabel | ecTranslate }}
+  </button>
+</div>

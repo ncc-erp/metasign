@@ -1,0 +1,21 @@
+<div class="wrapper bg-white w-100 h-100">
+  <img
+    class="img-success"
+    src="https://static.vecteezy.com/system/resources/previews/002/745/103/original/employment-contract-illustration-vector.jpg"
+  />
+  <h2 class="noti-success">{{ "ContractHasBeenSent" | ecTranslate }}</h2>
+
+  <div class="d-flex justify-content-center">
+    <a target="_blank" [href]="signUrl" class="signUrl button mr-2 mt-3">{{
+      "SignNow" | ecTranslate
+    }}</a>
+    <a
+      (click)="navigateContract()"
+      href="app/contracts"
+      class="button mt-3"
+      style="z-index: 1"
+    >
+      {{ "Contracts" | ecTranslate }}
+    </a>
+  </div>
+</div>

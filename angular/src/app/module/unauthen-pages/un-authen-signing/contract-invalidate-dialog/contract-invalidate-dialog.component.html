@@ -1,0 +1,38 @@
+<div class="wapper_contract--invalidate">
+  <abp-modal-header
+    id="header"
+    [title]="(titleDialog?titleDialog:'DeclineToSign')|ecTranslate"
+    (onCloseClick)="dialogRef.close()"
+  ></abp-modal-header>
+  <div class="mt-3">
+    <P *ngIf="dialogData.role === ContractInvalidate.contractCreator">
+      {{"NoticeVoidToSign" | ecTranslate}}
+    </P>
+    <p class="mt-3">
+      <strong>{{(dialogData.role === ContractInvalidate.contractCreator?"ReasonVoidToSign":"ResonDeclineToSign")|ecTranslate}}:</strong>
+    </p>
+    <textarea [(ngModel)]="valueContractInvalidate" maxlength="200"> </textarea>
+    <p
+      [ngStyle]="{
+        color:
+          remainingCharacters - valueContractInvalidate?.length <= 20
+            ? 'red'
+            : 'black'
+      }"
+    >
+      {{ remainingCharacters - valueContractInvalidate?.length }} {{"CharacterRemain"|ecTranslate}}
+    </p>
+  </div>
+  <div class="d-flex card-bottom">
+    <button (click)="dialogRef.close()" mat-raised-button>{{ "Cancel" | ecTranslate }}</button>
+    <button
+      [disabled]="!valueContractInvalidate?.trim()"
+      (click)="handleContractInvalidate()"
+      mat-raised-button
+      class="ml-3"
+      class="btn-confim"
+    >
+      {{ "Save" | ecTranslate }}
+    </button>
+  </div>
+</div>

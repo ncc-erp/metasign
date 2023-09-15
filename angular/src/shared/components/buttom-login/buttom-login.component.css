@@ -1,0 +1,31 @@
+.bottom_login {
+  width: 218px;
+  height: 48px;
+  border: 1px solid #d0d5dd;
+  background-color: #ffffff;
+  color: #004037;
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0 8px;
+  font-weight: 500;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.bottom_tenant {
+  width: 448px;
+  height: 48px;
+  border: 1px solid #d0d5dd;
+  background-color: #ffffff;
+  color: #004037;
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0 8px;
+  font-weight: 500;
+  font-size: 18px;
+  cursor: pointer;
+}

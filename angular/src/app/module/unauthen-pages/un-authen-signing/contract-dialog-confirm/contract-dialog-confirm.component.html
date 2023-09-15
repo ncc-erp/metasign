@@ -1,0 +1,27 @@
+<div class="wapper_contract--invalidate">
+  <abp-modal-header
+    id="header"
+    [title]="'Caution'|ecTranslate"
+    (click)="dialogRef.close()"
+  ></abp-modal-header>
+  <div class="contract_invalidate--body mt-4">
+    <p>
+      {{"CautionVoidToSign"|ecTranslate}}<strong style="text-transform: uppercase;">{{"Continue"|ecTranslate}}</strong>{{"CautionVoidToSign2"|ecTranslate}}
+    </p>
+    <p class="mt-4">
+      {{"CautionVoidToSign3"|ecTranslate}}
+      <strong style="text-transform: uppercase;">{{"Cancel"|ecTranslate}}</strong> {{"CautionVoidToSign4"|ecTranslate}}
+    </p>
+  </div>
+  <div class="d-flex contract_bottom">
+    <button (click)="dialogRef.close()" mat-raised-button>{{"Cancel"|ecTranslate}}</button>
+    <button
+      mat-raised-button
+      class="ml-3"
+      id="btn-confim"
+      (click)="handleConfirmInvalidate()"
+    >
+      {{"Continue"|ecTranslate}}
+    </button>
+  </div>
+</div>

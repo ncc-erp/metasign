@@ -1,0 +1,190 @@
+.setting_email {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn-edit-mail {
+  height: 36px;
+  transform: translateY(-15%);
+}
+
+.email_text--input {
+  margin-bottom: 20px;
+}
+
+.overlay-content-mail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: transparent;
+}
+
+.email_contract--file {
+  border-bottom: 1px solid rgb(223, 213, 213);
+}
+.email_contract--Send {
+  margin-top: 10px;
+}
+
+.fill-container {
+  width: 500px;
+  min-height: 400px;
+}
+
+.setting_email--text {
+  padding-left: 50px;
+  flex: 3;
+  width: 100%;
+}
+
+.setting_email--contract {
+  flex: 1;
+  padding: 20px;
+  background-color: white;
+}
+.email_contract--view {
+  margin-top: 20px;
+}
+.email_contract--signer {
+  margin-top: 20px;
+}
+.contract_signer--box {
+  margin-top: 10px;
+  /* padding: 10px; */
+  background-color: rgb(244, 244, 244);
+}
+
+.signer-item {
+  border-left: 10px solid;
+  transform: translateX(10px);
+}
+
+.btn_step {
+  display: flex;
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  height: 50px;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 2px 0px inset;
+}
+
+.signer_form--order {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  transform: translate(30%, 80%);
+  font-size: 18px;
+}
+
+.mat-raised-button.mat-button-disabled {
+  cursor: no-drop;
+}
+.contract_name {
+  font-size: 18px;
+}
+
+.contract_view--box {
+  padding: 10px 10px 10px 20px;
+  background-color: rgb(244, 244, 244);
+}
+
+.contract_email {
+  color: rgb(107 113 118);
+  font-size: 16px;
+}
+
+::ng-deep #mail-content td a {
+  font-size: 8px !important;
+  padding: 16px 6px 12px 6px !important;
+  white-space: nowrap;
+}
+
+::ng-deep #mail-content div h3 {
+  font-size: 24px !important;
+  margin-top: 8px;
+}
+
+@media only screen and (min-width: 992px) and (max-width: 1199.99px) {
+  ::ng-deep #mail-content td a {
+    font-size: 8px !important;
+    padding: 4px 1px 8px 0 !important;
+    white-space: nowrap;
+  }
+}
+
+@media only screen and (max-width: 1800px) {
+  ::ng-deep #mail-content div h3 {
+    font-size: 20px !important;
+    margin-top: 8px;
+  }
+
+  ::ng-deep #mail-content td h1 {
+    font-size: 24px !important;
+  }
+
+  ::ng-deep #mail-content td a {
+    font-size: 8px !important;
+    padding: 10px 2px !important;
+  }
+
+  ::ng-deep #mail-content td a {
+    padding: 16px 6px 12px 6px !important;
+    white-space: nowrap;
+  }
+}
+
+@media only screen and (max-width: 1440px) {
+  ::ng-deep #mail-content div h3 {
+    font-size: 16px !important;
+    margin-top: 8px;
+  }
+
+  ::ng-deep #mail-content td {
+    padding: 4px;
+  }
+
+  ::ng-deep #mail-content td h1 {
+    font-size: 18px !important;
+  }
+
+  ::ng-deep #mail-content td img {
+    width: 150px;
+    margin-top: 50px !important;
+  }
+
+  ::ng-deep #mail-content td a {
+    padding: 16px 6px 12px 6px !important;
+  }
+}
+
+@media only screen and (max-height: 912px) {
+  .setting_email {
+    margin-top: 12px !important;
+    overflow: hidden;
+  }
+
+  .wrapper-mail-content {
+    padding: 20px !important;
+  }
+
+  #mail-content {
+    padding: 0 !important;
+  }
+
+  .btn-edit-mail {
+    height: 36px;
+    transform: translateY(15%);
+  }
+
+  .email_text--input {
+    margin: 10px 0 18px 0;
+  }
+}

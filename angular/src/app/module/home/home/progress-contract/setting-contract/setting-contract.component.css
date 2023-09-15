@@ -1,0 +1,336 @@
+.mat-stepper-horizontal {
+  margin-top: 8px;
+}
+
+.container {
+  width: 80%;
+  margin: 0 auto;
+}
+.mat-mdc-form-field {
+  margin-top: 16px;
+}
+
+.example-full-width {
+  width: 25%;
+}
+
+.signer_form-add {
+  color: rgb(2 124 255);
+}
+
+.signer_form--item {
+  gap: 0 20px;
+}
+
+:host ::ng-deep #form-setting1 .mat-form-field-flex > .mat-form-field-infix,
+:host ::ng-deep #form-setting2 .mat-form-field-flex > .mat-form-field-infix {
+  padding: 0.6rem 0 !important;
+}
+
+.from_reviewer {
+  max-height: 15vh;
+  overflow: auto;
+  margin-left: 48px;
+}
+
+.signer_form {
+  position: relative;
+  border-left: 10px solid;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.msg_invalid_signer_form {
+  position: absolute;
+  bottom: -20px;
+  left: 20px;
+  color: red;
+  font-size: 13px;
+}
+
+.form_role {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.form_role p {
+  margin: 0;
+  padding: 0;
+}
+
+.signer_form form {
+  flex-wrap: wrap;
+  flex: 1;
+  display: flex;
+  gap: 0 30px;
+  align-items: center;
+}
+
+.signer_form-add {
+  margin-top: 20px;
+}
+
+.signer_form-delete {
+  margin-left: 10px;
+  color: rgb(211, 98, 98);
+  font-size: 20px;
+}
+.signer_form-delete:hover {
+  transition: color 0.5s;
+  color: red;
+}
+
+.signer_viewer-title {
+  margin-top: 20px;
+}
+
+.stepper_btn {
+  display: flex;
+  margin-top: 50px;
+  margin-left: 153px;
+  justify-content: space-between;
+}
+.setting-input {
+  width: 290px;
+}
+
+.form-signername {
+  position: relative;
+}
+
+.msg-error-signername {
+  position: absolute;
+  bottom: -16px;
+  left: 0;
+  font-size: 12px;
+}
+
+.form-signeremail {
+  position: relative;
+}
+
+.msg-error-signeremail {
+  position: absolute;
+  bottom: -16px;
+  left: 0;
+  font-size: 12px;
+}
+
+.form-signerrole {
+  position: relative;
+}
+
+.msg-error-signerrole {
+  position: absolute;
+  bottom: -16px;
+  left: 0;
+  font-size: 12px;
+}
+
+::ng-deep .mat-checkbox-ripple .mat-ripple-element {
+  background-color: var(--primary-color) !important;
+}
+
+::ng-deep .mat-checkbox-checked.mat-accent .mat-checkbox-background {
+  background-color: var(--primary-color) !important;
+}
+
+:host
+  ::ng-deep
+  .mat-checkbox-indeterminate.mat-accent
+  .mat-checkbox-background {
+  background-color: var(--primary-color) !important;
+}
+
+:host ::ng-deep .mat-form-field-flex > .mat-form-field-infix {
+  padding: 10px !important;
+}
+
+.not-allowed {
+  cursor: not-allowed;
+}
+
+.signer_form--drag:hover {
+  cursor: move;
+}
+
+.signer_form--drag i {
+  color: #7b7373;
+  font-size: 30px;
+}
+
+#signer_form--order {
+  padding: 0;
+  width: 100px;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.example-box:last-child {
+  border: none;
+}
+
+.example-list.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.example-list {
+  max-height: 40vh;
+  overflow: auto;
+}
+
+.list-signer-viewer {
+  max-height: 20vh;
+  overflow: auto;
+}
+
+.signer_form--order {
+  width: 30px;
+  height: 30px;
+  border-radius: 3px;
+  border: 1px solid black;
+  position: relative;
+}
+
+.form_order--child {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@media only screen and (max-width: 1320px) {
+  .signer_form form {
+    gap: 15px 30px;
+  }
+}
+
+@media only screen and (max-height: 749px) {
+  .setting {
+    padding-top: 8px !important;
+  }
+
+  .stepper_btn,
+  .signer_form-add {
+    margin-top: 12px;
+  }
+}
+
+@media only screen and (min-height: 912px) {
+  .list-signer-viewer {
+    max-height: 25vh;
+    overflow: auto;
+  }
+
+  .stepper_btn,
+  .signer_form-add {
+    margin-top: 24px;
+  }
+}
+
+@media only screen and (min-height: 1200px) {
+  .example-list {
+    max-height: 25vh;
+    overflow: auto;
+  }
+
+  .list-signer-viewer {
+    max-height: 30vh;
+    overflow: auto;
+  }
+}
+
+@media only screen and (min-width: 992px) and (max-width: 1199.99px) {
+  .sidebar-item {
+    padding: 8px 0px;
+  }
+  .sidebar-item i {
+    text-align: center;
+  }
+
+  .title-sidebar {
+    padding: 4px 8px;
+    margin-bottom: 20px;
+  }
+}
+
+:host {
+  overflow-y: auto;
+}
+
+.wapper {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+.contract_signer--form:not(:first-child) {
+  margin-top: 20px;
+}
+
+.contract_signer {
+  padding-bottom: 50px;
+  width: 50%;
+  margin: 50px auto auto auto;
+}
+
+.contract_signer--form {
+  border-left: 1px solid #e5e5e5;
+  border-bottom: 1px solid #e5e5e5;
+  border-right: 1px solid #e5e5e5;
+}
+.signer_form--name {
+  font-size: 20px;
+  padding: 10px;
+  background-color: rgb(240, 238, 237);
+  border-top: 5px solid #db5d5d;
+}
+
+.form_group--input {
+  display: flex;
+  gap: 0 30px;
+  padding: 10px;
+}
+
+.form_group--delete i {
+  font-size: 18px;
+}
+
+.signer_form--add {
+  margin-left: 40px;
+}
+
+.signer_name > span,
+.signer_email > span {
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--primary-color);
+}
+.signer_name > p,
+.signer_email > p {
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  font-weight: 500;
+  font-size: 14px;
+  color: #4c4c4c;
+}

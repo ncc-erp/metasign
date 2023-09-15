@@ -1,0 +1,51 @@
+    <section class="content p-4 not-full-width">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-body table-responsive p-0">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-center pl-3">{{ "No" | ecTranslate }}</th>
+                                <th>
+                                    {{ "TemplateName" | ecTranslate }}
+                                </th>
+                                <th>{{ "Type" | ecTranslate}}</th>
+                                <th> {{ "To" | ecTranslate}} </th>
+                                <th>
+                                    {{ "Cc" | ecTranslate }}
+                                </th>
+                                <th class="text-center" style="width: 300px;">
+                                    {{ "Action" | ecTranslate }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of templates; let i = index;">
+                                <td class="text-center">{{ i + 1 }}</td>
+                                <td>{{ item.name }}</td>
+                                <td class="text-center align-middle"></td>
+                                <td class="max-line-content-1">{{item.sendToEmail}}</td>
+                                <td>
+                                    <div class="note max-line-content-1" talentResizeContent>
+                                        <div *ngFor="let cc of item.arrCCs">{{ cc }}</div>
+                                    </div>
+                                </td>
+                                <td class="text-center w-max-content">
+                                    <div class="w-max-content row text-center justify-content-center">
+                                        <button *ngIf="isShowPreviewBtn()" class="btn btn-sm mr-2 btn-secondary"  (click)="preview(item)">
+                                            <i class="fa fa-eye mr-1 text-sm"></i>
+                                            {{'Preview' | ecTranslate}}
+                                        </button>
+                                        <button *ngIf="isShowEditbtn()" class="btn btn-sm button-edit button" (click)="edit(item)">
+                                            <i class="fa fa-pen mr-2 text-sm"></i>
+                                            <span>{{'Edit' | ecTranslate}}</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>

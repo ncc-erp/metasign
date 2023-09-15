@@ -1,0 +1,136 @@
+<div class="contract">
+  <header class="header">
+    <div class="header-title">{{contractName}}</div>
+    <div (click)="dialogRef.close()" class="header-close">
+      <i class="fas fa-times"></i>
+    </div>
+  </header>
+  <div class="wrapper_contract">
+    <div id="design_viewer">
+      <div
+        id="design"
+        class="contract_page"
+        style="position: relative"
+        *ngFor="let contractPage of contractFile; let i = index"
+        [ngStyle]="{
+          width: contractPage.width + 'px',
+          height: contractPage.height + 'px'
+        }"
+      >
+        <div class="page" [ngClass]="i > 0 ? 'mt-5' : ''" [id]="contractPage.contractPage">
+          <img class="design_viewer--img" [src]="contractPage.fileBase64" />
+        </div>
+        <div
+          *ngFor="let signature of contractPage.signatureSettings"
+          [style.top.px]="signature.positionY"
+          [style.left.px]="signature.positionX"
+          style="position: absolute"
+        >
+          <div [ngSwitch]="signature.signatureType">
+            <button
+              [style.backgroundColor]="signature.color"
+              [style.width.px]="signature.width"
+              [style.height.px]="signature.height"
+              *ngSwitchCase="ContractSettingType.Electronic"
+              class="signature_type"
+              [matTooltip]="signature.role"
+              tooltipClass="tooltip_signer"
+            >
+              <div style="position: relative" class="signature_container">
+                <div class="text-center">
+                  <div class="signature_type--icon">
+                    <mat-icon svgIcon="electronic"></mat-icon>
+                  </div>
+                  <div class="signature_type--name">
+                    {{ "ESignature" | ecTranslate }}
+                  </div>
+                </div>
+              </div>
+            </button>
+
+            <button
+              [style.backgroundColor]="signature.color"
+              [style.width.px]="signature.width"
+              [style.height.px]="signature.height"
+              *ngSwitchCase="ContractSettingType.Text"
+              class="text_type"
+              [matTooltip]="signature.role"
+              tooltipClass="tooltip_signer"
+            >
+              <div style="position: relative" class="signature_container">
+                <div class="text-center">
+                  <div #previewinput class="signature_type--name">
+                    <i class="fa-sharp fa-regular fa-pen-to-square"></i>
+                    {{ "Text" | ecTranslate }}
+                  </div>
+                </div>
+              </div>
+            </button>
+
+            <button
+              *ngSwitchCase="ContractSettingType.DatePicker"
+              [style.backgroundColor]="signature.color"
+              [style.width.px]="signature.width"
+              [style.height.px]="signature.height"
+              class="text_type"
+              [matTooltip]="signature.role"
+              tooltipClass="tooltip_signer"
+            >
+              <div style="position: relative" class="signature_container">
+                <div class="text-center">
+                  <div #previewinput class="signature_type--name">
+                    <i class="fa-regular fa-calendar-days"></i>
+                    {{ "Date" | ecTranslate }}
+                  </div>
+                </div>
+              </div>
+            </button>
+
+            <button
+              *ngSwitchCase="ContractSettingType.Digital"
+              [style.backgroundColor]="signature.color"
+              [style.width.px]="signature.width"
+              [style.height.px]="signature.height"
+              class="signature_type"
+              [matTooltip]="signature.role"
+              tooltipClass="tooltip_signer"
+            >
+              <div style="position: relative" class="signature_container">
+                <div class="text-center">
+                  <div class="signature_type--icon">
+                    <mat-icon svgIcon="digital"></mat-icon>
+                  </div>
+                  <div class="signature_type--name">
+                    {{ "UsbToken" | ecTranslate }}
+                  </div>
+                </div>
+              </div>
+            </button>
+
+            <button
+            *ngSwitchCase="ContractSettingType.Stamp"
+            [style.backgroundColor]="signature.color"
+            [style.width.px]="signature.width"
+            [style.height.px]="signature.height"
+            class="signature_type"
+            [matTooltip]="signature.role"
+            tooltipClass="tooltip_signer"
+          >
+            <div style="position: relative" class="signature_container">
+              <div class="text-center">
+                <div class="signature_type--icon">
+                  <mat-icon svgIcon="stamp"></mat-icon>
+                </div>
+                <div class="signature_type--name">
+                  {{ 'Stamp' }}
+                </div>
+              </div>
+            </div>
+          </button>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

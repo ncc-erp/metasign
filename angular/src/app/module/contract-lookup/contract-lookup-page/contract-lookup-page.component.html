@@ -1,0 +1,925 @@
+<div class="wrapper">
+  <div class="wrapper-header">
+    <h1 class="title-header">
+      {{ 'Lookup' | ecTranslate }}
+      <span class="title-header"> {{ 'Contract' | ecTranslate }}</span>
+    </h1>
+    <form [formGroup]="formSearch" (ngSubmit)="handleSearchGuid()">
+      <div class="search row">
+        <mat-form-field
+          id="formSearch"
+          appearance="outline"
+          class="form-search position-relative"
+        >
+          <mat-icon matPrefix *ngIf="!isMobile">search</mat-icon>
+          <input
+            class="input-search"
+            matInput
+            required
+            formControlName="id"
+            [(ngModel)]="valueContract"
+            type="text"
+            [placeholder]="'EnterTheContractIDHere' | ecTranslate"
+          />
+          <mat-error *ngIf="formSearch.get('id').hasError('required')">
+            {{'ThisFieldCannotBeEmpty'| ecTranslate }}
+          </mat-error>
+        </mat-form-field>
+        <div>
+          <button
+            *ngIf="!isMobile"
+            mat-raised-button
+            class="button-search"
+            type="submit"
+          >
+          {{'Sreach' | ecTranslate}}
+          </button>
+        </div>
+        <button
+          *ngIf="isMobile"
+          mat-raised-button
+          class="button-search"
+          type="submit"
+        >
+          <i style="font-size: 22px" class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </div>
+    </form>
+  </div>
+  <div class="wrapper-content position-relative">
+    <div class="content-empty" *ngIf="!contracts?.length && !isSearched">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        [ngStyle]="{
+          'width.px': isMobile ? 200 : 308,
+          'height.px': isMobile ? 203 : 311
+        }"
+        viewBox="0 0 308 311"
+        fill="none"
+      >
+        <g opacity="0.3" filter="url(#filter0_f_1117_4896)">
+          <path
+            d="M151.499 252.529C213.377 252.529 263.542 202.363 263.542 140.264C263.542 78.1653 213.377 28 151.499 28C89.6207 28 39.4553 78.1653 39.4553 140.264C39.4553 202.363 89.6207 252.529 151.499 252.529Z"
+            fill="url(#paint0_linear_1117_4896)"
+          />
+        </g>
+        <path
+          d="M69.0682 80.817H228.404C234.813 80.817 239.675 85.6788 239.675 92.0876V193.081C239.675 199.49 234.813 204.352 228.404 204.352H69.0682C62.6594 204.352 57.7976 199.49 57.7976 193.081V92.0876C57.7976 85.6788 63.1014 80.817 69.0682 80.817Z"
+          fill="url(#paint1_linear_1117_4896)"
+        />
+        <g filter="url(#filter1_d_1117_4896)">
+          <path
+            d="M209.129 92.0797L210.484 201.113C210.484 204.838 207.436 207.716 203.712 207.716H97.387C93.6623 207.716 90.6147 204.669 90.6147 201.113V60.9273C90.6147 57.2026 93.6623 54.3243 97.387 54.3243H174.422L209.129 92.0797Z"
+            fill="white"
+          />
+          <path
+            d="M210.629 92.0611L210.622 91.4871L210.234 91.0646L175.526 53.3092L175.08 52.8243H174.422H97.387C92.8839 52.8243 89.1147 56.3249 89.1147 60.9273V201.113C89.1147 205.522 92.8585 209.216 97.387 209.216H203.712C208.215 209.216 211.984 205.716 211.984 201.113V201.104L211.984 201.095L210.629 92.0611Z"
+            stroke="#21CC33"
+            stroke-width="3"
+          />
+        </g>
+        <mask
+          id="path-5-outside-1_1117_4896"
+          maskUnits="userSpaceOnUse"
+          x="171.421"
+          y="54.3244"
+          width="38"
+          height="41"
+          fill="black"
+        >
+          <rect fill="white" x="171.421" y="54.3244" width="38" height="41" />
+          <path
+            d="M174.421 54.3244V84.461C174.421 88.6936 178.146 92.0798 182.379 92.0798H209.129"
+          />
+        </mask>
+        <path
+          d="M174.421 54.3244V84.461C174.421 88.6936 178.146 92.0798 182.379 92.0798H209.129"
+          fill="#F0FDF1"
+        />
+        <path
+          d="M171.421 54.3244V84.461H177.421V54.3244H171.421ZM171.421 84.461C171.421 90.5168 176.661 95.0798 182.379 95.0798V89.0798C179.632 89.0798 177.421 86.8705 177.421 84.461H171.421ZM182.379 95.0798H209.129V89.0798H182.379V95.0798Z"
+          fill="#21CC33"
+          mask="url(#path-5-outside-1_1117_4896)"
+        />
+        <g filter="url(#filter2_d_1117_4896)">
+          <path
+            d="M159.523 77.1811H108.561C107.376 77.1811 106.36 76.1652 106.36 74.9801C106.36 73.795 107.376 72.7791 108.561 72.7791H159.523C160.708 72.7791 161.724 73.795 161.724 74.9801C161.724 76.1652 160.708 77.1811 159.523 77.1811Z"
+            fill="#21CC33"
+          />
+        </g>
+        <g filter="url(#filter3_d_1117_4896)">
+          <path
+            d="M128.201 94.5831H108.561C107.376 94.5831 106.36 93.5672 106.36 92.3821C106.36 91.1969 107.376 90.1811 108.561 90.1811H128.032C129.217 90.1811 130.233 91.1969 130.233 92.3821C130.233 93.5672 129.217 94.5831 128.201 94.5831Z"
+            fill="#21CC33"
+          />
+        </g>
+        <g filter="url(#filter4_d_1117_4896)">
+          <path
+            d="M193.685 107.583H175.21H170.63H107.939C107.15 107.583 106.36 108.374 106.36 109.482C106.36 110.432 106.992 111.381 107.939 111.381H170.63H175.21H193.527C194.633 111.381 195.264 110.59 195.264 109.482C195.264 108.533 194.633 107.583 193.685 107.583Z"
+            fill="#21CC33"
+          />
+        </g>
+        <path
+          d="M242.769 145.568V195.292C242.769 201.701 237.686 207.004 231.056 207.004H67.3005C60.8917 207.004 55.5879 201.701 55.5879 195.292V141.37"
+          stroke="#1676EE"
+          stroke-width="5.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M228.846 117.723H177.134C172.051 117.723 167.189 119.491 163.432 122.585L149.952 133.634C146.195 136.728 141.333 138.496 136.25 138.496H77.908C71.9412 138.496 67.0793 143.358 67.0793 149.325C67.0793 149.767 67.0793 150.43 67.3003 150.872L78.129 207.888C79.013 213.192 83.4328 217.17 88.9576 217.17H213.819C219.122 217.17 223.763 213.413 224.647 208.109L239.675 130.098C240.78 124.132 236.802 118.828 230.835 117.723C229.951 117.723 229.288 117.723 228.846 117.723Z"
+          fill="white"
+        />
+        <g filter="url(#filter5_d_1117_4896)">
+          <path
+            d="M252.05 102.474H184.869C178.239 102.474 172.051 104.684 166.968 108.883L149.289 123.248C144.427 127.226 138.018 129.656 131.388 129.656H55.3669C47.6321 129.656 41.4443 136.065 41.4443 143.579C41.4443 144.242 41.4443 144.905 41.6653 145.568L55.5879 220.043C56.6928 227.114 62.6596 232.197 69.5104 232.197H232.161C239.233 232.197 244.979 227.335 246.084 220.263L265.752 118.386C267.078 110.651 261.995 103.8 254.26 102.253C253.597 102.474 252.713 102.474 252.05 102.474Z"
+            fill="url(#paint2_linear_1117_4896)"
+          />
+        </g>
+        <path
+          d="M260.233 94.9934C264.46 94.9934 267.886 91.5669 267.886 87.3401C267.886 83.1133 264.46 79.6868 260.233 79.6868C256.006 79.6868 252.58 83.1133 252.58 87.3401C252.58 91.5669 256.006 94.9934 260.233 94.9934Z"
+          fill="#BAF8C0"
+        />
+        <path
+          d="M252.58 70.1668C255.467 70.1668 257.807 67.8268 257.807 64.9402C257.807 62.0536 255.467 59.7135 252.58 59.7135C249.693 59.7135 247.353 62.0536 247.353 64.9402C247.353 67.8268 249.693 70.1668 252.58 70.1668Z"
+          fill="#BAF8C0"
+        />
+        <path
+          d="M40.9 87.3401C43.7866 87.3401 46.1267 85.0001 46.1267 82.1134C46.1267 79.2268 43.7866 76.8868 40.9 76.8868C38.0134 76.8868 35.6733 79.2268 35.6733 82.1134C35.6733 85.0001 38.0134 87.3401 40.9 87.3401Z"
+          fill="#BAF8C0"
+        />
+        <path
+          d="M29.14 202.327C34.5009 202.327 38.8467 197.981 38.8467 192.62C38.8467 187.259 34.5009 182.914 29.14 182.914C23.7792 182.914 19.4333 187.259 19.4333 192.62C19.4333 197.981 23.7792 202.327 29.14 202.327Z"
+          fill="#BAF8C0"
+        />
+        <circle cx="186" cy="174" r="39" fill="#F0FDF1" />
+        <g filter="url(#filter6_d_1117_4896)">
+          <path
+            d="M249.811 246.772L217.343 214.369C183.072 239.572 136.084 214.999 136.084 173.864C136.084 145.871 158.902 123.189 186.86 123.189C227.264 123.189 252.065 168.554 228.527 202.848L261.174 235.431C264.331 238.582 264.331 243.622 261.174 246.772C258.018 249.923 252.967 249.923 249.811 246.772ZM186.86 139.3C167.74 139.3 152.138 154.872 152.138 173.954C152.138 204.648 188.934 219.409 210.038 199.697C233.938 177.375 217.975 139.3 186.86 139.3Z"
+            fill="#026351"
+          />
+        </g>
+        <defs>
+          <filter
+            id="filter0_f_1117_4896"
+            x="26.4553"
+            y="15"
+            width="250.087"
+            height="250.529"
+            filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB"
+          >
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feBlend
+              mode="normal"
+              in="SourceGraphic"
+              in2="BackgroundImageFix"
+              result="shape"
+            />
+            <feGaussianBlur
+              stdDeviation="6.5"
+              result="effect1_foregroundBlur_1117_4896"
+            />
+          </filter>
+          <filter
+            id="filter1_d_1117_4896"
+            x="46.5481"
+            y="30.791"
+            width="208.002"
+            height="241.525"
+            filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB"
+          >
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feColorMatrix
+              in="SourceAlpha"
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha"
+            />
+            <feOffset dy="20.5333" />
+            <feGaussianBlur stdDeviation="20.5333" />
+            <feColorMatrix
+              type="matrix"
+              values="0 0 0 0 0.397708 0 0 0 0 0.47749 0 0 0 0 0.575 0 0 0 0.27 0"
+            />
+            <feBlend
+              mode="normal"
+              in2="BackgroundImageFix"
+              result="effect1_dropShadow_1117_4896"
+            />
+            <feBlend
+              mode="normal"
+              in="SourceGraphic"
+              in2="effect1_dropShadow_1117_4896"
+              result="shape"
+            />
+          </filter>
+          <filter
+            id="filter2_d_1117_4896"
+            x="65.2937"
+            y="52.2458"
+            width="137.497"
+            height="86.5353"
+            filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB"
+          >
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feColorMatrix
+              in="SourceAlpha"
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha"
+            />
+            <feOffset dy="20.5333" />
+            <feGaussianBlur stdDeviation="20.5333" />
+            <feColorMatrix
+              type="matrix"
+              values="0 0 0 0 0.397708 0 0 0 0 0.47749 0 0 0 0 0.575 0 0 0 0.27 0"
+            />
+            <feBlend
+              mode="normal"
+              in2="BackgroundImageFix"
+              result="effect1_dropShadow_1117_4896"
+            />
+            <feBlend
+              mode="normal"
+              in="SourceGraphic"
+              in2="effect1_dropShadow_1117_4896"
+              result="shape"
+            />
+          </filter>
+          <filter
+            id="filter3_d_1117_4896"
+            x="65.2937"
+            y="69.6478"
+            width="106.006"
+            height="86.5353"
+            filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB"
+          >
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feColorMatrix
+              in="SourceAlpha"
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha"
+            />
+            <feOffset dy="20.5333" />
+            <feGaussianBlur stdDeviation="20.5333" />
+            <feColorMatrix
+              type="matrix"
+              values="0 0 0 0 0.397708 0 0 0 0 0.47749 0 0 0 0 0.575 0 0 0 0.27 0"
+            />
+            <feBlend
+              mode="normal"
+              in2="BackgroundImageFix"
+              result="effect1_dropShadow_1117_4896"
+            />
+            <feBlend
+              mode="normal"
+              in="SourceGraphic"
+              in2="effect1_dropShadow_1117_4896"
+              result="shape"
+            />
+          </filter>
+          <filter
+            id="filter4_d_1117_4896"
+            x="65.2937"
+            y="87.0497"
+            width="171.037"
+            height="85.9312"
+            filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB"
+          >
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feColorMatrix
+              in="SourceAlpha"
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha"
+            />
+            <feOffset dy="20.5333" />
+            <feGaussianBlur stdDeviation="20.5333" />
+            <feColorMatrix
+              type="matrix"
+              values="0 0 0 0 0.397708 0 0 0 0 0.47749 0 0 0 0 0.575 0 0 0 0.27 0"
+            />
+            <feBlend
+              mode="normal"
+              in2="BackgroundImageFix"
+              result="effect1_dropShadow_1117_4896"
+            />
+            <feBlend
+              mode="normal"
+              in="SourceGraphic"
+              in2="effect1_dropShadow_1117_4896"
+              result="shape"
+            />
+          </filter>
+          <filter
+            id="filter5_d_1117_4896"
+            x="0.37767"
+            y="81.72"
+            width="306.651"
+            height="212.077"
+            filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB"
+          >
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feColorMatrix
+              in="SourceAlpha"
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha"
+            />
+            <feOffset dy="20.5333" />
+            <feGaussianBlur stdDeviation="20.5333" />
+            <feColorMatrix
+              type="matrix"
+              values="0 0 0 0 0.397708 0 0 0 0 0.47749 0 0 0 0 0.575 0 0 0 0.27 0"
+            />
+            <feBlend
+              mode="normal"
+              in2="BackgroundImageFix"
+              result="effect1_dropShadow_1117_4896"
+            />
+            <feBlend
+              mode="normal"
+              in="SourceGraphic"
+              in2="effect1_dropShadow_1117_4896"
+              result="shape"
+            />
+          </filter>
+          <filter
+            id="filter6_d_1117_4896"
+            x="95.0178"
+            y="102.655"
+            width="209.591"
+            height="208.08"
+            filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB"
+          >
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feColorMatrix
+              in="SourceAlpha"
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha"
+            />
+            <feOffset dy="20.5333" />
+            <feGaussianBlur stdDeviation="20.5333" />
+            <feColorMatrix
+              type="matrix"
+              values="0 0 0 0 0.397708 0 0 0 0 0.47749 0 0 0 0 0.575 0 0 0 0.27 0"
+            />
+            <feBlend
+              mode="normal"
+              in2="BackgroundImageFix"
+              result="effect1_dropShadow_1117_4896"
+            />
+            <feBlend
+              mode="normal"
+              in="SourceGraphic"
+              in2="effect1_dropShadow_1117_4896"
+              result="shape"
+            />
+          </filter>
+          <linearGradient
+            id="paint0_linear_1117_4896"
+            x1="151.499"
+            y1="28"
+            x2="151.499"
+            y2="252.529"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stop-color="white" />
+            <stop offset="0.118096" stop-color="#9DE9A5" />
+            <stop offset="1" stop-color="#21CC33" />
+          </linearGradient>
+          <linearGradient
+            id="paint1_linear_1117_4896"
+            x1="148.736"
+            y1="80.817"
+            x2="148.736"
+            y2="204.352"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stop-color="#62E570" />
+            <stop offset="1" />
+          </linearGradient>
+          <linearGradient
+            id="paint2_linear_1117_4896"
+            x1="153.703"
+            y1="102.253"
+            x2="153.703"
+            y2="232.197"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stop-color="#85F090" />
+            <stop offset="1" stop-color="white" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <p class="noti_result-search">  {{ 'SearchResultsWillBeDisplayedHere' | ecTranslate }}</p>
+    </div>
+    <div class="content-contract" *ngIf="contracts?.length && !isNull ">
+      <div class="info-contract position-relative">
+        <button
+          class="button-download"
+          [matTooltip]="'Download' | ecTranslate"
+          mat-raised-button
+          (click)="downloadPdf(contracts[0]?.contractName)"
+        >
+          <i class="fas fa-download"></i>
+        </button>
+        <h4 class="title-info-contract"> {{ 'ContractInformation' | ecTranslate }}</h4>
+        <div class="row">
+          <div class="col-lg-6 pr-5">
+            <p
+              class="info-item mb-3"
+              matTooltip="{{ contracts[0]?.contractGuid }}"
+            >
+              <span class="title-field">ID: </span>
+              {{ contracts[0]?.contractGuid }}
+            </p>
+            <p
+              class="info-item mb-3"
+              matTooltip="{{ contracts[0]?.contractName }}"
+            >
+              <span class="title-field">{{ 'ContractName' | ecTranslate }}: </span
+              >{{ contracts[0]?.contractName }}
+            </p>
+            <p class="info-item mb-3">
+              <span class="title-field">{{ 'Status' | ecTranslate }}: </span
+              ><span class="{{ handleColorStatus(contracts[0]?.status) }}"
+                ><b>
+                  {{ displayStatusContract(contracts[0]?.status) | ecTranslate }}
+                </b></span
+              >
+            </p>
+          </div>
+          <div class="col-lg-6">
+            <p
+              class="info-item mb-3"
+              matTooltip="{{ contracts[0]?.createdUser }} ({{
+                contracts[0]?.createdEmail
+              }})"
+            >
+              <span class="title-field">{{ 'ContractCreator' | ecTranslate }}: </span
+              >{{ contracts[0]?.createdUser }} ({{
+                contracts[0]?.createdEmail
+              }})
+            </p>
+            <p class="info-item mb-3">
+              <span class="title-field">{{ 'ContractCreationTime' | ecTranslate }}: </span>
+              {{ contracts[0]?.creationTime | formatDateHour24h }}
+            </p>
+            <p class="info-item mb-3">
+              <span *ngIf="contracts[0]?.expriedTime" class="title-field"
+                >{{ 'SigningDeadline' | ecTranslate }}: 
+              </span>
+              {{ contracts[0]?.expriedTime | formatDateHour24h }}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="info-signer">
+        <h4 class="title-info-signer">{{ 'SignerInformation' | ecTranslate }}</h4>
+        <div *ngFor="let signerItem of listSigner; let i = index">
+          <div
+            class="signer-item {{ i !== listSigner?.length - 1 ? 'mb-4' : '' }}"
+          >
+            <div
+              *ngIf="isProcessOrder"
+              class="process-order position-relative pb-3"
+            >
+              <span class="{{ isMobile ? 'px-3' : 'px-4' }}">{{
+                signerItem?.processOrder
+              }}</span>
+            </div>
+            <div class="row w-100 px-5'">
+              <div class="col-lg-5">
+                <p
+                  class="info-signer-item mb-3"
+                  matTooltip="{{ signerItem?.name }}"
+                >
+                  <span class="title-field">{{ 'FullName' | ecTranslate }}: </span>
+                  {{ signerItem?.name }}
+                </p>
+                <p
+                  class="info-signer-item mb-3"
+                  matTooltip="{{ signerItem?.email }}"
+                >
+                  <span class="title-field">Email: </span
+                  >{{ signerItem?.email }}
+                </p>
+              </div>
+              <div class="col-lg-4">
+                <p class="info-signer-item mb-3">
+                  <span class="title-field" *ngIf="signerItem?.sendingTime"
+                    >{{ 'SendingTime' | ecTranslate }}: </span
+                  >{{ signerItem?.sendingTime | formatDateHour24h }}
+                </p>
+                <p class="info-signer-item mb-3">
+                  <span *ngIf="signerItem?.signingTime" class="title-field"
+                    >{{ 'SigningTime' | ecTranslate }}: </span
+                  >
+                  {{ signerItem?.signingTime | formatDateHour24h }}
+                  <span *ngIf="signerItem?.cancelTime" class="title-field"
+                    >{{ 'CancellationTime' | ecTranslate }}:</span
+                  >
+                  {{ signerItem?.cancelTime | formatDateHour24h }}
+                </p>
+              </div>
+              <div class="col-lg-3">
+                <p class="info-signer-item mb-3">
+                  <span class="title-field">{{ 'Status' | ecTranslate }}: </span>
+                  <span *ngIf="signerItem?.isComplete" class="text-success"
+                    ><b>{{ 'Completed' | ecTranslate }}</b></span
+                  >
+                  <span *ngIf="signerItem?.isCanceled" class="text-danger"
+                    ><b>{{ 'VoidToSign' | ecTranslate }}</b></span
+                  >
+                  <span
+                    *ngIf="!signerItem?.isCanceled && !signerItem?.isComplete"
+                    class="text-primary"
+                    ><b>{{ 'WaitingToSign' | ecTranslate }}</b></span
+                  >
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="listCopyRecipient?.length" class="info-copy-recipient">
+        <h4 class="title-info-copy-recipient">{{ 'InformationOfRecipientsOfCopies' | ecTranslate }}</h4>
+        <div *ngFor="let recipientItem of listCopyRecipient">
+          <div class="signer-item">
+            <div class="row w-100">
+              <div class="col-lg-4">
+                <p
+                  class="info-signer-item mb-3"
+                  matTooltip="{{ recipientItem?.name }}"
+                >
+                  <span class="title-field">{{ 'FullName' | ecTranslate }}: </span>
+                  {{ recipientItem?.name }}
+                </p>
+              </div>
+              <div class="col-lg-4">
+                <p
+                  class="info-signer-item mb-3"
+                  matTooltip="{{ recipientItem?.email }}"
+                >
+                  <span class="title-field">Email: </span
+                  >{{ recipientItem?.email }}
+                </p>
+              </div>
+              <div class="col-lg-4">
+                <p class="info-signer-item">
+                  <span class="title-field">{{ 'SendingTime' | ecTranslate }}: </span
+                  >{{ recipientItem?.sendingTime | formatDateHour24h }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="content-empty" *ngIf="(!contracts?.length && isSearched) || isNull">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        [ngStyle]="{
+          'width.px': isMobile ? 240 : 308,
+          'height.px': isMobile ? 254 : 322
+        }"
+        viewBox="0 0 308 322"
+        fill="none"
+      >
+        <g opacity="0.3" filter="url(#filter0_f_1117_4926)">
+          <path
+            d="M151.784 293.228C213.775 293.228 264.033 242.971 264.033 180.758C264.033 118.545 213.775 68.2874 151.784 68.2874C89.7923 68.2874 39.5349 118.545 39.5349 180.758C39.5349 242.971 89.7923 293.228 151.784 293.228Z"
+            fill="url(#paint0_linear_1117_4926)"
+          />
+        </g>
+        <path
+          d="M69.2023 107.917H228.83C235.251 107.917 240.122 112.788 240.122 119.209V220.388C240.122 226.808 235.251 231.679 228.83 231.679H69.2023C62.7817 231.679 57.9109 226.808 57.9109 220.388V119.209C57.9109 112.788 63.2245 107.917 69.2023 107.917Z"
+          fill="url(#paint1_linear_1117_4926)"
+        />
+        <path
+          d="M243.221 172.787V222.602C243.221 229.022 238.129 234.336 231.487 234.336H67.4311C61.0105 234.336 55.697 229.022 55.697 222.602V168.581"
+          stroke="#1676EE"
+          stroke-width="6.64195"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M229.273 144.891H177.466C172.374 144.891 167.503 146.662 163.739 149.762L150.234 160.832C146.47 163.931 141.599 165.703 136.507 165.703H78.0582C72.0804 165.703 67.2097 170.573 67.2097 176.551C67.2097 176.994 67.2097 177.658 67.4311 178.101L78.2796 235.222C79.1652 240.535 83.5931 244.52 89.1281 244.52H214.218C219.532 244.52 224.181 240.757 225.067 235.443L240.122 157.289C241.229 151.312 237.244 145.998 231.266 144.891C230.38 144.891 229.716 144.891 229.273 144.891Z"
+          fill="white"
+        />
+        <g filter="url(#filter1_d_1117_4926)">
+          <path
+            d="M252.994 130.221H185.689C179.047 130.221 172.847 132.435 167.755 136.642L150.043 151.033C145.173 155.018 138.752 157.453 132.11 157.453H55.9492C48.2002 157.453 42.0011 163.874 42.0011 171.401C42.0011 172.066 42.0011 172.73 42.2225 173.394L56.1706 248.005C57.2776 255.09 63.2553 260.182 70.1187 260.182H233.068C240.153 260.182 245.909 255.311 247.016 248.227L266.72 146.162C268.049 138.413 262.957 131.55 255.208 130C254.543 130.221 253.658 130.221 252.994 130.221Z"
+            fill="url(#paint2_linear_1117_4926)"
+          />
+        </g>
+        <path
+          d="M179.74 128C174.679 118.206 173.555 106.452 176.928 95.8182C180.161 85.1842 187.892 76.0893 197.45 70.9122C200.402 69.3731 203.776 68.1138 207.149 67.9739C210.522 67.834 214.177 68.9534 216.426 71.7518C218.675 74.2704 219.097 78.468 217.269 81.2664C215.302 83.9249 211.366 85.0443 208.133 84.2047C202.932 83.2253 198.715 79.1676 197.45 74.2704C196.185 69.3731 197.872 63.6364 201.808 60.4182C204.338 58.1794 207.852 56.9202 211.085 55.9407C226.828 51.3233 243.976 50.7636 260 54.2617"
+          stroke="#007E65"
+          stroke-width="1.5"
+          stroke-miterlimit="10"
+          stroke-dasharray="8.86 8.86"
+        />
+        <g filter="url(#filter2_d_1117_4926)">
+          <path
+            d="M117.743 207.159C122.934 207.159 127.259 202.833 127.259 197.642C127.259 192.451 122.934 188.125 117.743 188.125C112.552 188.125 108.226 192.451 108.226 197.642C108.226 202.833 112.552 207.159 117.743 207.159Z"
+            fill="#026351"
+          />
+        </g>
+        <g filter="url(#filter3_d_1117_4926)">
+          <path
+            d="M191.484 207.159C196.675 207.159 201.001 202.833 201.001 197.642C201.001 192.451 196.675 188.125 191.484 188.125C186.293 188.125 181.968 192.451 181.968 197.642C181.968 203.121 186.293 207.159 191.484 207.159Z"
+            fill="#026351"
+          />
+        </g>
+        <g filter="url(#filter4_d_1117_4926)">
+          <path
+            d="M178.06 215.159H131.167V219.067H178.06V215.159Z"
+            fill="#026351"
+          />
+        </g>
+        <path
+          d="M271.322 47.4068C271.101 50.7278 270.879 53.8274 268.444 54.4916C266.008 55.1558 264.901 52.9418 263.352 49.8422C261.802 46.964 262.688 43.8645 265.344 43.2003C267.78 42.5361 271.765 43.4217 271.322 47.4068Z"
+          fill="url(#paint3_linear_1117_4926)"
+        />
+        <path
+          d="M268.665 63.3475C269.33 59.3623 269.994 57.1483 267.78 56.0413C265.344 54.9343 263.795 56.9269 261.138 59.5837C258.924 62.0191 260.252 65.5615 262.466 66.6685C265.123 67.9968 268.001 66.6685 268.665 63.3475Z"
+          fill="url(#paint4_linear_1117_4926)"
+        />
+        <path
+          d="M271.765 56.0414C271.544 57.5912 270.437 58.6982 268.887 58.9196C268.223 58.9196 267.558 58.9196 266.673 58.9196C263.573 58.4768 261.138 56.4842 261.359 54.4916C261.581 52.499 264.459 51.392 268.001 51.8348C268.665 51.8348 269.33 52.0562 269.772 52.2776C271.101 52.7204 271.986 54.2702 271.765 56.0414C271.765 56.0414 271.765 55.82 271.765 56.0414Z"
+          fill="#026351"
+        />
+        <path
+          d="M34.8856 102.825C34.8856 99.0616 34.8856 95.2979 37.5423 94.1909C40.4205 93.0839 41.9703 95.7407 44.1843 99.5044C46.1769 102.825 45.2913 106.368 42.4131 107.475C39.9777 108.582 34.8856 107.918 34.8856 102.825Z"
+          fill="url(#paint5_linear_1117_4926)"
+        />
+        <path
+          d="M36.4353 84.2278C35.9925 88.8772 35.3283 91.534 38.2065 92.641C41.0847 93.748 42.6345 91.3126 45.5126 87.7702C47.7266 84.6706 46.1768 80.6855 43.2987 79.5785C40.4205 78.4715 36.8781 80.4641 36.4353 84.2278Z"
+          fill="url(#paint6_linear_1117_4926)"
+        />
+        <path
+          d="M33.9999 93.0839C33.9999 91.3128 35.3283 89.9844 36.8781 89.763C37.5423 89.5416 38.4279 89.5416 39.3135 89.763C42.8559 89.9844 45.9554 91.977 45.734 94.1909C45.5127 96.4049 42.6345 97.9547 38.8707 97.5119C38.2065 97.5119 37.5423 97.2905 36.8781 97.0691C35.1069 96.8477 33.9999 95.0765 33.9999 93.0839Z"
+          fill="#026351"
+        />
+        <path
+          d="M49.055 93.748C72.3018 93.748 115.253 107.253 115.917 156.847"
+          stroke="#007E65"
+          stroke-width="1.5"
+          stroke-miterlimit="10"
+          stroke-dasharray="8.86 8.86"
+        />
+        <defs>
+          <filter
+            id="filter0_f_1117_4926"
+            x="26.5349"
+            y="55.2874"
+            width="250.498"
+            height="250.941"
+            filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB"
+          >
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feBlend
+              mode="normal"
+              in="SourceGraphic"
+              in2="BackgroundImageFix"
+              result="shape"
+            />
+            <feGaussianBlur
+              stdDeviation="6.5"
+              result="effect1_foregroundBlur_1117_4926"
+            />
+          </filter>
+          <filter
+            id="filter1_d_1117_4926"
+            x="0.934433"
+            y="109.467"
+            width="307.063"
+            height="212.315"
+            filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB"
+          >
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feColorMatrix
+              in="SourceAlpha"
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha"
+            />
+            <feOffset dy="20.5333" />
+            <feGaussianBlur stdDeviation="20.5333" />
+            <feColorMatrix
+              type="matrix"
+              values="0 0 0 0 0.397708 0 0 0 0 0.47749 0 0 0 0 0.575 0 0 0 0.27 0"
+            />
+            <feBlend
+              mode="normal"
+              in2="BackgroundImageFix"
+              result="effect1_dropShadow_1117_4926"
+            />
+            <feBlend
+              mode="normal"
+              in="SourceGraphic"
+              in2="effect1_dropShadow_1117_4926"
+              result="shape"
+            />
+          </filter>
+          <filter
+            id="filter2_d_1117_4926"
+            x="67.159"
+            y="167.592"
+            width="101.167"
+            height="101.167"
+            filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB"
+          >
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feColorMatrix
+              in="SourceAlpha"
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha"
+            />
+            <feOffset dy="20.5333" />
+            <feGaussianBlur stdDeviation="20.5333" />
+            <feColorMatrix
+              type="matrix"
+              values="0 0 0 0 0.397708 0 0 0 0 0.47749 0 0 0 0 0.575 0 0 0 0.27 0"
+            />
+            <feBlend
+              mode="normal"
+              in2="BackgroundImageFix"
+              result="effect1_dropShadow_1117_4926"
+            />
+            <feBlend
+              mode="normal"
+              in="SourceGraphic"
+              in2="effect1_dropShadow_1117_4926"
+              result="shape"
+            />
+          </filter>
+          <filter
+            id="filter3_d_1117_4926"
+            x="140.901"
+            y="167.592"
+            width="101.167"
+            height="101.167"
+            filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB"
+          >
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feColorMatrix
+              in="SourceAlpha"
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha"
+            />
+            <feOffset dy="20.5333" />
+            <feGaussianBlur stdDeviation="20.5333" />
+            <feColorMatrix
+              type="matrix"
+              values="0 0 0 0 0.397708 0 0 0 0 0.47749 0 0 0 0 0.575 0 0 0 0.27 0"
+            />
+            <feBlend
+              mode="normal"
+              in2="BackgroundImageFix"
+              result="effect1_dropShadow_1117_4926"
+            />
+            <feBlend
+              mode="normal"
+              in="SourceGraphic"
+              in2="effect1_dropShadow_1117_4926"
+              result="shape"
+            />
+          </filter>
+          <filter
+            id="filter4_d_1117_4926"
+            x="90.1004"
+            y="194.626"
+            width="129.026"
+            height="86.041"
+            filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB"
+          >
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feColorMatrix
+              in="SourceAlpha"
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha"
+            />
+            <feOffset dy="20.5333" />
+            <feGaussianBlur stdDeviation="20.5333" />
+            <feColorMatrix
+              type="matrix"
+              values="0 0 0 0 0.397708 0 0 0 0 0.47749 0 0 0 0 0.575 0 0 0 0.27 0"
+            />
+            <feBlend
+              mode="normal"
+              in2="BackgroundImageFix"
+              result="effect1_dropShadow_1117_4926"
+            />
+            <feBlend
+              mode="normal"
+              in="SourceGraphic"
+              in2="effect1_dropShadow_1117_4926"
+              result="shape"
+            />
+          </filter>
+          <linearGradient
+            id="paint0_linear_1117_4926"
+            x1="151.784"
+            y1="68.2874"
+            x2="152.001"
+            y2="327"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stop-color="#21CC33" />
+            <stop offset="0.912677" stop-color="#9DE9A5" />
+            <stop offset="1" stop-color="white" />
+          </linearGradient>
+          <linearGradient
+            id="paint1_linear_1117_4926"
+            x1="149.016"
+            y1="107.917"
+            x2="149.016"
+            y2="231.679"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stop-color="#62E570" />
+            <stop offset="1" />
+          </linearGradient>
+          <linearGradient
+            id="paint2_linear_1117_4926"
+            x1="154.466"
+            y1="130"
+            x2="154.466"
+            y2="282.5"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0.0172983" stop-color="#85F090" />
+            <stop offset="1" stop-color="white" />
+          </linearGradient>
+          <linearGradient
+            id="paint3_linear_1117_4926"
+            x1="266.973"
+            y1="43"
+            x2="266.973"
+            y2="54.6098"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stop-color="white" />
+            <stop offset="1" stop-color="#21CC33" />
+          </linearGradient>
+          <linearGradient
+            id="paint4_linear_1117_4926"
+            x1="264.652"
+            y1="55.7292"
+            x2="264.652"
+            y2="67.1775"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stop-color="white" />
+            <stop offset="1" stop-color="#21CC33" />
+          </linearGradient>
+          <linearGradient
+            id="paint5_linear_1117_4926"
+            x1="40.0722"
+            y1="93.9375"
+            x2="40.0722"
+            y2="107.932"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stop-color="white" />
+            <stop offset="1" stop-color="#21CC33" />
+          </linearGradient>
+          <linearGradient
+            id="paint6_linear_1117_4926"
+            x1="41.3004"
+            y1="79.2739"
+            x2="41.3004"
+            y2="92.9106"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stop-color="white" />
+            <stop offset="1" stop-color="#21CC33" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <p class="noti_result-search">
+        {{ 'NoContractFoundTryCheckingTheIDAgain' |ecTranslate }}
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,80 @@
+<div class="dialog" #dialog>
+  <div>
+    <div class="card-header row mt-2">
+      <div class="col-10">
+        <h3 *ngIf="lableDialog; else elseBlock">
+          {{ "EditStamp" | ecTranslate }}
+        </h3>
+        <ng-template #elseBlock>
+          <h3>{{ "AddStamp" | ecTranslate }}</h3>
+        </ng-template>
+      </div>
+      <div class="col-2 text-right">
+        <i class="fa-solid fa-x fa-lg pointer" mat-dialog-close></i>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="signature_tab" mat-dialog-content>
+        <div class="signature_tab--upload">
+          <div class="upload_signature">
+            <input
+              #inputFile
+              (change)="handleValueFile($event)"
+              id="upload"
+              type="file"
+            />
+            <div
+              style="width: 500px"
+              *ngIf="cropImg || isNeedUpload; else uploadContent"
+            >
+              <image-cropper
+                [autoCrop]="true"
+                [maintainAspectRatio]="true"
+                [containWithinAspectRatio]="true"
+                [resizeToWidth]="500"
+                [imageChangedEvent]="cropImg"
+                [aspectRatio]="sizeBoxSignature.width / sizeBoxSignature.height"
+                format="png"
+                [imageBase64]="signaturePayload"
+                (imageCropped)="imageCropped($event)"
+                
+              ></image-cropper>
+
+              <div class="upload_signature--success">
+                <label class="upload_label" for="upload">
+                  {{ "Replace" | ecTranslate }}
+                </label>
+                <div (click)="handleRemove()" class="upload_label">
+                  {{ "Delete" | ecTranslate }}
+                </div>
+              </div>
+            </div>
+            <ng-template #uploadContent>
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <label class="upload_label" for="upload">
+                {{ "UploadSignature" | ecTranslate }}
+              </label>
+            </ng-template>
+            <p class="upload_signature--note">{{ "FormatSupport" | ecTranslate }}: jpg, jpeg, png. {{ "MaximumFileSize" | ecTranslate }} {{maximumSizeofSignatureImage}}KB</p>
+          </div>
+        </div>
+        <div>
+          <input [(ngModel)]="isDefault" type="checkbox" class="mt-2 mr-2" />
+          <span style="transform: translateY(-50%)"
+            ><b>{{ "SetAsDefaultSignature" | ecTranslate }}</b></span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog_btn" mat-dialog-actions>
+    <button  mat-dialog-close mat-raised-button>
+      {{ "Cancel" | ecTranslate }}
+    </button>
+    <button (click)="handleSave()" mat-raised-button class="button">
+      {{ "Save" | ecTranslate }}
+    </button>
+  </div>
+</div>
+

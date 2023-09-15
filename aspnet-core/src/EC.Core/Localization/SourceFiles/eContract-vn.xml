@@ -1,0 +1,389 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<localizationDictionary culture="vn">
+	<texts>
+		<text name="Home" value="Trang chủ" />
+		<text name="MyContract" value="Dành cho tôi" />
+		<text name="WaitForOther" value="Chờ người khác" />
+		<text name="Completed" value="Đã hoàn thành" />
+		<text name="DefaultSignature" value="Chữ ký mặc định" />
+		<text name="DropOrUploadDocument" value="Thả tài liệu vào đây hoặc tải lên để bắt đầu" />
+		<text name="SupportedFormats" value="Định dạng được hỗ trợ" />
+		<text name="CreateNewContract" value="Bắt đầu tạo hợp đồng" />
+		<text name="UploadContract" value="Tải hợp đồng" />
+		<text name="ChooseAFile" value="Chọn tập tin" />
+		<text name="ContractTitle" value="Tên hợp đồng" />
+		<text name="ContractCode" value="Mã hợp đồng" />
+		<text name="Preview" value="Xem trước" />
+		<text name="Continue" value="Tiếp tục" />
+		<text name="DeclareSigner" value="Khai báo người ký" />
+		<text name="UploadAContractSuccessfully" value="Tải hợp đồng thành công" />
+		<text name="Signer" value="Người ký" />
+		<text name="SetSigningOrder" value="Thiết lập người ký theo thứ tự" />
+		<text name="FullName" value="Họ và tên" />
+		<text name="Email" value="Email" />
+		<text name="ThisFieldIsRequired" value="Dữ liệu chưa được nhập" />
+		<text name="AddNewSigner" value="Thêm người ký" />
+		<text name="CopyRecipients" value="Người nhận bản sao" />
+		<text name="AddNewCopyRecipient" value="Thêm người nhận bản sao" />
+		<text name="Back" value="Quay lại" />
+		<text name="SetUpSignaturePosition" value="Thiết lập vị trí" />
+		<text name="SignatureTypes" value="Loại chữ ký" />
+		<text name="ESignature" value="Chữ ký điện tử" />
+		<text name="USBToken" value="USB Token" />
+		<text name="Text" value="Văn bản" />
+		<text name="Date" value="Ngày tháng" />
+		<text name="Pages" value="Số trang" />
+		<text name="MissingSignaturePositionsForExistedSigners" value="Tồn tại người ký chưa được thiết lập vị trí chữ ký" />
+		<text name="SetUpSendingEmail" value="Thiết lập gửi mail" />
+		<text name="MailContent" value="Nội dung mail" />
+		<text name="Edit" value="Sửa" />
+		<text name="From" value="Người gửi" />
+		<text name="ViewContract" value="Xem hợp đồng" />
+		<text name="Contract" value="Hợp đồng" />
+		<text name="ToOrSendTo" value="Gửi đến" />
+		<text name="Signers" value="Người ký" />
+		<text name="SendEmailSuccessfully" value="Gửi mail thành công" />
+		<text name="ContractSasBeenSent" value="Hợp đồng đã được gửi đi" />
+		<text name="SignNow" value="Ký ngay" />
+		<text name="ContractManagement" value="Quản lý hợp đồng" />
+		<text name="StartSigning" value="Bắt đầu ký" />
+		<text name="ESign" value="Ký điện tử" />
+		<text name="SigningInProgress" value="Đang thực hiện ký" />
+		<text name="TheDocumentOrContractHasBeenSignedSuccessfully" value="Tài liệu đã được ký thành công" />
+		<text name="Admin" value="Quản trị" />
+		<text name="EditRole" value="Chỉnh sửa vai trò" />
+		<text name="View" value="Xem" />
+		<text name="Create" value="Tạo mới" />
+		<text name="Update" value="Sửa thông tin" />
+		<text name="ChangeRole" value="Sửa role" />
+		<text name="Delete" value="Xóa" />
+		<text name="Update" value="Sửa" />
+		<text name="Company" value="Công ty" />
+		<text name="ConfigEmail" value="Cài đặt gửi mail" />
+		<text name="TestSendEmail" value="Kiểm thử gửi mail" />
+		<text name="ViewStatistics" value="Xem thống kế" />
+		<text name="ViewDefaultSignature" value="Xem chữ ký mặc định" />
+		<text name="CreateNewContract" value="Thêm mới hợp động" />
+		<text name="StepsToSetUpContract" value="Các bước thiết lập hợp đồng" />
+		<text name="StepToUpload" value="Bước tải hợp đồng" />
+		<text name="ViewOrPreview" value="Xem/Xem trước" />
+		<text name="StepToSetUpSigner" value="Bước thiết lập người ký" />
+		<text name="AddNewCopyRecipients" value="Thêm người nhận bản sao" />
+		<text name="StepToSetUpPosition" value="Bước thiết lập vị trí kí" />
+		<text name="StepToSendEmail" value="Bước gửi mail" />
+		<text name="SetUpDefaultSignature" value="Thiết lập chữ ký mặc định" />
+		<text name="CreateNewContract" value="Thêm mới hợp đồng" />
+		<text name="CancelContract" value="Hủy hợp đồng" />
+		<text name="ViewHistory" value="Xem lịch sử hợp đồng" />
+		<text name="Sign" value="Ký" />
+		<text name="Download" value="Tải tài liệu" />
+		<text name="ContractDetails" value="Chi tiết hợp đồng" />
+		<text name="SendEmail" value="Gửi email" />
+		<text name="ViewHistory" value="Xem lịch sử" />
+		<text name="Print" value="In tài liệu" />
+		<text name="Cancel" value="Hủy tài liệu" />
+		<text name="AddNew" value="Tạo mới" />
+		<text name="No" value="STT" />
+		<text name="WorkerName" value="Tên worker" />
+		<text name="Status" value="Trạng thái" />
+		<text name="Actions" value="Hành động" />
+		<text name="ViewOrDetail" value="Chi tiết" />
+		<text name="AddProperties" value="Thêm thuộc tính" />
+		<text name="DeleteProperty" value="Xóa thuộc tính" />
+		<text name="UpdatePropertiesSuccessfully" value="Chỉnh sửa thuộc tính worker thành công" />
+		<text name="AreYouSureYouWantToDeleteProperty" value="Bạn có chắc muốn xóa thuộc tính…?" />
+		<text name="DeletePropertySuccessfully" value="Xóa thuộc tính thành công" />
+		<text name="EditOrUpdate" value="Chỉnh sửa" />
+		<text name="AreYouSureYouWantToChangeTheStatusOfPdfWorker" value="Bạn có chắc chắn muốn thay đổi trạng thái của Pdf Worker?" />
+		<text name="Signature" value="Chữ ký" />
+		<text name="SignatureManagement" value="Quản lý chữ ký" />
+		<text name="CreationTime" value="Thời gian tạo" />
+		<text name="UpdateTime" value="Thời gian cập nhật" />
+		<text name="DefaultSignature" value="Chữ ký mặc định" />
+		<text name="YouHaveNotHadAnySignatureYet" value="Bạn chưa có bất kỳ chữ ký nào" />
+		<text name="AddNewSignature" value="Thêm chữ ký" />
+		<text name="UploadSignature" value="Tải chữ ký" />
+		<text name="DrawSignature" value="Vẽ chữ ký" />
+		<text name="SignatureType" value="Kiểu chữ ký" />
+		<text name="ESignature" value="Ký điện tử" />
+		<text name="SetAsDefaultSignature" value="Đặt làm chữ ký mặc định" />
+		<text name="PleaseProvideYourSignature" value="Bạn vui lòng cung cấp chữ ký!" />
+		<text name="EditSignature" value="Sửa chữ ký" />
+		<text name="AreYouSureYouWantToDeleteThisSignature" value="Bạn có chắc muốn xóa chữ ký này?" />
+		<text name="Contract" value="Hợp đồng" />
+		<text name="CreateNewContract" value="Tạo hợp đồng" />
+		<text name="All" value="Tất cả" />
+		<text name="Draft" value="Bản nháp" />
+		<text name="WaitToSign" value="Chờ ký" />
+		<text name="Cancelled" value="Đã hủy bỏ" />
+		<text name="Complete" value="Hoàn thành" />
+		<text name="QuickFilters" value="Bộ lọc nhanh" />
+		<text name="ContractsNeedMySignature" value="Hợp đồng cần tôi ký" />
+		<text name="WaitForOthers" value="Chờ người khác" />
+		<text name="ContractsNeedOtherSignatures" value="Hợp đồng tôi đã ký và chờ người khác ký để hoàn thành" />
+		<text name="CompletedContracts" value="Hợp đồng đã hoàn thành" />
+		<text name="SearchByContractCodeOrContractTitle" value="Tìm kiếm theo mã, tên hợp đồng" />
+		<text name="ContractTitle" value="Tên hợp đồng" />
+		<text name="ContractCode" value="Mã hợp đồng" />
+		<text name="FileName" value="Tên file" />
+		<text name="Status" value="Trạng thái" />
+		<text name="CreationTime" value="Thời gian tạo" />
+		<text name="UpdateTime" value="Thời gian cập nhật" />
+		<text name="By" value="bởi" />
+		<text name="NoMatchingResults" value="Không có kết quả phù hợp" />
+		<text name="History" value="Lịch sử hợp đồng" />
+		<text name="Email" value="Email" />
+		<text name="Actions" value="Hành động" />
+		<text name="Created" value="đã tạo" />
+		<text name="Sented" value="Đã gửi" />
+		<text name="ReSented" value="Đã gửi lại" />
+		<text name="DocumentTo" value="tài liệu đến" />
+		<text name="ACopyDocumentTo" value="bản sao tài liệu đến" />
+		<text name="Close" value="Đóng" />
+		<text name="Resend" value="Gửi lại" />
+		<text name="AreYouSureYouWantToResendEmail" value="Bạn có chắc muốn gửi lại mail không?" />
+		<text name="SendEmailSuccessfully" value="Gửi mail thành công" />
+		<text name="Download" value="Tải xuống" />
+		<text name="CancelContract" value="Hủy hợp đồng" />
+		<text name="AreYouSureYouWantToCancelTheContract" value="Bạn có chắc muốn hủy hợp đồng…?" />
+		<text name="AreYouSureYouWantToDeleteTheContract" value="Bạn có chắc muốn xóa hợp đồng…?" />
+		<text name="CreatedBy" value="Được tạo bởi" />
+		<text name="LastUpdate" value="Cập nhật gần nhất" />
+		<text name="ResendAll" value="Gửi lại tất cả" />
+		<text name="CopyRecipients" value="Người nhận bản sao" />
+		<text name="WaitToSign" value="Chờ ký" />
+		<text name="ViewHistory" value="Xem lịch sử hợp đồng" />
+		<text name="Contact" value="Liên hệ" />
+		<text name="AddNew" value="Thêm mới" />
+		<text name="SearchByCustomerNameOrEmail" value="Tìm kiếm theo tên khách hàng, email" />
+		<text name="CustomerName" value="Tên khách hàng" />
+		<text name="ContactNumber" value="Điện thoại" />
+		<text name="CompanyOrOrganization" value="Công ty/Tổ chức" />
+		<text name="EditCustomerInformation" value="Sửa thông tin khách hàng" />
+		<text name="UpdateCustomerInformationSuccessfully" value="Chỉnh sửa thông tin khách hàng thành công" />
+		<text name="AreYouSureYouWantToDelete" value="Bạn có chắc chắn muốn xóa không?" />
+		<text name="DeleteCustomerSuccessfully" value="Xóa khách hàng thành công" />
+		<text name="ContractTemplates" value="Mẫu hợp đồng" />
+		<text name="SearchTemplateByName" value="Tìm kiếm mẫu hợp đồng theo tên" />
+		<text name="CreateTemplate" value="Tạo mẫu hợp đồng" />
+		<text name="UploadTemplate" value="Tải hợp đồng" />
+		<text name="DropOrUploadDocumentHereToGetStarted" value="Thả tài liệu vào đây hoặc tải lên để bắt đầu" />
+		<text name="TemplateName" value="Tên mẫu hợp đồng" />
+		<text name="SetUpSignaturePosition" value="Thiết lập vị trí" />
+		<text name="USBToken" value="USB Token" />
+		<text name="CreatedNewContractTemplateSuccessfully" value="Tạo mẫu hợp đồng thành công" />
+		<text name="AllContractTemplates" value="Tất cả mẫu hợp đồng" />
+		<text name="MyTemplates" value="Mẫu hợp đồng của tôi" />
+		<text name="AvailableTemplatesOrSharedWithMe" value="Mẫu hợp đồng cung cấp" />
+		<text name="TemplateTitle" value="Tên hợp đồng" />
+		<text name="CreationTime" value="Thời gian tạo" />
+		<text name="LastUpdate" value="Thay đổi cuối cùng" />
+		<text name="AreYouSureYouWantToDeleteThisTemplate" value="Bạn có chắc muốn xóa mẫu hợp đồng?" />
+		<text name="TotalTemplates" value="Tổng số mẫu hợp đồng" />
+		<text name="Save" value="Lưu" />
+		<text name="AddNewPdfWorker" value="Tạo mới worker" />
+		<text name="SuccessfullyAddNewWorker" value="Thêm worker thành công" />
+		<text name="Roles" value="Vai trò" />
+		<text name="Role" value="Vai trò" />
+		<text name="RoleName" value="Tên vai trò" />
+		<text name="DisplayName" value="Tên hiện thị" />
+		<text name="Name" value="Tên" />
+		<text name="RoleDescription" value="Mô tả vai trò" />
+		<text name="Permissions" value="Quyền" />
+		<text name="Details" value="Thông tin" />
+		<text name="Users" value="Người dùng" />
+		<text name="SelectUser" value="Chọn người dùng" />
+		<text name="User" value="Người dùng" />
+		<text name="Remove" value="Xoá" />
+		<text name="AreYouSure" value="Bạn có chắc chắn không?" />
+		<text name="SavedSuccessfully" value="Đã Lưu Thành Công" />
+		<text name="DoYouWantToRemove" value="Bạn có muốn xoá" />
+		<text name="FromThisRole" value="khỏi vai trò này không" />
+		<text name="LogOut" value="Đăng xuất" />
+		<text name="FromTheRoleSuccessfully" value="khỏi vai trò thành công" />
+		<text name="SuccessfullyAddNew" value="Thêm mới thành công" />
+		<text name="Signature" value="Chữ ký" />
+		<text name="PleaseEnterContractCode" value="Vui lòng nhập mã hợp đồng" />
+		<text name="DeleteContractSuccessfully" value="Xoá hợp đồng thành công" />
+		<text name="AreYouSureYouWanttoDeleteTheContract" value="Bạn có chắc chắn muốn xóa hợp đồng?" />
+		<text name="AContractUploadFailed" value="Tải hợp đồng thất bại" />
+		<text name="PleaseEnterYourContractName" value="Vui lòng nhập tên hợp đồng" />
+		<text name="PleaseEnterYourFullName" value="Vui lòng nhập tên đầy đủ" />
+		<text name="PleaseEnterYourContractCode" value="Vui lòng nhập mã hợp đồng của bạn" />
+		<text name="YourEmailIsNotFormattedCorrectly" value="Email không hợp lệ" />
+		<text name="PleaseEnterYourEmail" value="Vui lòng nhập email" />
+		<text name="YouHaveNotSetUpASigner" value="Bạn chưa thiết lập người ký" />
+		<text name="YouHaveNotSetUpAContractParticipant" value="Bạn chưa thiết lập người tham gia hợp đồng" />
+		<text name="DeleteTheSignerSuccessfully" value="Xóa người ký thành công" />
+		<text name="Receiver" value="Người nhận" />
+		<text name="Location" value="Vị trí" />
+		<text name="Width" value="Chiều rộng" />
+		<text name="Height" value="Chiều dài" />
+		<text name="FontOption" value="Tuỳ chọn chữ" />
+		<text name="UsbToken" value="Usb token" />
+		<text name="FillInTheText" value="Điền văn bản" />
+		<text name="FillInTheDate" value="Điền ngày tháng" />
+		<text name="SignToken" value="Ký token" />
+		<text name="UpdateContractFormSuccessfully" value="Sửa mẫu hợp đồng thành công" />
+		<text name="DeletedCopyRecipientSuccessfully" value="Xóa người nhận bản sao thành công" />
+		<text name="DeleteSignatureSuccessfully" value="Xoá chữ ký thành công" />
+		<text name="SetupDefaultSignature" value="Thiết lập chữ ký mặc định?" />
+		<text name="SetupDefaultSignatureSuccessfully" value="Thiết lập chữ ký thành công" />
+		<text name="UpdateSignatureSuccessfully" value="Thiết lập chữ ký thành công" />
+		<text name="ResetPassword" value="Đặt lại mật khẩu" />
+		<text name="Configuration" value="Cấu hình" />
+		<text name="EmailTemplate" value="Mẫu email" />
+		<text name="Sent" value="Gửi" />
+		<text name="Send" value="Gửi" />
+		<text name="ViewStats" value="Xem thống kê" />
+		<text name="ViewDefaultSignature" value="Xem chữ kí mặc định" />
+		<text name="SetUpContract" value="Thiết lập hợp đồng" />
+		<text name="AddSignBox" value="Thêm ô kí" />
+		<text name="MoreTypesOfBoxes" value="Thêm các loại ô ký khác" />
+		<text name="EditSignBox" value="Sửa ô kí" />
+		<text name="DeleteSignBox" value="Xóa ô ký" />
+		<text name="PreviewTemplate" value="Xem trước hợp đồng" />
+		<text name="SentMail" value="Gửi mail" />
+		<text name="Change" value="Thay dổi" />
+		<text name="NoResultsFound" value="Không có kết quả tìm thấy" />
+		<text name="Search" value="Tìm kiếm" />
+		<text name="CreateContract" value="Tạo tài liệu" />
+		<text name="CancelContract" value="Hủy tài liệu" />
+		<text name="GetACopy" value="Nhận một bản sao" />
+		<text name="YouHaveNoContactYet" value="Bạn chưa có thông tin liên hệ nào" />
+		<text name="NoMatchingSearchResults" value="Không có kết quả tìm kiếm phù hợp" />
+		<text name="TotalItems" value="Tổng bản ghi" />
+		<text name="AddNewCustomer" value="Thêm khách hàng mới" />
+		<text name="Tenant" value="Người thuê" />
+		<text name="Configuration" value="Cấu hình" />
+		<text name="SignServer" value="Máy chủ ký" />
+		<text name="Disabled" value="Vô hiệu hóa" />
+		<text name="Using" value="Sử dụng" />
+		<text name="SelectTypeWorker" value="Chọn loại worker" />
+		<text name="UseDefaultCredentials" value="Sử dụng thông tin đăng nhập mặc định" />
+		<text name="IsAllowNormalLogin" value="Cho phép đăng nhập bình thường" />
+		<text name="IsActive" value="Đang hoạt động" />
+		<text name="Active" value="Hoạt động" />
+		<text name="Yes" value="Có" />
+		<text name="No1" value="Không" />
+		<text name="Search" value="Tìm kiếm" />
+		<text name="Clear" value="Xoá" />
+		<text name="TenancyName" value="Tên người thuê" />
+		<text name="EditTenant" value="Chỉnh sửa người thuê" />
+		<text name="CreateNewTenant" value="Tạo người thuê mới" />
+		<text name="DatabaseConnectionString" value="Chuỗi kết nối cơ sở dữ liệu" />
+		<text name="AdminEmailAddress" value="Địa chỉ email người quản trị" />
+		<text name="DefaultPasswordIs" value="Mật khẩu mặc định" />
+		<text name="SearchNameFullNameEmail" value="Tìm kiếm tên, địa chỉ, email" />
+		<text name="UserName" value="Tên tài khoản" />
+		<text name="EmailAddress" value="Địa chỉ email" />
+		<text name="ResetPassword" value="Đổi mật khẩu" />
+		<text name="EditUser" value="Chỉnh sửa người dùng" />
+		<text name="Surname" value="Họ" />
+		<text name="UserRoles" value="Vai trò người dùng" />
+		<text name="UserDetails" value="Thông tin người dùng" />
+		<text name="NormalUser" value="Người dùng bình thường" />
+		<text name="CreateNewUser" value="Tạo người dùng mới" />
+		<text name="UpdatePassword" value="Thay đổi mật khẩu" />
+		<text name="NewPassword" value="Mật khẩu mới" />
+		<text name="ConfirmNewPassword" value="Xác nhận mật khẩu mới" />
+		<text name="ResetPassword" value="Đặt lại mật khẩu" />
+		<text name="AdminPassword" value="Mật khẩu quyển quản trị" />
+		<text name="ResetPasswordStepOneInfo" value="Thiêt lập lại mật khẩu lần 1" />
+		<text name="ResetPasswordStepTwoInfo" value="Thiết lập lại mật khẩu lần 2" />
+		<text name="TemplateName" value="Tên mẫu" />
+		<text name="Type" value="Kiểu mẫu" />
+		<text name="To" value="Gửi đến" />
+		<text name="Cc" value="Người nhận" />
+		<text name="Subject" value="Tiêu đề" />
+		<text name="TestSendMail" value="Gửi thử mail" />
+		<text name="Message" value="Tin nhắn" />
+		<text name="ContractCode" value="Mã hợp đồng" />
+		<text name="ContractName" value="Tên hợp đồng" />
+		<text name="SignUrl" value="Ký Url" />
+		<text name="SendToEmail" value="Gửi tới Email" />
+		<text name="AuthorEmail" value="Email người gửi" />
+		<text name="ContractSettingId" value="Thiết lập hợp đồng" />
+		<text name="ContractRole" value="Vai trò hợp đồng" />
+		<text name="PropertiesSupport" value="Hỗ trợ thuộc tính" />
+		<text name="Me" value="Tôi" />
+		<text name="CreateEmailTeamplate" value="Tạo mẫu hợp đồng" />
+		<text name="CannelContract" value="Đã hủy tài liệu" />
+		<text name="CannelContractAt" value="Tài liệu đã bị hủy vào lúc" />
+		<text name="SetSigningOrde" value="Thiết lập người kí theo thứ tự" />
+		<text name="SignDocument" value="Ký tài liệu" />
+		<text name="ACopyDocument" value="Bản sao tài liệu" />
+		<text name="YouHadDocumentNeedSign" value="Bạn có tài liệu cần kí" />
+		<text name="CoordinatesX" value="Cách X" />
+		<text name="CoordinatesY" value="Cách Y" />
+		<text name="YouHaveReceivedACopyOfTheDocument" value="Bạn đã nhận được bản sao tài liệu" />
+		<text name="Viewer" value="Người xem" />
+		<text name="ApprovedBy" value="Người duyệt" />
+		<text name="ContractHasBeenSent" value="Hợp đồng đã được gửi" />
+		<text name="SignedDocument" value="Đã ký tài liệu" />
+		<text name="SigningInProgress" value="Đang thực hiện ký" />
+		<text name="ContractCompled" value="Tài liệu đã được hoàn thành" />
+		<text name="SelectSignature" value="Chọn chữ ký" />
+		<text name="StartSigning" value="Bắt đầu ký" />
+		<text name="SigningFailedPleaseRecheckUSB" value="Ký thất bại, hãy kiểm tra lại USB" />
+		<text name="FillText" value="Điền văn bản" />
+		<text name="FillDate" value="Điền ngày tháng" />
+		<text name="DownloadPlugin" value="Tải plugin" />
+		<text name="PleaseConnectPluginOrDownloadPluginIfNotAlready" value="Vui lòng kết nối Plugin hoặc tải Plugin nếu chưa có" />
+		<text name="DigitalSignatureInformation" value="Thông tin chữ ký số" />
+		<text name="ChangeDigitalCertificate" value="Đổi chứng thư số" />
+		<text name="CreatedContract" value="đã tạo tài liệu" />
+		<text name="SearchByContractCodeContractTitle" value="Tìm kiếm theo mã, tên hợp đồng" />
+		<text name="Contracts" value="Hợp đồng" />
+		<text name="UpdatedTime" value="Ngày cập nhật" />
+		<text name="SendMail" value="Gửi mail" />
+		<text name="WelcomeToMetaSign" value="Chào mừng đến với MetaSign" />
+		<text name="ToGetStartedPleaseSignIn" value="Để bắt đầu, vui lòng đăng nhập" />
+		<text name="SearchByCustomerNameEmail" value="Tìm kiếm theo tên khách hàng, email" />
+		<text name="EditGoogleClientIDSuccessfully" value="Chỉnh sửa Google client ID thành công" />
+		<text name="WorkerAttributeAddedSuccessfully" value="Thêm thuộc tính worker thành công" />
+		<text name="Successfully" value="Thành công" />
+		<text name="UpdatePropertiesSuccessfully" value="Cập nhật thuộc tính thành công" />
+		<text name="UserDeleteWarningMessage" value="Thông báo cảnh báo xóa người dùng" />
+		<text name="AreYouSureYouWantToDelete" value="Bạn có chắc chắn muốn xoá?" />
+		<text name="DeleteCustomerSuccessfully" value="Xoá khách hàng thành công!" />
+		<text name="AddedNewCustomersSuccessfully" value="Thêm mới khách hàng thành công!" />
+		<text name="SuccessfullyDeleted" value="Xoá thành công" />
+		<text name="AreYouSureYouWantToCancelTheContract" value="Bạn có chắc muốn hủy bỏ hợp đồng?" />
+		<text name="ContractHasBeenCanceled" value="Hợp đồng đã được hủy bỏ" />
+		<text name="AreYouSureToDeleteTheContract" value="Bạn có chắc xóa hợp đồng?" />
+		<text name="DeleteSuccessful" value="Xóa thành công" />
+		<text name="AreYouSureYouWantToResendTheEmail" value="Bạn có chắc chắn muốn gửi lại mail không?" />
+		<text name="SendEmailFailed" value="Gửi mail thất bại" />
+		<text name="AreYouSureYouWantToCancelTheContract" value="Bạn có chắc muốn hủy bỏ hợp đồng?" />
+		<text name="SigningFailedPleaseRecheckUSB" value="Ký thất bại, hãy kiểm tra lại USB" />
+		<text name="PleaseProvideSignature" value="Bạn vui lòng cung cấp chữ ký!" />
+		<text name="TenantDeleteWarningMessage" value="Bạn có chắc chắn muốn xóa không?" />
+		<text name="SavedSuccessfully" value="Lưu thành công" />
+		<text name="SuccessfullyDeleted" value="Xóa thành công" />
+		<text name="ResetPasswordSuccessfully" value="Cài đặt lại mật khẩu thành công" />
+		<text name="PasswordChangedSuccessfully" value="Đổi mật khẩu thành công" />
+		<text name="Success" value="Thành công" />
+		<text name="SearchWithThreeDot" value="Tìm kiếm dữ liệu" />
+		<text name="RoleDeleteWarningMessage" value="Thông báo cảnh báo xóa role" />
+		<text name="Signed" value="Đã ký" />
+		<text name="MissingSignaturesPositionsForExistedSigners" value="Tồn tại người ký chưa được thiết lập vị trí chữ ký" />
+		<text name="LoginEmailToViewDocuments" value="Đăng nhập email để xem tài liệu" />
+		<text name="EmailDoesNotHavePermissionToViewTheDocumentPleaseCheckAgain" value="Email không có quyền xem tài liệu, hãy kiểm tra lại" />
+		<text name="PleaseCompleteTheSignatureBeforeCompleting" value="Hãy điền đầy đủ chữ kí trước khi hoàn thành" />
+		<text name="PleaseFillInTheInputCompletelyBeforeCompleting" value="Hãy điền đầy đủ ô ký trước khi hoàn thành" />
+		<text name="SuccessfullyEditedCustomerInformation" value="Chỉnh sửa thông tin khách hàng thành công!" />
+		<text name="AddedSignatureSuccessfully" value="Tạo chữ ký mới thành công" />
+		<text name="Code" value="Mã hợp đồng" />
+		<text name="Title" value="Tên hợp đồng" />
+		<text name="Error" value="Lỗi" />
+		<text name="TitleTemplate" value="Tên mẫu hợp đồng" />
+		<text name="EditEmailContent" value="Chỉnh sửa nội dung gửi mail" />
+		<text name="OnlyThePersonWithTheFirstOrderOfSigningCanAddContractInformation" value="Chỉ người được thiết lập thứ tự ký đầu tiên mới được bổ sung thông tin hợp đồng" />
+		<text name="OnlyThePersonWithTheFirstOrderOfSigningCanAddContractInformation" value="Chỉ người ký đầu tiên mới được bổ sung thông tin hợp đồng" />
+		<text name="Font" value="Phông chữ" />
+		<text name="FontSize" value="Cỡ chữ" />
+		<text name="DoubleClickToFillText" value="Nhấp vào để điền văn bản" />
+		<text name="DoubleClickToEditText" value="Nhấp vào để chỉnh sửa văn bản" />
+	</texts>
+</localizationDictionary>

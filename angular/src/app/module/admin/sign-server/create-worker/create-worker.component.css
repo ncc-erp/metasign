@@ -1,0 +1,36 @@
+.content {
+  transform: translateY(-15px);
+}
+
+.content mat-form-field {
+  width: 100%;
+}
+
+::ng-deep #header .modal-header {
+  padding: 0 !important;
+  transform: translateY(-15px);
+  border: none;
+}
+
+::ng-deep #selectType .mat-form-field-flex {
+  height: 45px;
+}
+
+::ng-deep .mat-select-panel {
+  transform: translateY(27px) !important;
+}
+
+::ng-deep #selectType .mat-form-field-flex > .mat-form-field-infix {
+  padding: 0.5em 0px !important;
+}
+
+/* footer */
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn-action {
+  height: 36px;
+}

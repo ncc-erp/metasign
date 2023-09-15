@@ -1,0 +1,48 @@
+.signing_reject--wapper {
+  background-color: #FBF7EC;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 80px  0;
+}
+header {
+  text-align: center;
+}
+
+.signing_reject--title {
+  margin-top: 50px;
+  text-align: center;
+  font-size: 40px;
+}
+
+.signing_reject--content {
+  margin: 40px auto 0 auto;
+  height: 132px;
+  border: 1px solid #dee0e2;
+  width: 80%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.signing_reject--body {
+  height: 60%;
+  width: 60%;
+  background: white;
+}
+
+
+@media only screen and (max-width: 820px) {
+  .signing_reject--body {
+    height: 40%;
+  }
+  .signing_reject--title {
+    padding: 5px;
+    font-size: 25px;
+  }
+  
+  
+}
+

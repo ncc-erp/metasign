@@ -1,0 +1,13 @@
+
+<div *ngIf="loadingTemplate; else contractPreview" class="loadding_page">
+  <mat-spinner></mat-spinner>
+</div>
+
+<ng-template #contractPreview>
+  <app-contract-preview
+    [contractName]="contractName"
+    [contractFile]="contractFile"
+    [contractSigner]="contractSigner"
+  ></app-contract-preview>
+</ng-template>
+

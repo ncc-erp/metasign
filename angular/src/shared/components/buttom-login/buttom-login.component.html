@@ -1,0 +1,10 @@
+<div
+  [ngClass]="{
+    'bottom_login': type === buttomType.login,
+    'bottom_tenant': type === buttomType.tenant
+  }"
+  class="bottom_login"
+>
+  <ng-content></ng-content>
+  {{ text }}
+</div>

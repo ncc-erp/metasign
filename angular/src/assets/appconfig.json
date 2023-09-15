@@ -1,0 +1,18 @@
+{
+  "remoteServiceBaseUrl": "https://metasign-api.nccsoft.vn",
+  "appBaseUrl": "https://metasign.nccsoft.vn",
+  "localeMappings": [
+    {
+      "from": "pt-BR",
+      "to": "pt"
+    },
+    {
+      "from": "zh-CN",
+      "to": "zh"
+    },
+    {
+      "from": "he-IL",
+      "to": "he"
+    }
+  ]
+}

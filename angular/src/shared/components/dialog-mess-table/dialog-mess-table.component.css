@@ -1,0 +1,30 @@
+table {
+  width: 100%;
+}
+
+:host ::ng-deep .mat-elevation-z8 {
+  box-shadow: none;
+}
+
+.close_dialog {
+  display: flex;
+  justify-content: end;
+}
+.close_dialog i {
+  font-size: 30px;
+}
+.close_dialog i:hover {
+  color: red;
+}
+.failed_table {
+  font-size: 20px;
+  text-align: center;
+  font-weight: 600;
+  color: red;
+}
+
+.table_col {
+  font-weight: 700;
+  font-size: 16px;
+  color: black;
+}

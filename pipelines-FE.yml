@@ -1,0 +1,46 @@
+trigger:
+  branches:
+    include:
+      - dev
+      
+  paths:
+    include:
+      - angular
+      - pipelines-FE.yml
+      
+pool:
+  name: 'Devops'
+
+jobs:
+- job: BuildAngular
+  steps:
+    - script: |
+        cd angular 
+        export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
+        nvm use 14.17
+        node -v
+        echo "===Install package==="
+        npm i
+      displayName: 'Install Package'
+
+    - script: |
+        export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
+        nvm use 14.17
+        cd angular
+        echo "===Build node==="
+        ng build --prod
+      displayName: 'Build Frontend'
+
+    - script: |
+        export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
+        nvm use 14.17
+        cd angular/dist
+        zip -r frontend.zip *
+      displayName: 'Compress Build'
+        
+    - task: PublishBuildArtifacts@1
+      inputs: 
+        PathtoPublish: 'angular/dist/frontend.zip'
+        ArtifactName: 'frontend-dev-EC' 
+        publishLocation: 'Container'
+      displayName: 'Publish Compress Frontend to Aritifact'

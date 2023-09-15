@@ -1,0 +1,166 @@
+.pointer {
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  border: 1px rgb(151 114 7) solid;
+  background-color: #eef8ff;
+}
+
+.signing {
+  width: 100%;
+  height: 100%;
+  border-radius: 7px;
+}
+
+.signature_type--icon img {
+  width: 51px;
+  margin-top: 10px;
+}
+
+.sign-btn {
+  border-radius: 7px;
+}
+.signature-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.signature-digital {
+  position: relative;
+}
+
+.sign-btn:disabled {
+  cursor: not-allowed;
+}
+
+#contract_date {
+  border-radius: 8px;
+}
+
+.contractsettingtype-electronic {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.overlay-gray {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: rgb(207 235 242 / 40%) !important;
+  cursor: no-drop;
+}
+
+.border-general {
+  border: 1px solid #ccc !important;
+  border-radius: 7px !important;
+}
+
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
+  display: none !important;
+}
+
+.signature_Digital {
+  position: absolute;
+  width: 100%;
+  top: 35%;
+  left: 5px;
+}
+
+.signature_Digital p {
+  font-family: Calibri;
+  font-size: 22px;
+  cursor: pointer;
+  margin: 0;
+  line-height: 1.1;
+}
+
+#spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+mat-icon {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.text-area:focus-within {
+  background: #ffff !important;
+}
+
+.setting-input {
+  position: relative;
+}
+
+.setting-input:focus-within {
+  background: none !important;
+}
+
+.input::placeholder {
+  color: black;
+}
+
+textarea,
+.mat-input-element {
+  margin: 0;
+}
+
+:host ::ng-deep .mat-form-field-flex {
+  height: 43px;
+}
+
+:host ::ng-deep .mat-form-field-flex > .mat-form-field-infix {
+  padding: 0.02em 0px !important;
+}
+
+.isAllowSigning {
+  opacity: 0.7 !important;
+}
+
+:host ::ng-deep .mat-form-field-wrapper {
+  margin: 0 !important;
+}
+
+.text-area {
+  resize: none;
+  outline: none;
+  padding: 0;
+  height: auto;
+  overflow: hidden;
+  border: none;
+  padding: 9px;
+  border-radius: 9px;
+  box-sizing: border-box;
+}
+
+.text-area::-webkit-scrollbar {
+  width: 0px;
+}
+
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-flex {
+  padding: 0 !important;
+}
+
+:host ::ng-deep #contract_date .mat-form-field-infix {
+  border: none !important;
+  transform: translateY(3px) !important;
+}
+
+:host
+  ::ng-deep
+  .mat-form-field:not(.mat-form-field-appearance-legacy)
+  .mat-form-field-suffix
+  .mat-icon-button {
+  transform: translateY(-10px) !important;
+}
+.value-date {
+  padding: 0px 6px;
+}

@@ -1,0 +1,45 @@
+<div class="wrapper position-relative">
+  <header class="header">{{ "AddProperties" | ecTranslate }}</header>
+  <div class="content">
+    <form
+      id="form-create-properties"
+      [formGroup]="formCreateProperties"
+      (ngSubmit)="submitForm(formCreateProperties.value)"
+    >
+      <mat-form-field appearance="outline" id="selectProperties">
+        <mat-label>Select properties</mat-label>
+        <mat-select disableRipple formControlName="name" disableOptionCentering>
+          <mat-option
+            *ngFor="let propertiesItem of propertiesCanBeAdded"
+            value="{{ propertiesItem.key }}"
+            >{{ propertiesItem.key }}</mat-option
+          >
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Value *</mat-label>
+        <input matInput formControlName="value" />
+      </mat-form-field>
+    </form>
+  </div>
+  <footer class="footer">
+    <button
+      mat-raised-button
+      color="secondary"
+      class="btn-action"
+      (click)="dialogRef.close()"
+    >
+      <span style="font-size: 16px"> {{ "Cancel" | ecTranslate }}</span>
+    </button>
+    <button
+      class="button btn-add btn-action {{
+        formCreateProperties.invalid ? 'btn-disabled' : ''
+      }}"
+      form="form-create-properties"
+      type="submit"
+      [disabled]="formCreateProperties.invalid"
+    >
+      {{ "AddNew" | ecTranslate }}
+    </button>
+  </footer>
+</div>

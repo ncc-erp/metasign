@@ -1,0 +1,37 @@
+.tenant-change-component {
+  height: 54px;
+  background-color: #004037;
+  display: flex;
+  justify-content: center;
+  gap: 0 16px;
+  align-items: center;
+  color: #ffffff;
+  font-weight: 400;
+  font-size: 14px;
+  
+}
+
+.tenant_change--content {
+  margin: 0;
+  padding: 0;
+}
+
+.tenant_change--content span {
+  font-weight: 700;
+  font-size: 14px;
+  color: #21cc33;
+}
+
+.tenant_change--account {
+  color: #ffffff;
+  font-weight: 400;
+  font-size: 14px;
+  padding: 6px 12px;
+  background-color: transparent;
+  border: 1px solid #fbf7ec;
+  border-radius: 6px;
+}
+
+::ng-deep .modal-content {
+  margin-top: 35%;
+}

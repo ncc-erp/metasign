@@ -1,0 +1,57 @@
+<nav class="mt-2">
+  <ul class="list-menu">
+    <ng-container *ngFor="let item of menuItems">
+      <li class="nav-item d-inline-block" *ngIf="isMenuItemVisible(item)">
+        <a
+          *ngIf="item.route && item.route.indexOf('http') != 0"
+          class="nav-link d-inline-block"
+          [routerLink]="item?.route"
+          [routerLinkActive]="['active']"
+          [class.active]="item?.isActive"
+        >
+          <p class="m-1 menu-item">
+            {{ item?.label }}
+          </p>
+        </a>
+
+        <a
+          *ngIf="!item.route && item.children"
+          class="nav-link d-inline-block"
+          href="javascript:;"
+          [routerLinkActive]="['active']"
+          [class.active]="item.isActive"
+          (click)="item.isCollapsed = !item.isCollapsed"
+          [matMenuTriggerFor]="menuAdmin"
+        >
+          <p class="m-1 menu-item">
+            {{ item.label }}
+            <i class="fas fa-chevron-down icon-down"></i>
+          </p>
+        </a>
+        <mat-menu #menuAdmin="matMenu" class="admin-dropdown">
+          <ul class="menu-admin">
+            <ng-container *ngFor="let itemAdmin of item.children">
+              <li class="nav-item" *ngIf="isMenuItemVisible(itemAdmin)">
+                <a
+                  *ngIf="
+                    itemAdmin.route && itemAdmin.route.indexOf('http') != 0
+                  "
+                  class="nav-link {{
+                    itemAdmin.isActive && 'active-admin'
+                  }} nav-link-admin"
+                  [routerLink]="itemAdmin.route"
+                  [routerLinkActive]="['active']"
+                  [class.active]="itemAdmin.isActive"
+                >
+                  <p class="m-1 menu-item">
+                    {{ itemAdmin.label }}
+                  </p>
+                </a>
+              </li>
+            </ng-container>
+          </ul>
+        </mat-menu>
+      </li>
+    </ng-container>
+  </ul>
+</nav>

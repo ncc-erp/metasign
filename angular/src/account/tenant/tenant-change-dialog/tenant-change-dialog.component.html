@@ -1,0 +1,76 @@
+<form
+  class="form-horizontal from_modal"
+  autocomplete="off"
+  [formGroup]="changeTenantForm"
+  (ngSubmit)="save()"
+>
+  <div class="from_modal--warper">
+    <div class="modal_header">
+      <h6>{{ "Company" | ecTranslate }}</h6>
+      <span (click)="bsModalRef.hide()">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6L6 18M6 6L18 18"
+            stroke="#004037"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </span>
+    </div>
+    <div class="modal_main">
+      <div class="form-group row">
+        <label class="col-md-12 col-form-label" for="tenancyName">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M6.66667 14.1667H13.3333M9.18141 2.30333L3.52949 6.69927C3.15168 6.99312 2.96278 7.14005 2.82669 7.32405C2.70614 7.48704 2.61633 7.67065 2.56169 7.86588C2.5 8.08627 2.5 8.32558 2.5 8.80421V14.8333C2.5 15.7667 2.5 16.2335 2.68166 16.59C2.84144 16.9036 3.09641 17.1585 3.41002 17.3183C3.76654 17.5 4.23325 17.5 5.16667 17.5H14.8333C15.7668 17.5 16.2335 17.5 16.59 17.3183C16.9036 17.1585 17.1586 16.9036 17.3183 16.59C17.5 16.2335 17.5 15.7667 17.5 14.8333V8.80421C17.5 8.32558 17.5 8.08627 17.4383 7.86588C17.3837 7.67065 17.2939 7.48704 17.1733 7.32405C17.0372 7.14005 16.8483 6.99312 16.4705 6.69927L10.8186 2.30333C10.5258 2.07562 10.3794 1.96177 10.2178 1.918C10.0752 1.87938 9.92484 1.87938 9.78221 1.918C9.62057 1.96177 9.47418 2.07562 9.18141 2.30333Z"
+              stroke="url(#paint0_linear_1361_18412)"
+              stroke-width="1.25"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <defs>
+              <linearGradient
+                id="paint0_linear_1361_18412"
+                x1="10"
+                y1="1.88904"
+                x2="10"
+                y2="17.5"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop stop-color="#21CC33" />
+                <stop offset="1" stop-color="#004037" />
+              </linearGradient>
+            </defs>
+          </svg>
+          {{ "CompanyName" | ecTranslate }}
+        </label>
+        <div class="col-md-12 mt-2">
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'TypeCompanyNameHere' | ecTranslate"
+            formControlName="tenancyName"
+          />
+        </div>
+      </div>
+     
+    </div>
+    <div class="modal_footer">
+      <button>{{ "SelectACompany" | ecTranslate }}</button>
+    </div>
+  </div>
+</form>

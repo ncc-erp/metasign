@@ -1,0 +1,63 @@
+<div class="height-91vh wrapper card container-fluid not-full-width">
+  <div class="wrapper-content card-body row justify-content-between">
+    <div class="sidebar col-2 bg-light">
+      <button
+        mat-raised-button
+        class="btn-add button"
+        mat-button [matMenuTriggerFor]="menu"> <i class="fa-solid fa-plus"></i>{{'CreateTemplate' | ecTranslate}}</button>
+      <mat-menu #menu="matMenu">
+        <button (click)="handleCreateBatchContract()" mat-menu-item>{{'CreateMassTemplate' | ecTranslate}}</button>
+        <button (click)="handleCreateContract()" mat-menu-item> {{'CreateTemplate' | ecTranslate}}</button>
+      </mat-menu>
+
+      <mat-divider class="line"></mat-divider>
+      <h5 class="title-sidebar">{{'Templates' | ecTranslate}}</h5>
+      <ul class="status sidebar-list">
+        <li
+          routerLink="./"
+          class="sidebar-item status-item row text-color"
+          [ngClass]="{
+            'active-link':
+              statusCategorycontract == contractCategory.ContractTemplateAll
+          }"
+        >
+          <i
+            _ngcontent-xnm-c360=""
+            class="col-lg-3 col-md-2 col-xl-2 fa-list fas pr-2"
+            aria-hidden="true"
+          ></i>
+          <span>{{'AllTemplates' | ecTranslate}}</span>
+        </li>
+        <li
+          routerLink="./"
+          [queryParams]="{ status: contractCategory.ContractTemplateMy }"
+          [ngClass]="{
+            'active-link':
+              statusCategorycontract == contractCategory.ContractTemplateMy
+          }"
+          class="sidebar-item status-item row text-color"
+        >
+          <i class="fa-solid fa-user pr-2 col-xl-2 col-lg-3 col-md-2"></i>
+          <span>{{'MyTemplates' | ecTranslate}}</span>
+        </li>
+        <li
+          routerLink="./"
+          [queryParams]="{ status: contractCategory.ContractTemplateSystem }"
+          class="sidebar-item status-item row text-color"
+          [ngClass]="{
+            'active-link':
+              statusCategorycontract == contractCategory.ContractTemplateSystem
+          }"
+        >
+          <i
+            class="fa-solid fa-file-signature pr-2 col-xl-2 col-lg-3 col-md-2"
+          ></i>
+          <span>{{'TemplatesGallery' | ecTranslate}}</span>
+        </li>
+      </ul>
+    </div>
+    <div class="content table-contract col-10">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<VersionPrefix>1.0.0.0</VersionPrefix>
+		<TargetFramework>net6.0</TargetFramework>
+		<AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81;</AssetTargetFallback>
+		<AssemblyName>EC.Core</AssemblyName>
+		<PackageId>EC.Core</PackageId>
+		<GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+		<GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+		<GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+		<UserSecretsId>AbpCompanyName-EC-56C2EF2F-ABD6-4EFC-AAF2-2E81C34E8FB1</UserSecretsId>
+		<RootNamespace>EC</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Localization\SourceFiles\*.xml" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
+	</ItemGroup>
+	<ItemGroup>
+		<RuntimeHostConfigurationOption Include="System.Drawing.EnableUnixSupport" Value="true" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Include="..\..\.editorconfig" Link=".editorconfig" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Abp.AutoMapper" Version="7.3.0" />
+		<PackageReference Include="Abp.ZeroCore.EntityFrameworkCore" Version="7.3.0" />
+		<PackageReference Include="AWSSDK.S3" Version="3.7.201.6" />
+		<PackageReference Include="Castle.Windsor.MsDependencyInjection" Version="3.4.0" />
+		<PackageReference Include="ChromeHtmlToPdf" Version="3.1.0" />
+		<PackageReference Include="EPPlus" Version="6.2.8" />
+		<PackageReference Include="Google.Apis.Auth" Version="1.60.0" />
+		<PackageReference Include="iTextSharp" Version="5.5.13.3" />
+		<PackageReference Include="Microsoft.IdentityModel" Version="7.0.0" />
+		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.10.0" />
+		<PackageReference Include="NodaTime" Version="3.1.6" />
+		<PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.10.0" />
+		<PackageReference Include="System.Text.Encoding" Version="4.3.0" />
+	</ItemGroup>
+</Project>

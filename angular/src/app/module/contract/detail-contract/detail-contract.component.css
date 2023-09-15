@@ -1,0 +1,151 @@
+.wrapper {
+  height: 89vh;
+}
+
+.wrapper-content {
+  padding: 0;
+}
+
+/* header */
+.header {
+  padding: 20px;
+}
+
+.icon-back {
+  font-size: 1.5rem;
+  padding: 4px;
+  padding-right: 16px;
+}
+
+.icon-back:hover {
+  cursor: pointer;
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.status {
+  padding: 5px;
+  font-size: 14px;
+}
+
+.contract_id h3 {
+  cursor: pointer;
+  font-size: 16px;
+  color: rgba(25, 24, 35, 0.9);
+  font-weight: bold;
+}
+
+.header_content--id {
+  color: rgb(36, 99, 209);
+  cursor: pointer;
+  display: inline-block;
+}
+
+.header_content--id:hover {
+  text-decoration: underline;
+}
+
+.contract_id {
+  padding: 30px;
+  width: 400px;
+  background: white;
+  box-shadow: rgba(25, 24, 35, 0.15) 0px 0px 0px 1px,
+    rgba(25, 24, 35, 0.15) 0px 4px 8px;
+}
+
+/* button */
+
+.list-button {
+  margin-top: 30px;
+}
+
+.btn-action-right button {
+  margin-left: 8px;
+}
+
+.btn-action-right i {
+  font-size: 1.2rem;
+}
+
+.btn-action:hover {
+  cursor: pointer;
+}
+
+.btn-action-left button {
+  margin-right: 8px;
+}
+
+#contract_id--copy {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* content */
+
+.header-content {
+  margin-bottom: 30px;
+}
+
+.content {
+  padding: 20px;
+}
+
+.info-recipient {
+  position: relative;
+}
+
+.icon-check {
+  position: absolute;
+  top: 6px;
+  left: -30px;
+  padding-right: 12px;
+}
+
+.list-recipients {
+  list-style: none;
+  padding: 0;
+}
+
+.list-recipients li {
+  margin-bottom: 12px;
+}
+
+.action {
+  padding: 4px;
+}
+
+.action i {
+  padding-right: 8px;
+}
+
+@media only screen and (max-height: 912px) {
+  .wrapper {
+    height: 88.5vh;
+  }
+}
+@media only screen and (min-height: 912.01px) and (max-height: 1024px) {
+  .wrapper {
+    height: 90vh;
+  }
+}
+
+@media only screen and (min-height: 1024.01px) {
+  .wrapper {
+    height: 91vh;
+  }
+}
+
+@media only screen and (min-height: 1140.1px) {
+  .wrapper {
+    height: 91.7vh;
+  }
+}
+
+@media only screen and (min-height: 1290.01px) {
+  .wrapper {
+    height: 92.5vh;
+  }
+}

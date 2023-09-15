@@ -1,0 +1,11 @@
+<div *ngIf="tenancyName">
+  <div *ngIf="isMultiTenancyEnabled" class="tenant-change-component">
+    <p  class="tenant_change--content">
+      {{ "Company" | ecTranslate }}: <span>{{tenancyName}} </span>
+    </p>
+  
+    <button (click)="showChangeModal()" class="tenant_change--account">
+      {{ "Change" | ecTranslate }}
+    </button>
+  </div>
+</div>

@@ -1,0 +1,93 @@
+<section class="wrapper-content not-full-width">
+  <div class="overlay-loading" *ngIf="isLoading">
+    <mat-spinner id="spinner" class="spinner"></mat-spinner>
+  </div>
+  <div class="container-fluid">
+    <header class="row header">
+      <h3 class="pt-3 pb-2 px-2">Workers</h3>
+      <button class="button btn-add mr-2" (click)="addPdfWorker()">
+        <i class="fa-solid fa-plus pr-2 icon-add"></i>
+        {{ "Create" | ecTranslate }}
+      </button>
+    </header>
+    <div class="card content">
+      <div class="card-body table-responsive p-0">
+        <table class="table table-header table-striped">
+          <thead class="bg-light head-table">
+            <th style="width: 80px">{{ "No" | ecTranslate }}</th>
+            <th style="width: 50%">{{ "WorkerName" | ecTranslate }}</th>
+            <th>{{ "Status" | ecTranslate }}</th>
+            <th style="width: 250px">{{ "Actions" | ecTranslate }}</th>
+          </thead>
+        </table>
+        <div class="body-content">
+          <table
+            class="table table-striped table-content"
+            [busy]="isTableLoading"
+          >
+            <tbody class="table-content-body">
+              <tr
+                *ngFor="
+                  let activePdfSignersItem of listActivePdfSigners?.payload;
+                  let i = index
+                "
+              >
+                <td style="width: 80px">{{ i + 1 }}</td>
+                <td style="width: 50%">
+                  <span class="activePdfSignersName">{{
+                    activePdfSignersItem.name
+                  }}</span>
+                </td>
+                <td>
+                  <span
+                    class="status-label {{
+                      handleColorStatus(activePdfSignersItem.status)
+                    }}"
+                    >{{
+                      handleNameStatus(activePdfSignersItem.status)
+                        | ecTranslate
+                    }}</span
+                  ><span
+                    *ngIf="activePdfSignersItem.name === currentPdfSignerName"
+                    class="ml-1 status-label badge badge-primary"
+                    >{{ "Using" | ecTranslate }}</span
+                  >
+                </td>
+                <td class="row float-right px-0" style="width: 250px">
+                  <button
+                    class="button btn-view-details mr-2"
+                    (click)="
+                      viewPropertiesWorker(
+                        activePdfSignersItem.id,
+                        activePdfSignersItem.name,
+                        activePdfSignersItem.status
+                      )
+                    "
+                  >
+                    {{ "ViewOrDetail" | ecTranslate }}
+                  </button>
+                  <button
+                    *ngIf="activePdfSignersItem.status !== 'OFFLINE'"
+                    class="button button-change-status"
+                    (click)="
+                      handleChangeStatus(
+                        activePdfSignersItem.status,
+                        activePdfSignersItem.id
+                      )
+                    "
+                  >
+                    {{
+                      activePdfSignersItem.status === "ACTIVE"
+                        ? ("Disabled" | ecTranslate)
+                        : ("Active" | ecTranslate)
+                    }}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

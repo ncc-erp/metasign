@@ -1,0 +1,284 @@
+<div class="setting p-4">
+  <div style="width: 75vw; margin: auto">
+    <div class="setting_signer">
+      <h6 class="signer_title">
+        <i class="fa-solid fa-user"></i> {{ "Signers " | ecTranslate }}
+      </h6>
+      <div class="container">
+        <mat-checkbox
+          [disabled]="formSigner.controls.length <= 1"
+          [(ngModel)]="toggleOrderSign"
+          [ngClass]="{ 'not-allowed': formSigner.controls.length <= 1 }"
+          (change)="setOrderChange($event.checked)"
+          >{{ "SetSigningOrder" | ecTranslate }}</mat-checkbox
+        >
+          <div
+            cdkDropList
+            class="example-list"
+            (cdkDropListDropped)="drop($event)"
+          >
+            <ng-container *ngFor="let form of formSigner.controls; let i = index">
+              <div
+                cdkDrag
+                class="signer_form--item d-flex align-items-center justify-content-center mt-3"
+              >
+                <div
+                  [ngStyle]="{ opacity: toggleOrderSign ? 1 : 0 }"
+                  class="signer_form--order"
+                >
+                  <div class="form_order--child">
+                    {{ i + 1 }}
+                  </div>
+                </div>
+                <div
+                  class="signer_form"
+                  [ngStyle]="{
+                    padding: templateContractId && contractId ? '30px' : '20px'
+                  }"
+                  [style.border-left-color]="form.value.color"
+                >
+                  <div cdkDragHandle class="signer_form--drag">
+                    <ng-container>
+                      <i
+                        *ngIf="formSigner.controls.length > 1"
+                        class="fas fa-grip-horizontal"
+                      ></i>
+                    </ng-container>
+                  </div>
+  
+                  <form [formGroup]="form" id="form-setting1" class="ml-3">
+                    <div
+                      *ngIf="templateContractId && contractId"
+                      class="form_role"
+                    >
+                      <p>{{ form.value.role }}</p>
+                    </div>
+                    <div class="form-signername">
+                      <mat-form-field class="setting-input" appearance="outline">
+                        <mat-label>{{ "FullName" | ecTranslate }}</mat-label>
+                        <input
+                          id="validationSignerName"
+                          formControlName="signerName"
+                          type="name"
+                          [placeholder]="'EnterYourFullName' | ecTranslate"
+                          matInput
+                          [required]="contractId"
+                        />
+                      </mat-form-field>
+                      <mat-error
+                        class="msg-error-signername"
+                        *ngIf="
+                          form.get('signerName').hasError('required') &&
+                          form.get('signerName').touched
+                        "
+                      >
+                        {{ "FullNameIsRequired" | ecTranslate }}
+                      </mat-error>
+                    </div>
+                    <div class="form-signeremail">
+                      <mat-form-field class="setting-input" appearance="outline">
+                        <mat-label> Email</mat-label>
+                        <input
+                          id="validationSignereMail"
+                          formControlName="signerEmail"
+                          type="email"
+                          matInput
+                          [placeholder]="'EnterYourEmail' | ecTranslate"
+                          [required]="contractId"
+                          email
+                        />
+                      </mat-form-field>
+                      <mat-error
+                        class="msg-error-signeremail"
+                        *ngIf="form.get('signerEmail').hasError('email')"
+                        >{{ "EmailIsNotValid" | ecTranslate }}</mat-error
+                      >
+                      <mat-error
+                        class="msg-error-signeremail"
+                        *ngIf="
+                          form.get('signerEmail').hasError('required') &&
+                          form.get('signerEmail').touched
+                        "
+                      >
+                        {{ "EmailIsRequired" | ecTranslate }}
+                      </mat-error>
+                    </div>
+  
+                    <div *ngIf="templateContract" class="form-signerrole">
+                      <mat-form-field class="setting-input" appearance="outline">
+                        <mat-label>{{ "Role" | ecTranslate }}</mat-label>
+                        <input
+                          formControlName="role"
+                          type="name"
+                          matInput
+                          [placeholder]="'EnterRole' | ecTranslate"
+                          [required]="templateContractId"
+                        />
+                      </mat-form-field>
+  
+                      <mat-error
+                        class="msg-error-signerrole"
+                        *ngIf="
+                          form.get('role').hasError('required') &&
+                          form.get('role').touched
+                        "
+                      >
+                        {{ "RoleIsRequired" | ecTranslate }}
+                      </mat-error>
+                    </div>
+                  </form>
+  
+                  <div class="signer_form-delete">
+                    <span
+                      (click)="handleDeleteSigner(i, form.value.id)"
+                      *ngIf="isShowDeleteBtn()"
+                    >
+                      <i
+                        class="fa-sharp fa-solid fa-trash pointer"
+                        style="font-size: 20px"
+                      ></i>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        <div class="signer_form-add">
+          <span
+            (click)="handleAddSigner()"
+            class="pointer mr-4"
+            *ngIf="isShowAddSignerBtn()"
+          >
+            <i class="fa-regular fa-plus"></i>
+            {{ "AddSigner" | ecTranslate }}
+          </span>
+
+          <span (click)="handleAddMe()" class="pointer">
+            <i class="fa-solid fa-user-plus"></i>
+            {{ "AddMe" | ecTranslate }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="signer_viewer">
+      <h6 class="signer_viewer-title">
+        <i class="fa-regular fa-closed-captioning"></i>
+        {{ "CopyRecipients" | ecTranslate }}
+      </h6>
+      <div class="container">
+        <div class="from_reviewer">
+          <ng-container
+            *ngFor="let form of formReviewer.controls; let i = index"
+          >
+            <div
+              class="signer_form mt-2"
+              [ngStyle]="{
+                padding: templateContractId && contractId ? '30px' : '20px'
+              }"
+            >
+              <form [formGroup]="form" id="form-setting2">
+                <div class="form-signername">
+                  <mat-form-field appearance="outline" class="setting-input">
+                    <mat-label>{{ "FullName" | ecTranslate }}</mat-label>
+                    <input
+                      id="validationReviewerName"
+                      formControlName="signerName"
+                      type="name"
+                      matInput
+                      [placeholder]="'EnterYourFullName' | ecTranslate"
+                      required
+                    />
+                  </mat-form-field>
+                  <mat-error
+                    class="msg-error-signername"
+                    *ngIf="
+                      form.get('signerName').hasError('required') &&
+                      form.get('signerName').touched
+                    "
+                  >
+                    {{ "FullNameIsRequired" | ecTranslate }}
+                  </mat-error>
+                </div>
+                <div class="form-signeremail">
+                  <mat-form-field appearance="outline" class="setting-input">
+                    <mat-label>Email</mat-label>
+                    <input
+                      id="validationReviewerMail"
+                      formControlName="signerEmail"
+                      type="email"
+                      matInput
+                      [placeholder]="'EnterYourEmail' | ecTranslate"
+                      required
+                      email
+                    />
+                  </mat-form-field>
+                  <mat-error
+                    class="msg-error-signeremail"
+                    *ngIf="form.get('signerEmail').hasError('email')"
+                    >{{ "EmailIsNotValid" | ecTranslate }}</mat-error
+                  >
+                  <mat-error
+                    class="msg-error-signeremail"
+                    *ngIf="
+                      form.get('signerEmail').hasError('required') &&
+                      form.get('signerEmail').touched
+                    "
+                  >
+                    {{ "EmailIsRequired" | ecTranslate }}
+                  </mat-error>
+                </div>
+              </form>
+              <div class="signer_form-delete">
+                <span
+                  (click)="handleDeleteReviewer(i, form)"
+                  *ngIf="isShowDeleteBtn()"
+                >
+                  <i
+                    class="fa-sharp fa-solid fa-trash pointer"
+                    style="font-size: 20px"
+                  ></i>
+                </span>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+        <div class="signer_form-add" color="primary">
+          <span
+            (click)="handleAddReviewer()"
+            class="pointer mr-4"
+            *ngIf="isShowAddReviewerBtn()"
+          >
+            <i class="fa-regular fa-plus"></i>
+            {{ "AddCopyRecipients" | ecTranslate }}
+          </span>
+          <span
+            (click)="handleAddMeReviewer()"
+            class="pointer"
+            *ngIf="isShowAddReviewerBtn()"
+          >
+            <i class="fa-solid fa-user-plus"></i>
+            {{ "AddMe" | ecTranslate }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stepper_btn">
+    <button (click)="handleBack()" mat-raised-button color="secondary">
+      {{ "Back" | ecTranslate }}
+    </button>
+    <button
+      class="button"
+      style="margin-right: 153px"
+      (click)="handleNext()"
+      mat-raised-button
+      form="form"
+      type="submit"
+      [disabled]="dbclick"
+    >
+      {{ "Continue" | ecTranslate }}
+    </button>
+  </div>
+</div>

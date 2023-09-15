@@ -1,0 +1,211 @@
+:host ::ng-deep #header .modal-header {
+  padding: 0 10px !important;
+}
+
+:host ::ng-deep #header .modal-header .modal-title {
+  transform: translateY(-4px) !important;
+}
+:host ::ng-deep #header .modal-header .close {
+  transform: translateY(-16px) !important;
+}
+
+header {
+  padding: 0 10px;
+  height: 7%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-close i {
+  font-size: 30px;
+}
+.header-close i:hover {
+  color: red;
+  cursor: pointer;
+}
+
+.contract {
+  height: 100%;
+}
+
+.wrapper_contract {
+  height: 93%;
+  position: relative;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 2px 0px;
+  background-color: rgb(233, 233, 233);
+  overflow-x: hidden;
+  display: flex;
+  justify-content: center;
+}
+
+.spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#design {
+  margin: 0 auto;
+}
+
+#design_viewer img {
+  width: 100%;
+  object-fit: cover;
+}
+
+.design_viewer--img:not(:first-child) {
+  margin-top: 20px;
+}
+
+.signature_type {
+  border-radius: 7px;
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background-color: rgb(255, 214, 91);
+  border: 3px solid #d1cbcb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+}
+.text_type {
+  border-radius: 7px;
+  position: absolute;
+  width: 100px;
+  height: 50px;
+  background-color: #eef8ff;
+  border: 3px solid #d1cbcb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+}
+
+.focus_Signature {
+  border: 3px solid #026351;
+}
+
+.signature_type--delete {
+  cursor: pointer;
+  color: white;
+  padding: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  font-size: 12px;
+  position: absolute;
+  background-color: #026351;
+  width: 10px;
+  height: 10px;
+  width: 10px;
+  right: -17px;
+  top: -17px;
+}
+
+.signature_type--delete:hover {
+  transition: 0.3s;
+  background-color: #e74c3c;
+}
+
+.move_pointer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  cursor: move;
+  width: 24px;
+  height: 24px;
+}
+
+.header-title {
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.signature_container {
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.signature_type--icon img {
+  width: 44px;
+}
+.contract_page:nth-child(1) > .page {
+  margin-top: 50px;
+}
+
+.contract_page:nth-last-child(1) > .page {
+  padding-bottom: 50px;
+}
+
+.tooltip_signer {
+  padding: 20px;
+  font-size: 15px;
+  color: #e74c3c;
+}
+
+mat-icon {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+@media (max-width: 2215px) {
+  #design_viewer {
+    transform: scale(0.9);
+    transform-origin: top center;
+  }
+}
+
+@media (max-width: 1925px) {
+  #design_viewer {
+    transform: scale(0.85);
+    transform-origin: top center;
+  }
+}
+
+@media (max-width: 1820px) {
+  #design_viewer {
+    transform: scale(0.75);
+    transform-origin: top center;
+  }
+}
+
+@media (max-width: 1600px) {
+  #design_viewer {
+    transform: scale(0.65);
+    transform-origin: top center;
+  }
+}
+
+@media (max-width: 1350px) {
+  #design_viewer {
+    transform: scale(0.55);
+    transform-origin: top center;
+  }
+}
+
+@media (max-width: 1130px) {
+  #design_viewer {
+    transform: scale(0.45);
+    transform-origin: top center;
+  }
+}
+
+@media (max-width: 996px) {
+  #design_viewer {
+    transform: scale(0.4);
+    transform-origin: top center;
+  }
+}
+
+/* 1129 */

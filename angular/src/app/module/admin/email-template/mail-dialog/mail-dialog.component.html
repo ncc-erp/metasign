@@ -1,0 +1,45 @@
+<ng-container *ngIf="mailInfo">
+    <abp-modal-header *ngIf="showDialogHeader" [title]="title" (onCloseClick)="dialogRef.close()"></abp-modal-header>
+    <div class="p-3 background-card">
+        <div class="row">
+            <div class="col-6">
+                <div class="form-group row">
+                    <label class="col-2 col-form-label">
+                        {{'To' | ecTranslate}}: 
+                    </label>
+                    <div class="col-9">
+                        <input class="form-control" #emailAdress="ngModel" #emailEl [(ngModel)]="mailInfo.sendToEmail"
+                            required placeholder="Email Address">
+                        <abp-validation-summary [control]="emailAdress" [controlEl]="emailEl"></abp-validation-summary>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-2 col-form-label">
+                        {{'Subject' | ecTranslate}}:
+                    </label>
+                    <div class="col-9">
+                        <input class="form-control" [(ngModel)]="mailInfo.subject" required placeholder="Subject">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class=" email-content bg-white">
+            <div [innerHtml]="sanitizer.bypassSecurityTrustHtml(mailInfo.bodyMessage)">
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-action mr-2" [disabled]="cancelDisabled"
+            (click)="dialogRef.close()">
+            {{'Close' | ecTranslate}}
+        </button>
+        <button  (click)="editTemplate()" type="button"
+            class="btn btn-primary btn-action" [disabled]="saveDisabled">
+            {{'Edit' | ecTranslate}}
+        </button>
+        <button  type="submit" class="btn btn-primary btn-action" (click)="sendMail()"
+            [disabled]="saveDisabled">
+            {{showEditButton ? ('SendMail'| ecTranslate) :('TestSendMail' | ecTranslate) }}
+        </button>
+    </div>
+</ng-container>

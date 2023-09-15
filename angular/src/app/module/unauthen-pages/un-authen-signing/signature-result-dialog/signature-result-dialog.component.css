@@ -1,0 +1,15 @@
+.dialog_contract--success {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    background-color: antiquewhite;
+  }
+
+  .dialog_contract--success img {
+    width: 400px;
+    height: 400px;
+  }
+
+  .dialog_contract--success h3 {
+    margin-top: 20px;
+  }
