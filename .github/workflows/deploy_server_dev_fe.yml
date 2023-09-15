@@ -1,0 +1,79 @@
+name: Deploy Metasign_FE DEV
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - 'angular/**'
+      - '.github/workflows/deploy_server_dev_fe.yml'
+jobs:
+  build:
+    runs-on: dev-metasign
+    name: Build Metasign_FE DEV
+    environment: dev
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Cache Node Module
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: |
+          **/node_modules
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json,**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
+    
+    - name: npm install
+      if: steps.cache-nodemodules.outputs.cache-hit != 'true'
+      run: |
+        cd angular/
+        export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+        nvm use 14.17
+        node -v
+        echo "=== INSTALL PACKAGE ==="
+        npm install
+
+    - name: Angular Build
+      run: |
+        cd angular/
+        export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+        nvm use 14.17
+        ng build --prod
+
+    - name: Remove appconfig
+      run: |
+        cd angular/dist/assets
+        rm -rf appconfig.production.json
+        
+    - name: Copy AngularBuild
+      run: |
+        cd angular/dist/
+        cp -r . /var/www/frontend_git/
+        
+    - name: Update Env-Config
+      run: |
+        cd angular/
+        echo '${{ secrets.APP_CONFIG_DEV }}' > appconfig.production.json
+      
+    - name: Restart Nginx
+      run: |
+        cd angular/
+        cp appconfig.production.json /var/www/frontend_git/assets/
+        sudo systemctl reload nginx
+
+        
+        
+        
+      
+        
+     
