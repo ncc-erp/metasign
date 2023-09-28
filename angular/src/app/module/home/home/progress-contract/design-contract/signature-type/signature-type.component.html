@@ -1,22 +1,12 @@
 <div [ngSwitch]="signatureValue.signatureType" id="signature-type">
-  <button
-    *ngSwitchCase="ContractSettingType.Electronic"
-    (focus)="handleSignatureFocus()"
-    [ngClass]="focusSignatureId == signatureValue.id ? 'focus_Signature' : ''"
-    #signatureType
-    (cdkDragEnded)="dragEnded($event, signatureType)"
-    cdkDrag
-    cdkDragBoundary="#design"
-    class="signature_type"
+  <button *ngSwitchCase="ContractSettingType.Electronic" (focus)="handleSignatureFocus()"
+    [ngClass]="focusSignatureId == signatureValue.id ? 'focus_Signature' : ''" #signatureType
+    (cdkDragEnded)="dragEnded($event, signatureType)" cdkDrag cdkDragBoundary="#design" class="signature_type"
     tooltipClass="tooltip_signer"
-    [matTooltip]="signatureValue.signerName + '\n' + batchContract ? signatureValue.signerEmail : ''"
-  >
+    [style.width.px]="signatureValue.width" [style.height.px]="signatureValue.height"
+    [matTooltip]="signatureValue.signerName + '\n' + batchContract ? signatureValue.signerEmail : ''">
     <div style="position: relative" class="signature_container">
-      <div
-        class="signature_type--delete"
-        (click)="handleDeleteSignature()"
-        *ngIf="isShowDeleteSignature()"
-      >
+      <div class="signature_type--delete" (click)="handleDeleteSignature()" *ngIf="isShowDeleteSignature()">
         <i class="fa-solid fa-trash"></i>
       </div>
       <div class="text-center">
@@ -26,129 +16,71 @@
         <div class="signature_type--name">{{ "Signature" | ecTranslate }}</div>
       </div>
     </div>
+    <div class="bottom-right" (mousedown)="onResize($event, i)">
+      <svg xmlns="http://www.w3.org/2000/svg" height="15" viewBox="0 0 18 18" width="18">
+        <path
+          d="m14.228 16.227a1 1 0 0 1 -.707-1.707l1-1a1 1 0 0 1 1.416 1.414l-1 1a1 1 0 0 1 -.707.293zm-5.638 0a1 1 0 0 1 -.707-1.707l6.638-6.638a1 1 0 0 1 1.416 1.414l-6.638 6.638a1 1 0 0 1 -.707.293zm-5.84 0a1 1 0 0 1 -.707-1.707l12.477-12.477a1 1 0 1 1 1.415 1.414l-12.478 12.477a1 1 0 0 1 -.707.293z"
+          fill="#494c4e" />
+      </svg>
+    </div>
   </button>
 
-  <div
-    *ngSwitchCase="ContractSettingType.Text"
-    class="text_type"
-    [ngClass]="focusSignatureId == signatureValue.id ? 'focus_Signature' : ''"
-    (mousedown)="handleSignatureFocus()"
-    cdkDrag
-    [cdkDragDisabled]="isTextareaFocused"
-    #signatureType
-    cdkDragBoundary="#design"
-    (cdkDragStarted)="onDrag = true"
-    (cdkDragEnded)="dragEnded($event, signatureType)"
+  <div *ngSwitchCase="ContractSettingType.Text" class="text_type"
+    [ngClass]="focusSignatureId == signatureValue.id ? 'focus_Signature' : ''" (mousedown)="handleSignatureFocus()"
+    cdkDrag [cdkDragDisabled]="isTextareaFocused" #signatureType cdkDragBoundary="#design"
+    (cdkDragStarted)="onDrag = true" (cdkDragEnded)="dragEnded($event, signatureType)"
     [matTooltip]="signatureValue.signerName + '\n' + batchContract ? signatureValue.signerEmail : ''"
-    tooltipClass="tooltip_signer"
-    [style.border]="
+    tooltipClass="tooltip_signer" [style.border]="
       (isTextareaFocused || signatureValue.valueInput) &&
       '2px solid ' + signatureValue.color
-    "
-    [style.height.px]="signatureValue.height"
-    [style.width.px]="signatureValue.width"
-  >
-    <textarea
-      class="text-area"
-      [ngClass]="!isTextareaFocused || onDrag ? 'cursor-pointer' : ''"
-      matInput
-      #textarea
-      (focus)="onTextareaFocus()"
-      (focusout)="onTextareaFocusOut()"
-      [(ngModel)]="signatureValue.valueInput"
-      (input)="handleValueTextarea($event)"
-      [placeholder]="'EnterText' | ecTranslate"
-      [style.width.px]="signatureValue.width"
-      [style.height.px]="signatureValue.height"
-      [style.font-size.px]="signatureValue.fontSize"
-      [style.font-family]="signatureValue.fontFamily"
-      [style.color]="signatureValue.fontColor"
-    ></textarea>
-    <div
-      class="signature_type--delete"
-      (click)="handleDeleteSignature()"
-      *ngIf="isShowDeleteSignature()"
-    >
+    " [style.height.px]="signatureValue.height" [style.width.px]="signatureValue.width">
+    <textarea class="text-area" [ngClass]="!isTextareaFocused || onDrag ? 'cursor-pointer' : ''" matInput #textarea
+      (focus)="onTextareaFocus()" (focusout)="onTextareaFocusOut()" [(ngModel)]="signatureValue.valueInput"
+      (input)="handleValueTextarea($event)" [placeholder]="'EnterText' | ecTranslate"
+      [style.width.px]="signatureValue.width" [style.height.px]="signatureValue.height"
+      [style.font-size.px]="signatureValue.fontSize" [style.font-family]="signatureValue.fontFamily"
+      [style.color]="signatureValue.fontColor"></textarea>
+    <div class="signature_type--delete" (click)="handleDeleteSignature()" *ngIf="isShowDeleteSignature()">
       <i class="fa-solid fa-trash"></i>
     </div>
     <div class="bottom-right" (mousedown)="onResize($event, i)">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        height="15"
-        viewBox="0 0 18 18"
-        width="18"
-      >
+      <svg xmlns="http://www.w3.org/2000/svg" height="15" viewBox="0 0 18 18" width="18">
         <path
           d="m14.228 16.227a1 1 0 0 1 -.707-1.707l1-1a1 1 0 0 1 1.416 1.414l-1 1a1 1 0 0 1 -.707.293zm-5.638 0a1 1 0 0 1 -.707-1.707l6.638-6.638a1 1 0 0 1 1.416 1.414l-6.638 6.638a1 1 0 0 1 -.707.293zm-5.84 0a1 1 0 0 1 -.707-1.707l12.477-12.477a1 1 0 1 1 1.415 1.414l-12.478 12.477a1 1 0 0 1 -.707.293z"
-          fill="#494c4e"
-        />
+          fill="#494c4e" />
       </svg>
     </div>
   </div>
 
-  <div
-    *ngSwitchCase="ContractSettingType.DatePicker"
-    (mousedown)="handleSignatureFocus()"
-    #signatureType
-    (cdkDragEnded)="dragEnded($event, signatureType)"
-    cdkDrag
-    cdkDragBoundary="#design"
-    class="text_type"
+  <div *ngSwitchCase="ContractSettingType.DatePicker" (mousedown)="handleSignatureFocus()" #signatureType
+    (cdkDragEnded)="dragEnded($event, signatureType)" cdkDrag cdkDragBoundary="#design" class="text_type"
     [ngClass]="focusSignatureId == signatureValue.id ? 'focus_Signature' : ''"
     [matTooltip]="signatureValue.signerName + '\n' + batchContract ? signatureValue.signerEmail : ''"
-    tooltipClass="tooltip_signer"
-    [style.border]="
+    tooltipClass="tooltip_signer" [style.border]="
       (isTextareaFocused || signatureValue.valueInput) &&
       '2px solid ' + signatureValue.color
-    "
-    [style.background-color]="
+    " [style.background-color]="
       !signatureValue.valueInput ? signatureValue.color : 'transparent'
-    "
-    [style.min-height.px]="signatureValue.height"
-    [style.width.px]="signatureValue.width"
-  >
-    <input
-      readonly
-      formatDateHandInputDirective
-      class="input cursor-pointer input-date"
-      matInput
-      [(ngModel)]="signatureValue.valueInput"
-      (dateChange)="onDateChange()"
-      [matDatepicker]="picker"
-      [placeholder]="'ChooseDate' | ecTranslate"
-      [style.font-size.px]="signatureValue.fontSize"
-      [style.font-family]="signatureValue.fontFamily"
-      [style.color]="signatureValue.fontColor"
-    />
+    " [style.min-height.px]="signatureValue.height" [style.width.px]="signatureValue.width">
+    <input readonly formatDateHandInputDirective class="input cursor-pointer input-date" matInput
+      [(ngModel)]="signatureValue.valueInput" (dateChange)="onDateChange()" [matDatepicker]="picker"
+      [placeholder]="'ChooseDate' | ecTranslate" [style.font-size.px]="signatureValue.fontSize"
+      [style.font-family]="signatureValue.fontFamily" [style.color]="signatureValue.fontColor" />
     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
     <mat-datepicker #picker panelClass="datepickerTwo"></mat-datepicker>
-    <div
-      class="signature_type--delete"
-      (click)="handleDeleteSignature()"
-      *ngIf="isShowDeleteSignature()"
-    >
+    <div class="signature_type--delete" (click)="handleDeleteSignature()" *ngIf="isShowDeleteSignature()">
       <i class="fa-solid fa-trash"></i>
     </div>
   </div>
 
-  <button
-    *ngSwitchCase="ContractSettingType.Digital"
-    (focus)="handleSignatureFocus()"
-    [ngClass]="focusSignatureId == signatureValue.id ? 'focus_Signature' : ''"
-    #signatureType
-    (cdkDragEnded)="dragEnded($event, signatureType)"
-    cdkDrag
-    cdkDragBoundary="#design"
-    class="signature_type"
+  <button *ngSwitchCase="ContractSettingType.Digital" (focus)="handleSignatureFocus()"
+    [ngClass]="focusSignatureId == signatureValue.id ? 'focus_Signature' : ''" #signatureType
+    (cdkDragEnded)="dragEnded($event, signatureType)" cdkDrag cdkDragBoundary="#design" class="signature_type"
     [matTooltip]="signatureValue.signerName + '\n' + batchContract ? signatureValue.signerEmail : ''"
-    tooltipClass="tooltip_signer"
-  >
+    [style.width.px]="signatureValue.width" [style.height.px]="signatureValue.height"
+    tooltipClass="tooltip_signer">
     <div style="position: relative" class="signature_container">
-      <div
-        class="signature_type--delete"
-        (click)="handleDeleteSignature()"
-        *ngIf="isShowDeleteSignature()"
-      >
+      <div class="signature_type--delete" (click)="handleDeleteSignature()" *ngIf="isShowDeleteSignature()">
         <i class="fa-solid fa-trash"></i>
       </div>
       <div class="text-center">
@@ -159,24 +91,14 @@
       </div>
     </div>
   </button>
-  <button
-    *ngSwitchCase="ContractSettingType.Stamp"
-    (focus)="handleSignatureFocus()"
-    [ngClass]="focusSignatureId == signatureValue.id ? 'focus_Signature' : ''"
-    #signatureType
-    (cdkDragEnded)="dragEnded($event, signatureType)"
-    cdkDrag
-    cdkDragBoundary="#design"
-    class="signature_type"
+  <button *ngSwitchCase="ContractSettingType.Stamp" (focus)="handleSignatureFocus()"
+    [ngClass]="focusSignatureId == signatureValue.id ? 'focus_Signature' : ''" #signatureType
+    (cdkDragEnded)="dragEnded($event, signatureType)" cdkDrag cdkDragBoundary="#design" class="signature_type"
     [matTooltip]="signatureValue.signerName + '\n' + batchContract ? signatureValue.signerEmail : ''"
-    tooltipClass="tooltip_signer"
-  >
+    [style.width.px]="signatureValue.width" [style.height.px]="signatureValue.height"
+    tooltipClass="tooltip_signer">
     <div style="position: relative" class="signature_container">
-      <div
-        class="signature_type--delete"
-        (click)="handleDeleteSignature()"
-        *ngIf="isShowDeleteSignature()"
-      >
+      <div class="signature_type--delete" (click)="handleDeleteSignature()" *ngIf="isShowDeleteSignature()">
         <i class="fa-solid fa-trash"></i>
       </div>
       <div class="text-center">
@@ -185,6 +107,13 @@
         </div>
         <div class="signature_type--name">{{ "Stamp" | ecTranslate }}</div>
       </div>
+    </div>
+    <div class="bottom-right" (mousedown)="onResize($event, i)">
+      <svg xmlns="http://www.w3.org/2000/svg" height="15" viewBox="0 0 18 18" width="18">
+        <path
+          d="m14.228 16.227a1 1 0 0 1 -.707-1.707l1-1a1 1 0 0 1 1.416 1.414l-1 1a1 1 0 0 1 -.707.293zm-5.638 0a1 1 0 0 1 -.707-1.707l6.638-6.638a1 1 0 0 1 1.416 1.414l-6.638 6.638a1 1 0 0 1 -.707.293zm-5.84 0a1 1 0 0 1 -.707-1.707l12.477-12.477a1 1 0 1 1 1.415 1.414l-12.478 12.477a1 1 0 0 1 -.707.293z"
+          fill="#494c4e" />
+      </svg>
     </div>
   </button>
 </div>

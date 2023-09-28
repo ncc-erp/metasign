@@ -2,6 +2,7 @@
 using EC.Manager.ContractTemplateSigners.Dto;
 using HRMv2.NccCore;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
@@ -42,7 +43,7 @@ namespace EC.Manager.ContractTemplateSigners
                 && x.Color == input.ContractTemplateSigners[i].Color
                 && x.ProcesOrder == input.ContractTemplateSigners[i].ProcesOrder
                 && x.Role == input.ContractTemplateSigners[i].Role);
-                if (alreadyExist && templateMassType != Constants.Enum.MassType.Multiple)
+                if (alreadyExist)
                 {
                     continue;
                 }
@@ -53,29 +54,7 @@ namespace EC.Manager.ContractTemplateSigners
                 }
                 else
                 {
-                    var id = await WorkScope.InsertAndGetIdAsync(entity);
-                    listNewId.Add(id);
-                    if (templateMassType == Constants.Enum.MassType.Multiple)
-                    {
-                        var listExist = WorkScope.GetAll<ContractTemplateSigner>()
-                        .Where(x => x.ContractTemplateId == input.ContractTemplateId && !listNewId.Contains(x.Id)).ToList();
-                        listExist.ForEach(x =>
-                        {
-                            x.IsDeleted = true;
-                        });
-                        await CurrentUnitOfWork.SaveChangesAsync();
-                        var listMassEntity = new List<MassContractTemplateSigner>();
-                        for (int j = 0; j < input.MassContractTemplateSigners[i].RowData.Count; j++)
-                        {
-                            listMassEntity.Add(new MassContractTemplateSigner
-                            {
-                                ContractTemplateSignerId = id,
-                                SignerEmail = input.MassContractTemplateSigners[i].RowData[j].Email,
-                                SignerName = input.MassContractTemplateSigners[i].RowData[j].Name
-                            });
-                        }
-                        await WorkScope.InsertRangeAsync(listMassEntity);
-                    }
+                    await WorkScope.InsertAsync(entity);
                 }
             }
             return input;
@@ -113,7 +92,7 @@ namespace EC.Manager.ContractTemplateSigners
                     ProcesOrder = x.ProcesOrder,
                     Role = x.Role,
                     SignerEmail = x.SignerEmail,
-                    SignerName = x.SignerName
+                    SignerName = x.SignerName,
                 }).FirstOrDefaultAsync();
         }
 
@@ -121,8 +100,6 @@ namespace EC.Manager.ContractTemplateSigners
         {
             var listSigner = WorkScope.GetAll<ContractTemplateSigner>().AsNoTracking()
                 .Where(x => x.ContractTemplateId == id).ToList();
-            var massType = WorkScope.GetAll<ContractTemplate>()
-                .Where(x => x.Id == id).FirstOrDefault().MassType;
             var isOrder = false;
             if (listSigner.Count > 0)
             {
@@ -140,29 +117,7 @@ namespace EC.Manager.ContractTemplateSigners
                     Role = x.Role,
                     SignerEmail = x.SignerEmail,
                     SignerName = x.SignerName,
-                    MassContractTemplateSigner = new List<GetMassContractTemplateSignerDto>()
                 }).ToListAsync();
-            if (massType == Constants.Enum.MassType.Multiple)
-            {
-                var massTemplateSigner = WorkScope.GetAll<MassContractTemplateSigner>()
-                    .Where(x => signers.Select(y => y.Id).Contains(x.ContractTemplateSignerId))
-                    .Select(x => new GetMassContractTemplateSignerDto
-                    {
-                        ContractTemplateSignerId = x.ContractTemplateSignerId,
-                        Email = x.SignerEmail,
-                        Name = x.SignerName
-                    }).ToList();
-                signers.ForEach(x =>
-                {
-                    massTemplateSigner.ForEach(y =>
-                    {
-                        if (x.Id == y.ContractTemplateSignerId)
-                        {
-                            x.MassContractTemplateSigner.Add(y);
-                        }
-                    });
-                });
-            }
             return new GetAllContractTemplateSignerDto
             {
                 IsOrder = isOrder,

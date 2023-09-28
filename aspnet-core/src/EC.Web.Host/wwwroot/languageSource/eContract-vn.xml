@@ -658,10 +658,19 @@
 		<text name="Row" value="Dòng" />
 		<text name="Error" value="Lỗi" />
 		<text name="ChoseSignType" value="Lựa chọn kiểu ký" />
-		<text name="SignMass" value="Áp dụng lô hợp đồng" />
-		<text name="SignSingle" value="Áp dụng cho hợp đồng hiện tại" />
+		<text name="SignMass" value="Áp dụng kí cho lô hợp đồng" />
+		<text name="SignSingle" value="Áp dụng kí cho hợp đồng hiện tại" />
 		<text name="PleaseFillCorectForm" value="Hãy điền đúng với file tải mẫu tài liệu" />
 		<text name="UploadSuccessFully" value="Tải thành công" />
-		<text name="JustSupportXlsx" value="Chỉ hỗ trợ file .xlsx" />
+		<text name="JustSupportXlsx" value="Chỉ hỗ trợ file .xlsx, .xlsm" />
+		<text name="AutoFillField" value="Trường tự động điền" />
+		<text name="Cell" value="Ô" />
+		<text name="ContractNameIsEmpty" value="Tên hợp đồng trống!" />
+		<text name="NameIsEmpty" value="Tên trống!" />
+		<text name="EmailIsNotValid" value="Email không đúng định dạng!" />
+		<text name="AutoFillFieldValueIsEmpty" value="Trường dữ liệu trống!" />
+		<text name="FileError" value="File có lỗi vui lòng kiểm tra lại!" />
+		<text name="NoData" value="Không có dữ liệu!" />
+		<text name="SignerNotBeenSet" value="Tồn tại người ký chưa được thiết lập vị trí ký!" />
 	</texts>
 </localizationDictionary>

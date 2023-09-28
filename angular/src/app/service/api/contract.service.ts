@@ -139,9 +139,9 @@ export class ContractService extends BaseApiService {
   public validImportMassTemplate(Contracttemplate): Observable<ApiResponseDto<any>> {
     return this.processPost(`ValidImportMassTemplate`,Contracttemplate)
   }
-  
-  public createMassContract(contractTemplateid): Observable<ApiResponseDto<any>> {
-    return this.processPost(`CreateMassContract?id=${contractTemplateid}`)
+
+  public createMassContract(input): Observable<ApiResponseDto<any>> {
+    return this.processPost(`CreateMassContract`,input)
   }
 
 }

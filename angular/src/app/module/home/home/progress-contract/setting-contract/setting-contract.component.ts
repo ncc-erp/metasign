@@ -48,6 +48,7 @@ export class SettingContractComponent
   templateContractId: number;
   useTemplateContract: boolean;
   createSigner: boolean;
+  public batchContract: boolean;
   templateContract: boolean;
   contractRoles: contractRoles[] = [
     {
@@ -89,12 +90,15 @@ export class SettingContractComponent
     this.useTemplateContract = Boolean(
       this.route.snapshot.queryParamMap.get("useTemplateContract")
     );
-   
+
     SetLocalStorageContract(this.contractId, this.currentStep, false);
   }
 
   ngOnInit() {
     this.getContractSetting();
+    this.batchContract = Boolean(
+      this.route.snapshot.queryParamMap.get("batchContract")
+    );
   }
 
   handleAddMe() {
@@ -295,8 +299,9 @@ export class SettingContractComponent
   handleAddReviewer() {
     const formReviewerGroup = this.fb.group({
       id: [null],
-      signerName: ["", Validators.required],
-      signerEmail: ["", Validators.required],
+      signerName: [""],
+      signerEmail: [""],
+      role: [""],
       procesOrder: [1],
       contractRole: [ContractRole.Viewer],
     });
@@ -467,8 +472,9 @@ export class SettingContractComponent
         this.formReviewer.push(
           this.fb.group({
             id: [this.createSigner ? null : value.id],
-            signerName: [value.signerName, Validators.required],
-            signerEmail: [value.signerEmail, Validators.required],
+            signerName: [value.signerName],
+            signerEmail: [value.signerEmail],
+            role: [value.role],
             contractRole: [value.contractRole],
             procesOrder: [value.procesOrder],
           })

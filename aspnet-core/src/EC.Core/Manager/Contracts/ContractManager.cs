@@ -33,8 +33,10 @@ using NccCore.Extension;
 using NccCore.Extensions;
 using NccCore.Paging;
 using NccCore.Uitls;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OfficeOpenXml;
+using Spire.Doc;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -47,6 +49,7 @@ using System.Threading.Tasks;
 using System.Web;
 using static EC.Constants.Enum;
 using Contract = EC.Entities.Contract;
+using Document = Spire.Doc.Document;
 using Font = iTextSharp.text.Font;
 using Image = iTextSharp.text.Image;
 using Rectangle = iTextSharp.text.Rectangle;
@@ -55,17 +58,17 @@ namespace EC.Manager.Contracts
 {
     public class ContractManager : BaseManager, IContractManager
     {
-        private readonly SignServerWorkerManager _workerManager;
         private readonly IConfiguration _appConfiguration;
-        private readonly EmailManager _emailManager;
         private readonly BackgroundJobManager _backgroundJobManager;
         private readonly ContractHistoryManager _contractHistoryManager;
-        private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly string tempConvertFolder = Path.Combine("tempConvert");
-        private readonly TenantManager _tenantManager;
+        private readonly EmailManager _emailManager;
+        private readonly FileStoringManager _fileStoringManager;
         private readonly NotificationManager _notificationManager;
         private readonly PDFConverterWebService _pDFConverterWebService;
-        private readonly FileStoringManager _fileStoringManager;
+        private readonly TenantManager _tenantManager;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly SignServerWorkerManager _workerManager;
+        private readonly string tempConvertFolder = Path.Combine("tempConvert");
 
         public ContractManager(IWorkScope workScope,
             SignServerWorkerManager signServerWorkerManager,
@@ -89,6 +92,106 @@ namespace EC.Manager.Contracts
             _notificationManager = notificationManager;
             _pDFConverterWebService = pDFConverterWebService;
             _fileStoringManager = fileStoringManager;
+        }
+
+        public async Task<long> CancelContract(CancelContractDto input)
+        {
+            var contract = await WorkScope.GetAll<Contract>()
+                .Where(x => x.Id == input.ContractId)
+                .FirstOrDefaultAsync();
+            if (contract.Status == ContractStatus.Cancelled)
+            {
+                throw new UserFriendlyException("This contract had been Canceled!");
+            }
+
+            contract.Status = ContractStatus.Cancelled;
+
+            await WorkScope.UpdateAsync(contract);
+            string loginUserEmail = await WorkScope.GetAll<User>()
+            .Where(x => x.Id == AbpSession.UserId)
+            .Select(x => x.EmailAddress)
+            .FirstOrDefaultAsync();
+
+            var history = new CreaContractHistoryDto
+            {
+                Action = HistoryAction.CancelContract,
+                AuthorEmail = loginUserEmail,
+                ContractId = input.ContractId,
+                ContractStatus = ContractStatus.Cancelled,
+                TimeAt = DateTimeUtils.GetNow(),
+                Note = $"{loginUserEmail} cancelledtheDocument {input.Reason}]"
+            };
+            await _contractHistoryManager.Create(history);
+            await _notificationManager.RemoveOldJob(contract.Id);
+            await _notificationManager.NotifyCancelContract(input.ContractId, history.TimeAt, history.AuthorEmail);
+
+            return input.ContractId;
+        }
+
+        public async Task<bool> CheckContractHasSigned(long contractId)
+        {
+            return (WorkScope.GetAll<ContractSigning>()
+                    .Where(s => s.ContractId == contractId && !string.IsNullOrEmpty(s.SignartureBase64))
+                    .ToList()).Any();
+        }
+
+        public async Task<object> CheckHasInput(long contractId)
+        {
+            var hasInput = await WorkScope.GetAll<SignerSignatureSetting>()
+                .Where(x => x.ContractSetting.ContractId == contractId)
+                .AnyAsync(x => CommonUtils.InputSignature.Contains(x.SignatureType));
+            var hasSign = await WorkScope.GetAll<SignerSignatureSetting>()
+                .Where(x => x.ContractSetting.ContractId == contractId)
+                .AnyAsync(x => CommonUtils.SigningSignature.Contains(x.SignatureType));
+            return new
+            {
+                HasInput = hasInput,
+                HasSign = hasSign
+            };
+        }
+
+        public async Task<string> CompressPdfFilesToZip(List<FileDto> listFile)
+        {
+            using (MemoryStream zipMemoryStream = new MemoryStream())
+            {
+                using (ZipArchive zipArchive = new ZipArchive(zipMemoryStream, ZipArchiveMode.Create, true))
+                {
+                    foreach (var file in listFile)
+                    {
+                        byte[] pdfBytes = Convert.FromBase64String(file.FileBase64);
+
+                        using (MemoryStream pdfMemoryStream = new MemoryStream(pdfBytes))
+                        {
+                            ZipArchiveEntry entry = zipArchive.CreateEntry(file.FileName, System.IO.Compression.CompressionLevel.Optimal);
+                            using (Stream entryStream = entry.Open())
+                            {
+                                await pdfMemoryStream.CopyToAsync(entryStream);
+                            }
+                        }
+                    }
+                }
+
+                byte[] zipBytes = zipMemoryStream.ToArray();
+
+                string zipBase64 = Convert.ToBase64String(zipBytes);
+
+                return "data:application/zip;base64," + zipBase64;
+            }
+        }
+
+        public async Task<string> ConvertHtmltoPdf(string html)
+        {
+            string filePath = Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder, "output.html");
+            File.WriteAllText(filePath, html);
+            var outputPdfPath = Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder);
+            await ConvertToPdf(filePath, Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder));
+            string pdfFilePath = Path.Combine(outputPdfPath, Path.GetFileNameWithoutExtension(filePath) + ".pdf");
+            Logger.Log(LogSeverity.Debug, $"PDF Location: {pdfFilePath}");
+            byte[] pdfBytes = File.ReadAllBytes(pdfFilePath);
+            string pdfBase64 = Convert.ToBase64String(pdfBytes);
+            File.Delete(filePath);
+            File.Delete(pdfFilePath);
+            return "data:application/pdf;base64," + pdfBase64;
         }
 
         public async Task<long> Create(CreatECDto input)
@@ -147,36 +250,186 @@ namespace EC.Manager.Contracts
             return entity.Id;
         }
 
-        public async Task SetNotiExpiredContract(long contractId)
+        public async Task<long> CreateContractFromTemplate(CreateContractFromTemplateDto input)
         {
-            var contract = await WorkScope.GetAsync<Contract>(contractId);
-            var input = new CancelExpiredContractDto
+            var loginUserId = AbpSession.UserId.Value;
+            var template = await WorkScope.GetAsync<ContractTemplate>(input.ContractTemplateId);
+
+            var loginUserEmail = await WorkScope.GetAll<User>()
+                .Where(x => x.Id == loginUserId)
+                .Select(x => x.EmailAddress)
+                .FirstOrDefaultAsync();
+
+            var guid = Guid.NewGuid();
+
+            var entity = new Contract
             {
-                ContractId = contract.Id,
-                CurrentUserLoginId = AbpSession.UserId,
-                ExpiredTime = contract.ExpriredTime,
-                TenantId = AbpSession.TenantId
+                Name = input.Name,
+                Code = input.Code,
+                Status = ContractStatus.Draft,
+                UserId = loginUserId,
+                File = template.Name + ".pdf",
+                ContractTemplateId = input.ContractTemplateId,
+                ExpriredTime = input.ExpriedTime,
+                ContractGuid = guid,
             };
-            if (input.ExpiredTime.HasValue)
+
+            entity.Id = await WorkScope.InsertAndGetIdAsync(entity);
+
+            var location = new SignPositionDto
             {
-                var delay = (input.ExpiredTime.Value - CommonUtils.GetNow()).TotalMilliseconds;
-                _backgroundJobManager.Enqueue<CancelExpiredContract, CancelExpiredContractDto>(input, BackgroundJobPriority.High, TimeSpan.FromMilliseconds(delay));
-            }
+                PositionX = 20,
+                PositionY = 10,
+                Page = 1
+            };
+            var fillInput = new FillInputDto
+            {
+                Color = "black",
+                Content = $"MetaSign Document ID: {guid.ToString().ToUpper()}",
+                FontSize = 10,
+                PageHeight = 0,
+                SignerSignatureSettingId = 1,
+                IsCreateContract = true
+            };
+            var base64 = await SignUtils.FillPdfWithText(fillInput, location, template.Content, _webHostEnvironment.WebRootPath);
+            var file = CommonUtils.ConvertBase64PdfToFile(base64.Split(",")[1], entity.File);
+            await _fileStoringManager.UploadUnsignedContract(entity.Id, file);
+
+            var history = new CreaContractHistoryDto
+            {
+                Action = HistoryAction.CreateContract,
+                AuthorEmail = loginUserEmail,
+                ContractId = entity.Id,
+                ContractStatus = ContractStatus.Draft,
+                TimeAt = DateTimeUtils.GetNow(),
+                Note = $"{loginUserEmail} đã tạo tài liệu"
+            };
+            await _contractHistoryManager.Create(history);
+
+            return entity.Id;
         }
 
-        public async Task<List<ContractBase64ImageDto>> GetContractFileImage(long contractId)
+        public async Task CreateMassContract(CreateMassContractDto input)
         {
-            return await WorkScope.GetAll<ContractBase64Image>()
-                .Where(x => x.ContractId == contractId)
-                .OrderBy(x => x.ContractPage)
-                .Select(x => new ContractBase64ImageDto
+            var loginUserId = AbpSession.UserId.Value;
+            var template = WorkScope.GetAll<ContractTemplate>().Where(x => x.Id == input.Id).FirstOrDefault();
+
+            var loginUserEmail = WorkScope.GetAll<User>()
+                .Where(x => x.Id == loginUserId)
+                .Select(x => x.EmailAddress)
+                .FirstOrDefault();
+            var massGuid = Guid.NewGuid();
+            var numOfContracts = input.RowData.Count;
+            for (int i = 0; i < numOfContracts; i++)
+            {
+                #region Create Contract
+
+                var entity = new Contract
                 {
-                    ContractPage = x.ContractPage,
-                    FileBase64 = x.FileBase64,
-                    Width = x.Width,
-                    Height = x.Height
-                })
-                .ToListAsync();
+                    Name = input.RowData[i].Contract.Name,
+                    Status = ContractStatus.Draft,
+                    UserId = loginUserId,
+                    File = input.RowData[i].Contract.Name + ".pdf",
+                    ContractTemplateId = template.Id,
+                    ContractGuid = Guid.NewGuid(),
+                    MassGuid = massGuid,
+                    ExpriredTime = input.RowData[i].Contract.ExpriedTime
+                };
+
+                entity.Id = await WorkScope.InsertAndGetIdAsync(entity);
+
+                var location = new SignPositionDto
+                {
+                    PositionX = 20,
+                    PositionY = 10,
+                    Page = 1
+                };
+                var fillInput = new FillInputDto
+                {
+                    Color = "black",
+                    Content = $"MetaSign Document ID: {entity.ContractGuid.ToString().ToUpper()}",
+                    FontSize = 10,
+                    PageHeight = 0,
+                    SignerSignatureSettingId = 1,
+                    IsCreateContract = true
+                };
+                var base64 = "";
+                if (!string.IsNullOrEmpty(template.MassWordContent))
+                {
+                    var base64Convert = await FillAndRepaceContent(template.MassWordContent, template.MassField, input.RowData[i].ListFieldDto);
+                    base64 = await SignUtils.FillPdfWithText(fillInput, location, base64Convert, _webHostEnvironment.WebRootPath);
+                }
+                else
+                {
+                    base64 = await SignUtils.FillPdfWithText(fillInput, location, template.Content, _webHostEnvironment.WebRootPath);
+                }
+                var file = CommonUtils.ConvertBase64PdfToFile(base64.Split(",")[1], entity.File);
+                await _fileStoringManager.UploadUnsignedContract(entity.Id, file);
+
+                #endregion Create Contract
+
+                #region Create Contract History
+
+                var history = new CreaContractHistoryDto
+                {
+                    Action = HistoryAction.CreateContract,
+                    AuthorEmail = loginUserEmail,
+                    ContractId = entity.Id,
+                    ContractStatus = ContractStatus.Draft,
+                    TimeAt = DateTimeUtils.GetNow(),
+                    Note = $"{loginUserEmail} đã tạo tài liệu"
+                };
+                await _contractHistoryManager.Create(history);
+
+                #endregion Create Contract History
+
+                #region Create Signer and SignatureSetting
+
+                foreach (var item1 in input.RowData[i].Signers)
+                {
+                    var signer = new ContractSetting
+                    {
+                        ContractId = entity.Id,
+                        ContractRole = item1.ContractRole,
+                        SignerName = item1.Name,
+                        SignerEmail = item1.Email,
+                        Status = ContractSettingStatus.NotConfirmed,
+                        ProcesOrder = item1.ProcesOrder,
+                        Color = item1.Color,
+                        SignerMassGuid = item1.MassGuid
+                    };
+                    signer.Id = WorkScope.InsertAndGetId(signer);
+                    var signatureSetting = item1.SignatureSettings.Select(x => new SignerSignatureSetting
+                    {
+                        ContractSettingId = signer.Id,
+                        SignatureType = x.SignatureType,
+                        Page = x.Page,
+                        PositionX = x.PositionX,
+                        PositionY = x.PositionY,
+                        Width = x.Width,
+                        Height = x.Height,
+                        FontSize = x.FontSize,
+                        FontFamily = x.FontFamily,
+                        FontColor = x.FontColor,
+                        ValueInput = x.ValueInput,
+                    }).ToList();
+                    WorkScope.InsertRange(signatureSetting);
+                }
+
+                #endregion Create Signer and SignatureSetting
+
+                #region Send Mail
+
+                var sendMailDto = new SendMailDto
+                {
+                    ContractId = entity.Id,
+                    MailContent = GetContractMailContent(entity.Id)
+                };
+                await SendMailToViewer(sendMailDto);
+                await SendMail(sendMailDto);
+
+                #endregion Send Mail
+            }
         }
 
         public async Task<long> Delete(long id)
@@ -188,6 +441,143 @@ namespace EC.Manager.Contracts
             await WorkScope.DeleteAsync(contract);
 
             return id;
+        }
+
+        public async Task<string> DownloadContractAndCertificate(DownloadContractAndCertificateDto input)
+        {
+            var contract = await WorkScope.GetAll<Contract>()
+                .Where(x => x.Id == input.ContractId)
+                .Select(x => new { x.Id, x.Name, x.File, x.Code, x.UserId, x.Status, x.CreationTime, x.ExpriredTime, x.CreatorUserId, x.FileBase64, x.ContractGuid })
+                .FirstOrDefaultAsync();
+
+            var createdUser = await WorkScope.GetAll<User>()
+                .Where(x => x.Id == contract.UserId)
+                .Select(x => new { x.FullName, x.EmailAddress })
+                .FirstOrDefaultAsync();
+
+            var listContractSignarture = await WorkScope.GetAll<ContractSigning>()
+                .Where(x => x.ContractId == input.ContractId)
+                .OrderBy(x => x.TimeAt)
+                .ToListAsync();
+
+            var lastContractSignature = listContractSignarture.LastOrDefault();
+
+            string base64Contract = contract.FileBase64;
+
+            if (listContractSignarture.Count != 0)
+            {
+                base64Contract = lastContractSignature.SigningResult;
+            }
+
+            if (input.DownloadType == DownloadContractType.Contract)
+            {
+                return base64Contract;
+            };
+
+            var signatures = new List<SignartureDto>();
+
+            foreach (var contractSigning in listContractSignarture)
+            {
+                if (!string.IsNullOrEmpty(contractSigning.SignartureBase64))
+                {
+                    var signerName = await WorkScope.GetAll<ContractSetting>()
+                    .Where(x => x.ContractId == input.ContractId &&
+                                x.SignerEmail == contractSigning.Email)
+                    .Select(x => x.SignerName)
+                    .FirstOrDefaultAsync();
+
+                    var signingTime = await WorkScope.GetAll<ContractHistory>()
+                        .Where(x => x.ContractId == input.ContractId &&
+                                    x.AuthorEmail == contractSigning.Email &&
+                                    x.Action == HistoryAction.Sign)
+                        .Select(x => x.CreationTime)
+                        .FirstOrDefaultAsync();
+
+                    var sendingTime = await WorkScope.GetAll<ContractHistory>()
+                        .Where(x => x.ContractId == input.ContractId &&
+                                    x.Note.Contains($"sent theDocumentTo {contractSigning.Email}") &&
+                                    x.Action == HistoryAction.SendMail)
+                        .Select(x => x.CreationTime)
+                        .FirstOrDefaultAsync();
+
+                    var signature = new SignartureDto
+                    {
+                        Email = contractSigning.Email,
+                        SignartureBase64 = contractSigning.SignartureBase64,
+                        Name = signerName,
+                        SigningTime = signingTime,
+                        SendingTime = sendingTime,
+                        GuId = contractSigning.Guid,
+                        SignatureType = contractSigning.SignatureType
+                    };
+
+                    signatures.Add(signature);
+                }
+            }
+
+            var certificate = new CertificateDto
+            {
+                ContractId = contract.Id,
+                ContractGuId = contract.ContractGuid,
+                ContractName = contract.Name,
+                FileName = contract.File,
+                Code = contract.Code,
+                UserId = contract.UserId,
+                Status = contract.Status,
+                CreationTime = contract.CreationTime,
+                CreatorUser = createdUser.FullName,
+                CreatorEmail = createdUser.EmailAddress,
+                Signatures = signatures,
+                ExpriredTime = contract.ExpriredTime,
+            };
+
+            string base64Certificate = await RenderCertificatePdf(certificate);
+
+            if (input.DownloadType == DownloadContractType.Certificate)
+            {
+                return base64Certificate;
+            };
+
+            List<FileDto> listFile = new List<FileDto>();
+
+            listFile.Add(new FileDto
+            {
+                FileName = "Certificate.pdf",
+                FileBase64 = base64Certificate.Replace("data:application/pdf;base64,", "")
+            });
+
+            listFile.Add(new FileDto
+            {
+                FileName = contract.File,
+                FileBase64 = base64Contract.Replace("data:application/pdf;base64,", "")
+            });
+
+            return await CompressPdfFilesToZip(listFile);
+        }
+
+        public async Task<FileBase64Dto> DownLoadMassTemplate()
+        {
+            using (var package = new ExcelPackage(new FileInfo(Path.Combine(_webHostEnvironment.WebRootPath, "massTemplate", "Mass_Template_Contract.xlsx"))))
+            {
+                return new FileBase64Dto
+                {
+                    Base64 = Convert.ToBase64String(package.GetAsByteArray()),
+                    FileName = "Mass_Contract_Template.xlsx",
+                    FileType = "application/vnd.ms-excel"
+                };
+            }
+        }
+
+        public async Task<GetContractDto> Get(long id)
+        {
+            var res = await QueryAllContract()
+                .Where(x => x.Id == id)
+                .FirstOrDefaultAsync();
+            if (string.IsNullOrEmpty(res.FileBase64))
+            {
+                res.FileBase64 = await _fileStoringManager.DownloadLatestContractBase64(res.Id);
+            }
+            return res;
         }
 
         public List<GetContractDto> GetAll()
@@ -215,6 +605,34 @@ namespace EC.Manager.Contracts
                 });
 
             return await query.GetGridResult(query, input);
+        }
+
+        public async Task<List<GetSignersDto>> GetAllSigners()
+        {
+            var userId = AbpSession.UserId;
+            var userEmail = WorkScope.GetAsync<User>(userId.Value).Result.EmailAddress;
+
+            var query = WorkScope.GetAll<ContractSetting>()
+                .Where(x => x.Contract.UserId == userId && x.ContractRole != ContractRole.Viewer)
+                .Select(x => new
+                {
+                    Signer = new
+                    {
+                        Email = x.SignerEmail,
+
+                        //Name = x.SignerName
+                    }
+                })
+                .ToList()
+                .GroupBy(x => x.Signer)
+                .Select(x => new GetSignersDto
+                {
+                    Email = x.Key.Email,
+
+                    //Name = x.Key.Name
+                }).ToList();
+            query = query.Where(x => x.Email != userEmail).ToList();
+            return query;
         }
 
         public async Task<GridResult<GetContractDto>> GetContractByFilterPaging(GetContractByFilterDto input)
@@ -392,460 +810,61 @@ namespace EC.Manager.Contracts
             return result;
         }
 
-        public IQueryable<GetContractDto> QueryAllContract()
+        public async Task<List<GetContractDesginInfo>> GetContractDesginInfo(long contractId)
         {
-            return WorkScope.GetAll<Contract>()
-                .OrderByDescending(x => x.CreationTime)
-                .Select(x => new GetContractDto
+            var contractImages = WorkScope.GetAll<ContractBase64Image>()
+                     .Where(x => x.ContractId == contractId)
+                     .OrderBy(x => x.ContractPage)
+                     .Select(x => new ContractBase64ImageDto
+                     {
+                         ContractPage = x.ContractPage,
+                         FileBase64 = x.FileBase64,
+                         Width = x.Width,
+                         Height = x.Height
+                     })
+                     .ToList();
+
+            var dicSettingColor = await WorkScope.GetAll<ContractSetting>()
+                .Where(x => x.ContractId == contractId)
+                .ToDictionaryAsync(x => x.Id, x => x.Color);
+
+            var signatureSettings = WorkScope.GetAll<SignerSignatureSetting>()
+                .Where(x => x.ContractSetting.ContractId == contractId)
+                .ToList()
+                .Select(x => new GetSignerSignatureSettingDto
                 {
                     Id = x.Id,
-                    UserId = x.UserId,
-                    Name = x.Name,
-                    Code = x.Code,
-                    ExpriedTime = x.ExpriredTime.Value,
-                    Status = x.Status,
-                    File = x.File,
-                    FileBase64 = x.FileBase64,
-                    UpdatedUser = (x.LastModificationTime == default || x.LastModifierUser == null) ? string.Empty : x.LastModifierUser.FullName,
-                    UpdatedTime = x.LastModificationTime != default ? x.LastModificationTime : null,
-                    CreatorUser = x.CreatorUser == null ? string.Empty : x.CreatorUser.FullName,
-                    CreationTime = x.CreationTime,
-                    ContractTemplateId = x.ContractTemplateId
-                });
-        }
-
-        public async Task<List<GetSignersDto>> GetAllSigners()
-        {
-            var userId = AbpSession.UserId;
-            var userEmail = WorkScope.GetAsync<User>(userId.Value).Result.EmailAddress;
-
-            var query = WorkScope.GetAll<ContractSetting>()
-                .Where(x => x.Contract.UserId == userId && x.ContractRole != ContractRole.Viewer)
-                .Select(x => new
-                {
-                    Signer = new
-                    {
-                        Email = x.SignerEmail,
-
-                        //Name = x.SignerName
-                    }
-                })
-                .ToList()
-                .GroupBy(x => x.Signer)
-                .Select(x => new GetSignersDto
-                {
-                    Email = x.Key.Email,
-
-                    //Name = x.Key.Name
-                }).ToList();
-            query = query.Where(x => x.Email != userEmail).ToList();
-            return query;
-        }
-
-        public async Task<GetContractDto> Get(long id)
-        {
-            var res = await QueryAllContract()
-                .Where(x => x.Id == id)
-                .FirstOrDefaultAsync();
-            if (string.IsNullOrEmpty(res.FileBase64))
-            {
-                res.FileBase64 = await _fileStoringManager.DownloadLatestContractBase64(res.Id);
-            }
-            return res;
-        }
-
-        public async Task<UpdatECDto> Update(UpdatECDto input)
-        {
-            var oldContract = WorkScope.GetAll<Contract>().Where(x => x.Id == input.Id).FirstOrDefault();
-
-            //var isChangeFile = oldContract.FileBase64 != input.FileBase64;
-
-            //var entity = ObjectMapper.Map<Contract>(input);
-
-            //entity.ContractGuid = oldContract.ContractGuid;
-
-            if (oldContract.UserId == default)
-            {
-                oldContract.UserId = AbpSession.UserId.Value;
-            }
-
-            oldContract.ExpriredTime = input.ExpriedTime;
-            oldContract.Code = input.Code;
-            oldContract.File = input.File;
-            oldContract.Status = input.Status;
-            oldContract.ContractTemplateId = input.ContractTemplateId;
-            oldContract.Name = input.Name;
-
-            //if (isChangeFile)
-            //{
-            var location = new SignPositionDto
-            {
-                PositionX = 20,
-                PositionY = 10,
-                Page = 1
-            };
-            var fillInput = new FillInputDto
-            {
-                Color = "black",
-                Content = $"MetaSign Document ID: {oldContract.ContractGuid.ToString().ToUpper()}",
-                FontSize = 10,
-                PageHeight = 0,
-                SignerSignatureSettingId = 1,
-                IsCreateContract = true
-            };
-
-            var base64 = await SignUtils.FillPdfWithText(fillInput, location, input.FileBase64, _webHostEnvironment.WebRootPath);
-            var file = CommonUtils.ConvertBase64PdfToFile(base64.Split(",")[1], oldContract.File);
-            await _fileStoringManager.DeleteUnsignedContract(oldContract.Id);
-            await _fileStoringManager.UploadUnsignedContract(oldContract.Id, file);
-
-            //}
-
-            await WorkScope.UpdateAsync(oldContract);
-
-            //if (isChangeFile)
-            //{
-            var signatureSettings = WorkScope.GetAll<SignerSignatureSetting>()
-                .Where(x => x.ContractSetting.ContractId == input.Id)
-                .ToList();
-            foreach (var item in signatureSettings)
-            {
-                await WorkScope.DeleteAsync(item);
-            }
-            await SaveDraft(input.Id);
-
-            //}
-
-            return input;
-        }
-
-        public async Task<GetContractMailSettingDto> GetSendMailInfo(long contractId)
-        {
-            var contract = await WorkScope.GetAll<Contract>()
-                .Where(x => x.Id == contractId)
-                .FirstOrDefaultAsync();
-
-            var signers = await WorkScope.GetAll<ContractSetting>()
-                .Where(x => x.ContractId == contractId)
-                .Select(x => new SignerDto
-                {
-                    Name = x.SignerName,
-                    Email = x.SignerEmail,
-                    ContractRole = x.ContractRole,
-                    ProcesOrder = x.ProcesOrder,
-                    Color = x.Color
-                })
-                .ToListAsync();
-
-            return new GetContractMailSettingDto
-            {
-                File = contract.File,
-                MailContent = contract.EmailContent,
-                Signers = signers
-            };
-        }
-
-        public async Task SendMailToViewer(SendMailDto input)
-        {
-            //var emailTemplate = _emailManager.GetEmailTemplateDto(MailFuncEnum.Signing);
-            //if (emailTemplate == default)
-            //{
-            //    throw new UserFriendlyException($"Not found email template");
-            //}
-            var contract = WorkScope.GetAll<Contract>()
-                .Include(x => x.User)
-                .Where(x => x.Id == input.ContractId).FirstOrDefault();
-            string contractCreator = contract.User.EmailAddress;
-            var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
-
-            var viewers = await WorkScope.GetAll<ContractSetting>()
-                .Include(x => x.Contract)
-                .Include(x => x.Contract.User)
-                .Where(x => x.ContractId == input.ContractId && x.ContractRole == ContractRole.Viewer)
-                .ToListAsync();
-
-            if (viewers.Count > 0)
-            {
-                string notiReceivers = viewers.Select(x => x.SignerEmail).JoinAsString(", ");
-                List<ResultTemplateEmail<ContractMailTemplateDto>> maiContents = viewers.Select(x => new ResultTemplateEmail<ContractMailTemplateDto>
-                {
-                    Result = SetContractMailTemplate(x, baseUrl)
+                    ContractSettingId = x.ContractSettingId,
+                    SignatureType = x.SignatureType,
+                    Height = x.Height,
+                    IsSigned = x.IsSigned,
+                    PositionX = x.PositionX,
+                    PositionY = x.PositionY,
+                    Width = x.Width,
+                    SignerName = x.ContractSetting.SignerName,
+                    Page = x.Page,
+                    Color = dicSettingColor.ContainsKey(x.ContractSettingId) ? dicSettingColor[x.ContractSettingId] : null,
+                    FontSize = x.FontSize,
+                    FontColor = x.FontColor,
+                    FontFamily = x.FontFamily
                 }).ToList();
 
-                var delaySendMail = 0;
-                foreach (var content in maiContents)
+            var result = new List<GetContractDesginInfo>();
+
+            foreach (var img in contractImages)
+            {
+                var designInfo = new GetContractDesginInfo
                 {
-                    MailPreviewInfoDto mailInput = (MailPreviewInfoDto)input.MailContent.Clone();
-                    mailInput.SendToEmail = content.Result.SendToEmail;
-                    mailInput.CurrentUserLoginId = AbpSession.UserId;
-                    mailInput.TenantId = AbpSession.TenantId;
-                    mailInput.Subject = string.IsNullOrEmpty(mailInput.Subject) ? $"[Nhận một bản sao] {content.Result.ContractName}" : mailInput.Subject;
-                    mailInput.BodyMessage = CommonUtils.ReplaceBodyMessage(mailInput.BodyMessage, content.Result);
-                    mailInput.ContractSettingId = content.Result.ContractSettingId;
-                    mailInput.MailHistory = CreateContractHistory(contractCreator, input.ContractId, notiReceivers, ContractRole.Viewer);
-                    _backgroundJobManager.Enqueue<SendMail, MailPreviewInfoDto>(mailInput, BackgroundJobPriority.High, TimeSpan.FromSeconds(delaySendMail));
-                    delaySendMail += ECConsts.DELAY_SEND_MAIL_SECOND;
-                    var item = await WorkScope.GetAsync<ContractSetting>(mailInput.ContractSettingId.Value);
-                    item.IsComplete = true;
-                    CurrentUnitOfWork.SaveChanges();
+                    ContractBase64 = img.FileBase64,
+                    Page = img.ContractPage,
+                    Width = img.Width,
+                    Height = img.Height,
+                    SignatureSettings = signatureSettings.Where(x => x.Page == img.ContractPage).ToList()
                 };
-                contract.Status = ContractStatus.Inprogress;
-                await WorkScope.UpdateAsync(contract);
-            }
-        }
-
-        public async Task<object> SendMail(SendMailDto input)
-        {
-            var contract = WorkScope.GetAll<Contract>()
-                .Include(x => x.User)
-                .Where(x => x.Id == input.ContractId).FirstOrDefault();
-
-            string contractCreator = contract.User.EmailAddress;
-
-            var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
-
-            var signers = await WorkScope.GetAll<ContractSetting>()
-                .Include(x => x.Contract)
-                .Include(x => x.Contract.User)
-                .Where(x => x.ContractId == input.ContractId && x.ContractRole == ContractRole.Signer)
-                .OrderBy(x => x.ProcesOrder)
-                .ToListAsync();
-
-            var isOrder = signers.Any(x => x.ProcesOrder != 1);
-            List<ResultTemplateEmail<ContractMailTemplateDto>> maiContents = signers.Where(x => !x.IsComplete)
-            .Select(x => new ResultTemplateEmail<ContractMailTemplateDto>
-            {
-                Result = SetContractMailTemplate(x, baseUrl)
-            }).ToList();
-
-            var lastcontent = new ResultTemplateEmail<ContractMailTemplateDto>();
-            if (maiContents.Count == 0 && isOrder /*&& !isSendAll*/)
-            {
-                var lastSigner = signers.Last();
-                lastcontent = new ResultTemplateEmail<ContractMailTemplateDto>
-                {
-                    Result = SetContractMailTemplate(lastSigner, baseUrl)
-                };
-                MailPreviewInfoDto mailInput = (MailPreviewInfoDto)input.MailContent.Clone();
-                mailInput.CurrentUserLoginId = AbpSession.UserId;
-                mailInput.TenantId = AbpSession.TenantId;
-                mailInput.Subject = string.IsNullOrEmpty(mailInput.Subject) ? $"[Ký tài liệu] {lastcontent.Result.ContractName}" : mailInput.Subject;
-                mailInput.BodyMessage = CommonUtils.ReplaceBodyMessage(mailInput.BodyMessage, lastcontent.Result);
-                mailInput.ContractSettingId = lastcontent.Result.ContractSettingId;
-                mailInput.MailHistory = CreateContractHistory(contractCreator, input.ContractId, lastcontent.Result.SendToEmail, ContractRole.Signer);
-                _backgroundJobManager.Enqueue<SendMail, MailPreviewInfoDto>(mailInput, BackgroundJobPriority.High, TimeSpan.FromSeconds(1));
+                result.Add(designInfo);
             }
 
-            var delaySendMail = 0;
-
-            if (maiContents.Count > 0 /*|| isSendAll*/)
-            {
-                foreach (var content in maiContents)
-                {
-                    MailPreviewInfoDto mailInput = (MailPreviewInfoDto)input.MailContent.Clone();
-                    mailInput.CurrentUserLoginId = AbpSession.UserId;
-                    mailInput.TenantId = AbpSession.TenantId;
-                    mailInput.BodyMessage = CommonUtils.ReplaceBodyMessage(mailInput.BodyMessage, content.Result);
-                    mailInput.ContractSettingId = content.Result.ContractSettingId;
-                    mailInput.SendToEmail = content.Result.SendToEmail;
-                    mailInput.Subject = string.IsNullOrEmpty(mailInput.Subject) ? $"[Ký tài liệu] {content.Result.ContractName}" : mailInput.Subject;
-                    mailInput.MailHistory = CreateContractHistory(contractCreator, input.ContractId, content.Result.SendToEmail, ContractRole.Signer);
-                    _backgroundJobManager.Enqueue<SendMail, MailPreviewInfoDto>(mailInput, BackgroundJobPriority.High, TimeSpan.FromSeconds(delaySendMail));
-
-                    delaySendMail += ECConsts.DELAY_SEND_MAIL_SECOND;
-
-                    var firstContent = WorkScope.GetAll<ContractHistory>()
-                        .Where(x => x.ContractId == input.ContractId && x.Action == HistoryAction.SendMail)
-                        .Where(x => string.IsNullOrEmpty(x.MailContent)).FirstOrDefault();
-
-                    if (firstContent == default)
-                    {
-                        var contentHistory = new CreaContractHistoryDto
-                        {
-                            MailContent = input.MailContent.ToJsonString(),
-                            Action = HistoryAction.SendMail,
-                            ContractId = input.ContractId,
-                            ContractStatus = ContractStatus.Inprogress,
-                            Note = "CreateEmailTemplate",
-                            TimeAt = Clock.Provider.Now,
-                            AuthorEmail = contractCreator
-                        };
-                        await _contractHistoryManager.Create(contentHistory);
-                    }
-                    if (isOrder /*&& !isSendAll*/)
-                    {
-                        break;
-                    }
-                };
-            }
-
-            var contractSettingId = signers.Where(x => x.SignerEmail == contractCreator)
-                .Select(x => x.Id)
-                .FirstOrDefault();
-
-            var isfirstSigner = signers.First().SignerEmail == contractCreator;
-
-            contract.Status = ContractStatus.Inprogress;
-            await WorkScope.UpdateAsync(contract);
-            return new
-            {
-                contractId = input.ContractId,
-                settingId = contractSettingId,
-                isAssigned = contractSettingId != default,
-                isOrder = isOrder,
-                isfirstSigner = isfirstSigner,
-                EmailContent = maiContents.Count > 0 ? maiContents[0].Result.SignUrl : lastcontent.Result.SignUrl,
-                Receivers = maiContents
-            };
-        }
-
-        public async Task ResendMailAll(long contractId)
-        {
-            var contract = WorkScope.GetAll<Contract>()
-                .Include(x => x.User)
-                .Where(x => x.Id == contractId).FirstOrDefault();
-
-            string contractCreator = contract.User.EmailAddress;
-
-            var contractHistory = WorkScope.GetAll<ContractHistory>()
-                .Where(x => x.ContractId == contractId)
-                .Where(x => !string.IsNullOrEmpty(x.MailContent))
-                .FirstOrDefault();
-
-            MailPreviewInfoDto mailContent = contractHistory.MailContent.FromJsonString<MailPreviewInfoDto>();
-
-            var signers = await WorkScope.GetAll<ContractSetting>()
-                .Include(x => x.Contract)
-                .Include(x => x.Contract.User)
-                .Where(x => x.ContractId == contractId && x.IsSendMail == true)
-                .OrderBy(x => x.ProcesOrder)
-                .ToListAsync();
-
-            var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
-
-            List<ResultTemplateEmail<ContractMailTemplateDto>> mailContents = signers.Where(x => x.ContractRole == ContractRole.Viewer || x.IsComplete == false).Select(x => new ResultTemplateEmail<ContractMailTemplateDto>
-            {
-                Result = SetContractMailTemplate(x, baseUrl)
-            }).ToList();
-
-            bool IsReSent = true;
-
-            foreach (var content in mailContents)
-            {
-                MailPreviewInfoDto clonedMailContent = (MailPreviewInfoDto)mailContent.Clone();
-                clonedMailContent.SendToEmail = content.Result.SendToEmail;
-                clonedMailContent.CurrentUserLoginId = AbpSession.UserId;
-                clonedMailContent.TenantId = AbpSession.TenantId;
-                var action = content.Result.ContractRole == ContractRole.Signer ? "[Ký tài liệu]" : "[Nhận một bản sao]";
-                clonedMailContent.Subject = string.IsNullOrEmpty(mailContent.Subject) ? $"{action} {content.Result.ContractName}" : mailContent.Subject;
-                clonedMailContent.BodyMessage = CommonUtils.ReplaceBodyMessage(clonedMailContent.BodyMessage, content.Result);
-                clonedMailContent.MailHistory = CreateContractHistory(contractCreator, contractId, content.Result.SendToEmail, content.Result.ContractRole, IsReSent);
-
-                _backgroundJobManager.Enqueue<SendMail, MailPreviewInfoDto>(clonedMailContent, BackgroundJobPriority.High, TimeSpan.FromSeconds(0));
-            };
-        }
-
-        public async Task ResendMailOne(ReSendMailDto input)
-        {
-            var contract = WorkScope.GetAll<Contract>()
-                .Include(x => x.User)
-                .Where(x => x.Id == input.ContractId).FirstOrDefault();
-
-            string contractCreator = contract.User.EmailAddress;
-
-            var contractHistory = WorkScope.GetAll<ContractHistory>()
-                .Where(x => x.ContractId == input.ContractId)
-                .Where(x => !string.IsNullOrEmpty(x.MailContent))
-                .FirstOrDefault();
-
-            MailPreviewInfoDto mailContent = contractHistory.MailContent.FromJsonString<MailPreviewInfoDto>();
-
-            var signers = await WorkScope.GetAll<ContractSetting>()
-                .Include(x => x.Contract)
-                .Include(x => x.Contract.User)
-                .Where(x => x.ContractId == input.ContractId && x.SignerEmail == input.ResentToMail)
-                .OrderBy(x => x.ProcesOrder)
-                .FirstOrDefaultAsync();
-
-            var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
-            var content = new ResultTemplateEmail<ContractMailTemplateDto>
-            {
-                Result = SetContractMailTemplate(signers, baseUrl)
-            };
-
-            bool IsReSent = true;
-
-            var action = content.Result.ContractRole == ContractRole.Signer ? "[Ký tài liệu]" : "[Nhận một bản sao]";
-            mailContent.SendToEmail = signers.SignerEmail;
-            mailContent.CurrentUserLoginId = AbpSession.UserId;
-            mailContent.TenantId = AbpSession.TenantId;
-            mailContent.Subject = string.IsNullOrEmpty(mailContent.Subject) ? $"{action} {content.Result.ContractName}" : mailContent.Subject;
-            mailContent.BodyMessage = CommonUtils.ReplaceBodyMessage(mailContent.BodyMessage, content.Result);
-            mailContent.MailHistory = CreateContractHistory(contractCreator, input.ContractId, content.Result.SendToEmail, content.Result.ContractRole, IsReSent);
-            _backgroundJobManager.Enqueue<SendMail, MailPreviewInfoDto>(mailContent, BackgroundJobPriority.High, TimeSpan.FromSeconds(0));
-        }
-
-        public string GetSignUrl(long settingId, long contractId)
-        {
-            var tenantName = "";
-            if (AbpSession.TenantId.HasValue)
-            {
-                tenantName = _tenantManager.GetById(AbpSession.TenantId.Value).TenancyName;
-            }
-            var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
-            return $"{baseUrl}app/signging/email-valid?{HttpUtility.UrlEncode($"settingId={settingId}&contractId={contractId}&tenantName={tenantName}")}";
-        }
-
-        public MailPreviewInfoDto GetContractMailContent(long contractId)
-        {
-            return _emailManager.GetEmailContentById(MailFuncEnum.Signing, contractId);
-        }
-
-        public async Task<long> SaveDraft(long contractId)
-        {
-            var contract = await WorkScope.GetAll<Contract>()
-                .Where(x => x.Id == contractId)
-                .FirstOrDefaultAsync();
-
-            contract.Status = ContractStatus.Draft;
-
-            await WorkScope.UpdateAsync(contract);
-
-            return contractId;
-        }
-
-        public async Task<long> CancelContract(CancelContractDto input)
-        {
-            var contract = await WorkScope.GetAll<Contract>()
-                .Where(x => x.Id == input.ContractId)
-                .FirstOrDefaultAsync();
-            if (contract.Status == ContractStatus.Cancelled)
-            {
-                throw new UserFriendlyException("This contract had been Canceled!");
-            }
-
-            contract.Status = ContractStatus.Cancelled;
-
-            await WorkScope.UpdateAsync(contract);
-            string loginUserEmail = await WorkScope.GetAll<User>()
-            .Where(x => x.Id == AbpSession.UserId)
-            .Select(x => x.EmailAddress)
-            .FirstOrDefaultAsync();
-
-            var history = new CreaContractHistoryDto
-            {
-                Action = HistoryAction.CancelContract,
-                AuthorEmail = loginUserEmail,
-                ContractId = input.ContractId,
-                ContractStatus = ContractStatus.Cancelled,
-                TimeAt = DateTimeUtils.GetNow(),
-                Note = $"{loginUserEmail} cancelledtheDocument {input.Reason}]"
-            };
-            await _contractHistoryManager.Create(history);
-            await _notificationManager.RemoveOldJob(contract.Id);
-            await _notificationManager.NotifyCancelContract(input.ContractId, history.TimeAt, history.AuthorEmail);
-
-            return input.ContractId;
+            return result;
         }
 
         public async Task<GetContractDetailDto> GetContractDetail(long contractId)
@@ -945,61 +964,24 @@ namespace EC.Manager.Contracts
             };
         }
 
-        public async Task<List<GetContractDesginInfo>> GetContractDesginInfo(long contractId)
+        public async Task<List<ContractBase64ImageDto>> GetContractFileImage(long contractId)
         {
-            var contractImages = WorkScope.GetAll<ContractBase64Image>()
-                     .Where(x => x.ContractId == contractId)
-                     .OrderBy(x => x.ContractPage)
-                     .Select(x => new ContractBase64ImageDto
-                     {
-                         ContractPage = x.ContractPage,
-                         FileBase64 = x.FileBase64,
-                         Width = x.Width,
-                         Height = x.Height
-                     })
-                     .ToList();
-
-            var dicSettingColor = await WorkScope.GetAll<ContractSetting>()
+            return await WorkScope.GetAll<ContractBase64Image>()
                 .Where(x => x.ContractId == contractId)
-                .ToDictionaryAsync(x => x.Id, x => x.Color);
-
-            var signatureSettings = WorkScope.GetAll<SignerSignatureSetting>()
-                .Where(x => x.ContractSetting.ContractId == contractId)
-                .ToList()
-                .Select(x => new GetSignerSignatureSettingDto
+                .OrderBy(x => x.ContractPage)
+                .Select(x => new ContractBase64ImageDto
                 {
-                    Id = x.Id,
-                    ContractSettingId = x.ContractSettingId,
-                    SignatureType = x.SignatureType,
-                    Height = x.Height,
-                    IsSigned = x.IsSigned,
-                    PositionX = x.PositionX,
-                    PositionY = x.PositionY,
+                    ContractPage = x.ContractPage,
+                    FileBase64 = x.FileBase64,
                     Width = x.Width,
-                    SignerName = x.ContractSetting.SignerName,
-                    Page = x.Page,
-                    Color = dicSettingColor.ContainsKey(x.ContractSettingId) ? dicSettingColor[x.ContractSettingId] : null,
-                    FontSize = x.FontSize,
-                    FontColor = x.FontColor,
-                    FontFamily = x.FontFamily
-                }).ToList();
+                    Height = x.Height
+                })
+                .ToListAsync();
+        }
 
-            var result = new List<GetContractDesginInfo>();
-
-            foreach (var img in contractImages)
-            {
-                var designInfo = new GetContractDesginInfo
-                {
-                    ContractBase64 = img.FileBase64,
-                    Page = img.ContractPage,
-                    Width = img.Width,
-                    Height = img.Height,
-                    SignatureSettings = signatureSettings.Where(x => x.Page == img.ContractPage).ToList()
-                };
-                result.Add(designInfo);
-            }
-
-            return result;
+        public MailPreviewInfoDto GetContractMailContent(long contractId)
+        {
+            return _emailManager.GetEmailContentById(MailFuncEnum.Signing, contractId);
         }
 
         public async Task<GetContractStatisticDto> GetContractStatistic()
@@ -1065,298 +1047,75 @@ namespace EC.Manager.Contracts
             };
         }
 
-        private async Task ConvertToPdf(string filePath, string outputPdfPath)
+        public async Task<GetContractMailSettingDto> GetSendMailInfo(long contractId)
         {
-            string libreOfficePath = _appConfiguration.GetValue<string>("LibreOfficeDir");
-            Logger.Log(LogSeverity.Debug, $"outputPdfPath Location: {outputPdfPath}");
+            var contract = await WorkScope.GetAll<Contract>()
+                .Where(x => x.Id == contractId)
+                .FirstOrDefaultAsync();
 
-            string command = $" --headless --convert-to pdf " + $"\"{filePath}\"" + " --outdir " + $"\"{outputPdfPath}\"";
+            var signers = await WorkScope.GetAll<ContractSetting>()
+                .Where(x => x.ContractId == contractId)
+                .Select(x => new SignerDto
+                {
+                    Name = x.SignerName,
+                    Email = x.SignerEmail,
+                    ContractRole = x.ContractRole,
+                    ProcesOrder = x.ProcesOrder,
+                    Color = x.Color
+                })
+                .ToListAsync();
 
-            Process process = new Process();
-            ProcessStartInfo startInfo = new ProcessStartInfo
+            return new GetContractMailSettingDto
             {
-                FileName = "soffice",
-                Arguments = command,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
+                File = contract.File,
+                MailContent = contract.EmailContent,
+                Signers = signers
             };
-            process.StartInfo = startInfo;
-            Logger.Log(LogSeverity.Debug, $"Command: {command}");
-            process.Start();
-            string stdout = process.StandardOutput.ReadToEnd();
-            string stderr = process.StandardError.ReadToEnd();
-            process.WaitForExit();
-            Logger.Log(LogSeverity.Debug, $"Error process: {stderr}");
-            Logger.Log(LogSeverity.Debug, $"Output process: {stdout}");
         }
 
-        private ContractMailTemplateDto SetContractMailTemplate(ContractSetting contractSetting, string baseUrl)
+        public string GetSignUrl(long settingId, long contractId)
         {
-            string tenantName = "";
+            var tenantName = "";
             if (AbpSession.TenantId.HasValue)
             {
                 tenantName = _tenantManager.GetById(AbpSession.TenantId.Value).TenancyName;
             }
-            return new ContractMailTemplateDto
-            {
-                AuthorName = contractSetting.Contract.User.FullName,
-                SendToName = contractSetting.SignerName,
-                ContractSettingId = contractSetting.Id,
-                ContractName = contractSetting.Contract.Name,
-                SendToEmail = contractSetting.SignerEmail,
-                ContractCode = contractSetting.Contract.Code,
-                ContractRole = contractSetting.ContractRole,
-                AuthorEmail = contractSetting.Contract.User.EmailAddress,
-                Subject = contractSetting.ContractRole == ContractRole.Signer ? $"[SignDocument] {contractSetting.Contract.Name}" : $"[ACopyDocument] {contractSetting.Contract.Name}",
-                SignUrl = $"{baseUrl}app/signging/email-valid?{HttpUtility.UrlEncode($"settingId={contractSetting.Id}&contractId={contractSetting.ContractId}&tenantName={tenantName}")}",
-                Message = contractSetting.ContractRole == ContractRole.Signer ? "YouHadDocumentNeedSign" : "YouHaveReceivedACopyOfTheDocument",
-                ContractGuid = contractSetting.Contract.ContractGuid,
-                ExpireTime = contractSetting.Contract.ExpriredTime,
-                LookupUrl = $"{baseUrl}app/email-login"
-            };
+            var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
+            return $"{baseUrl}app/signging/email-valid?{HttpUtility.UrlEncode($"settingId={settingId}&contractId={contractId}&tenantName={tenantName}")}";
         }
 
-        private CreaContractHistoryDto CreateContractHistory(string loginUserEmail, long contractId, string receiver, ContractRole contractRole, bool IsReSent = false)
+        public IQueryable<GetContractDto> QueryAllContract()
         {
-            string sentedTranslate = "sent";
-            if (IsReSent)
-            {
-                sentedTranslate = "reSent";
-            };
-            return new CreaContractHistoryDto
-            {
-                Action = HistoryAction.SendMail,
-                AuthorEmail = loginUserEmail,
-                ContractId = contractId,
-                ContractStatus = ContractStatus.Inprogress,
-                TimeAt = DateTimeUtils.GetNow(),
-                Note = contractRole == ContractRole.Signer ? $"{loginUserEmail} {sentedTranslate} theDocumentTo {receiver}" : $"{loginUserEmail} {sentedTranslate} aCopyOfTheDocumentTo {receiver}"
-            };
-        }
-
-        public async Task<object> UploadFile(IFormFile file)
-        {
-            var fullFilePath = Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder, file.FileName);
-            using (var fileStream = new FileStream(fullFilePath, FileMode.Create))
-            {
-                await file.CopyToAsync(fileStream);
-            }
-            var fileType = Path.GetExtension(fullFilePath);
-            if (!CommonUtils.SupportFile.Contains(fileType))
-            {
-                File.Delete(fullFilePath);
-                throw new UserFriendlyException("ThisDocumentFormatIsNotSupported");
-            }
-            var outputPdfPath = Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder);
-            await ConvertToPdf(fullFilePath, Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder));
-            string pdfFilePath = Path.Combine(outputPdfPath, Path.GetFileNameWithoutExtension(fullFilePath) + ".pdf");
-            Logger.Log(LogSeverity.Debug, $"PDF Location: {pdfFilePath}");
-            byte[] pdfBytes = File.ReadAllBytes(pdfFilePath);
-            string pdfBase64 = Convert.ToBase64String(pdfBytes);
-            var pdfFileName = Path.GetFileName(pdfFilePath);
-            File.Delete(fullFilePath);
-            File.Delete(pdfFilePath);
-            return new
-            {
-                Base64String = "data:application/pdf;base64," + pdfBase64,
-                PageNumber = 0,
-                FileName = pdfFileName
-            };
-        }
-
-        public async Task<string> ConvertHtmltoPdf(string html)
-        {
-            string filePath = Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder, "output.html");
-            File.WriteAllText(filePath, html);
-            var outputPdfPath = Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder);
-            await ConvertToPdf(filePath, Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder));
-            string pdfFilePath = Path.Combine(outputPdfPath, Path.GetFileNameWithoutExtension(filePath) + ".pdf");
-            Logger.Log(LogSeverity.Debug, $"PDF Location: {pdfFilePath}");
-            byte[] pdfBytes = File.ReadAllBytes(pdfFilePath);
-            string pdfBase64 = Convert.ToBase64String(pdfBytes);
-            File.Delete(filePath);
-            File.Delete(pdfFilePath);
-            return "data:application/pdf;base64," + pdfBase64;
-        }
-
-        public async Task<long> CreateContractFromTemplate(CreateContractFromTemplateDto input)
-        {
-            var loginUserId = AbpSession.UserId.Value;
-            var template = await WorkScope.GetAsync<ContractTemplate>(input.ContractTemplateId);
-
-            var loginUserEmail = await WorkScope.GetAll<User>()
-                .Where(x => x.Id == loginUserId)
-                .Select(x => x.EmailAddress)
-                .FirstOrDefaultAsync();
-
-            var guid = Guid.NewGuid();
-
-            var entity = new Contract
-            {
-                Name = input.Name,
-                Code = input.Code,
-                Status = ContractStatus.Draft,
-                UserId = loginUserId,
-                File = template.Name + ".pdf",
-                ContractTemplateId = input.ContractTemplateId,
-                ExpriredTime = input.ExpriedTime,
-                ContractGuid = guid,
-            };
-
-            entity.Id = await WorkScope.InsertAndGetIdAsync(entity);
-
-            var location = new SignPositionDto
-            {
-                PositionX = 20,
-                PositionY = 10,
-                Page = 1
-            };
-            var fillInput = new FillInputDto
-            {
-                Color = "black",
-                Content = $"MetaSign Document ID: {guid.ToString().ToUpper()}",
-                FontSize = 10,
-                PageHeight = 0,
-                SignerSignatureSettingId = 1,
-                IsCreateContract = true
-            };
-            var base64 = await SignUtils.FillPdfWithText(fillInput, location, template.Content, _webHostEnvironment.WebRootPath);
-            var file = CommonUtils.ConvertBase64PdfToFile(base64.Split(",")[1], entity.File);
-            await _fileStoringManager.UploadUnsignedContract(entity.Id, file);
-
-            var history = new CreaContractHistoryDto
-            {
-                Action = HistoryAction.CreateContract,
-                AuthorEmail = loginUserEmail,
-                ContractId = entity.Id,
-                ContractStatus = ContractStatus.Draft,
-                TimeAt = DateTimeUtils.GetNow(),
-                Note = $"{loginUserEmail} đã tạo tài liệu"
-            };
-            await _contractHistoryManager.Create(history);
-
-            return entity.Id;
-        }
-
-        public async Task<bool> CheckContractHasSigned(long contractId)
-        {
-            return (WorkScope.GetAll<ContractSigning>()
-                    .Where(s => s.ContractId == contractId && !string.IsNullOrEmpty(s.SignartureBase64))
-                    .ToList()).Any();
-        }
-
-        public async Task<string> DownloadContractAndCertificate(DownloadContractAndCertificateDto input)
-        {
-            var contract = await WorkScope.GetAll<Contract>()
-                .Where(x => x.Id == input.ContractId)
-                .Select(x => new { x.Id, x.Name, x.File, x.Code, x.UserId, x.Status, x.CreationTime, x.ExpriredTime, x.CreatorUserId, x.FileBase64, x.ContractGuid })
-                .FirstOrDefaultAsync();
-
-            var createdUser = await WorkScope.GetAll<User>()
-                .Where(x => x.Id == contract.UserId)
-                .Select(x => new { x.FullName, x.EmailAddress })
-                .FirstOrDefaultAsync();
-
-            var listContractSignarture = await WorkScope.GetAll<ContractSigning>()
-                .Where(x => x.ContractId == input.ContractId)
-                .OrderBy(x => x.TimeAt)
-                .ToListAsync();
-
-            var lastContractSignature = listContractSignarture.LastOrDefault();
-
-            string base64Contract = contract.FileBase64;
-
-            if (listContractSignarture.Count != 0)
-            {
-                base64Contract = lastContractSignature.SigningResult;
-            }
-
-            if (input.DownloadType == DownloadContractType.Contract)
-            {
-                return base64Contract;
-            };
-
-            var signatures = new List<SignartureDto>();
-
-            foreach (var contractSigning in listContractSignarture)
-            {
-                if (!string.IsNullOrEmpty(contractSigning.SignartureBase64))
+            return WorkScope.GetAll<Contract>()
+                .OrderByDescending(x => x.CreationTime)
+                .Select(x => new GetContractDto
                 {
-                    var signerName = await WorkScope.GetAll<ContractSetting>()
-                    .Where(x => x.ContractId == input.ContractId &&
-                                x.SignerEmail == contractSigning.Email)
-                    .Select(x => x.SignerName)
-                    .FirstOrDefaultAsync();
+                    Id = x.Id,
+                    UserId = x.UserId,
+                    Name = x.Name,
+                    Code = x.Code,
+                    ExpriedTime = x.ExpriredTime.Value,
+                    Status = x.Status,
+                    File = x.File,
+                    FileBase64 = x.FileBase64,
+                    UpdatedUser = (x.LastModificationTime == default || x.LastModifierUser == null) ? string.Empty : x.LastModifierUser.FullName,
+                    UpdatedTime = x.LastModificationTime != default ? x.LastModificationTime : null,
+                    CreatorUser = x.CreatorUser == null ? string.Empty : x.CreatorUser.FullName,
+                    CreationTime = x.CreationTime,
+                    ContractTemplateId = x.ContractTemplateId
+                });
+        }
 
-                    var signingTime = await WorkScope.GetAll<ContractHistory>()
-                        .Where(x => x.ContractId == input.ContractId &&
-                                    x.AuthorEmail == contractSigning.Email &&
-                                    x.Action == HistoryAction.Sign)
-                        .Select(x => x.CreationTime)
-                        .FirstOrDefaultAsync();
-
-                    var sendingTime = await WorkScope.GetAll<ContractHistory>()
-                        .Where(x => x.ContractId == input.ContractId &&
-                                    x.Note.Contains($"sent theDocumentTo {contractSigning.Email}") &&
-                                    x.Action == HistoryAction.SendMail)
-                        .Select(x => x.CreationTime)
-                        .FirstOrDefaultAsync();
-
-                    var signature = new SignartureDto
-                    {
-                        Email = contractSigning.Email,
-                        SignartureBase64 = contractSigning.SignartureBase64,
-                        Name = signerName,
-                        SigningTime = signingTime,
-                        SendingTime = sendingTime,
-                        GuId = contractSigning.Guid,
-                        SignatureType = contractSigning.SignatureType
-                    };
-
-                    signatures.Add(signature);
-                }
-            }
-
-            var certificate = new CertificateDto
+        public async Task RemoveAllSignature(long contractId)
+        {
+            var allSignature = await WorkScope.GetAll<SignerSignatureSetting>()
+                .Where(x => x.ContractSetting.ContractId == contractId)
+                .ToListAsync();
+            allSignature.ForEach(x =>
             {
-                ContractId = contract.Id,
-                ContractGuId = contract.ContractGuid,
-                ContractName = contract.Name,
-                FileName = contract.File,
-                Code = contract.Code,
-                UserId = contract.UserId,
-                Status = contract.Status,
-                CreationTime = contract.CreationTime,
-                CreatorUser = createdUser.FullName,
-                CreatorEmail = createdUser.EmailAddress,
-                Signatures = signatures,
-                ExpriredTime = contract.ExpriredTime,
-            };
-
-            string base64Certificate = await RenderCertificatePdf(certificate);
-
-            if (input.DownloadType == DownloadContractType.Certificate)
-            {
-                return base64Certificate;
-            };
-
-            List<FileDto> listFile = new List<FileDto>();
-
-            listFile.Add(new FileDto
-            {
-                FileName = "Certificate.pdf",
-                FileBase64 = base64Certificate.Replace("data:application/pdf;base64,", "")
+                x.IsDeleted = true;
             });
-
-            listFile.Add(new FileDto
-            {
-                FileName = contract.File,
-                FileBase64 = base64Contract.Replace("data:application/pdf;base64,", "")
-            });
-
-            return await CompressPdfFilesToZip(listFile);
+            await CurrentUnitOfWork.SaveChangesAsync();
         }
 
         public async Task<string> RenderCertificatePdf(CertificateDto certificate)
@@ -1559,53 +1318,339 @@ namespace EC.Manager.Contracts
             return "data:application/pdf;base64," + base64Pdf;
         }
 
-        public async Task<string> CompressPdfFilesToZip(List<FileDto> listFile)
+        public async Task ResendMailAll(long contractId)
         {
-            using (MemoryStream zipMemoryStream = new MemoryStream())
+            var contract = WorkScope.GetAll<Contract>()
+                .Include(x => x.User)
+                .Where(x => x.Id == contractId).FirstOrDefault();
+
+            string contractCreator = contract.User.EmailAddress;
+
+            var contractHistory = WorkScope.GetAll<ContractHistory>()
+                .Where(x => x.ContractId == contractId)
+                .Where(x => !string.IsNullOrEmpty(x.MailContent))
+                .FirstOrDefault();
+
+            MailPreviewInfoDto mailContent = contractHistory.MailContent.FromJsonString<MailPreviewInfoDto>();
+
+            var signers = await WorkScope.GetAll<ContractSetting>()
+                .Include(x => x.Contract)
+                .Include(x => x.Contract.User)
+                .Where(x => x.ContractId == contractId && x.IsSendMail == true)
+                .OrderBy(x => x.ProcesOrder)
+                .ToListAsync();
+
+            var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
+
+            List<ResultTemplateEmail<ContractMailTemplateDto>> mailContents = signers.Where(x => x.ContractRole == ContractRole.Viewer || x.IsComplete == false).Select(x => new ResultTemplateEmail<ContractMailTemplateDto>
             {
-                using (ZipArchive zipArchive = new ZipArchive(zipMemoryStream, ZipArchiveMode.Create, true))
+                Result = SetContractMailTemplate(x, baseUrl)
+            }).ToList();
+
+            bool IsReSent = true;
+
+            foreach (var content in mailContents)
+            {
+                MailPreviewInfoDto clonedMailContent = (MailPreviewInfoDto)mailContent.Clone();
+                clonedMailContent.SendToEmail = content.Result.SendToEmail;
+                clonedMailContent.CurrentUserLoginId = AbpSession.UserId;
+                clonedMailContent.TenantId = AbpSession.TenantId;
+                var action = content.Result.ContractRole == ContractRole.Signer ? "[Ký tài liệu]" : "[Nhận một bản sao]";
+                clonedMailContent.Subject = string.IsNullOrEmpty(mailContent.Subject) ? $"{action} {content.Result.ContractName}" : mailContent.Subject;
+                clonedMailContent.BodyMessage = CommonUtils.ReplaceBodyMessage(clonedMailContent.BodyMessage, content.Result);
+                clonedMailContent.MailHistory = CreateContractHistory(contractCreator, contractId, content.Result.SendToEmail, content.Result.ContractRole, IsReSent);
+
+                _backgroundJobManager.Enqueue<SendMail, MailPreviewInfoDto>(clonedMailContent, BackgroundJobPriority.High, TimeSpan.FromSeconds(0));
+            };
+        }
+
+        public async Task ResendMailOne(ReSendMailDto input)
+        {
+            var contract = WorkScope.GetAll<Contract>()
+                .Include(x => x.User)
+                .Where(x => x.Id == input.ContractId).FirstOrDefault();
+
+            string contractCreator = contract.User.EmailAddress;
+
+            var contractHistory = WorkScope.GetAll<ContractHistory>()
+                .Where(x => x.ContractId == input.ContractId)
+                .Where(x => !string.IsNullOrEmpty(x.MailContent))
+                .FirstOrDefault();
+
+            MailPreviewInfoDto mailContent = contractHistory.MailContent.FromJsonString<MailPreviewInfoDto>();
+
+            var signers = await WorkScope.GetAll<ContractSetting>()
+                .Include(x => x.Contract)
+                .Include(x => x.Contract.User)
+                .Where(x => x.ContractId == input.ContractId && x.SignerEmail == input.ResentToMail)
+                .OrderBy(x => x.ProcesOrder)
+                .FirstOrDefaultAsync();
+
+            var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
+            var content = new ResultTemplateEmail<ContractMailTemplateDto>
+            {
+                Result = SetContractMailTemplate(signers, baseUrl)
+            };
+
+            bool IsReSent = true;
+
+            var action = content.Result.ContractRole == ContractRole.Signer ? "[Ký tài liệu]" : "[Nhận một bản sao]";
+            mailContent.SendToEmail = signers.SignerEmail;
+            mailContent.CurrentUserLoginId = AbpSession.UserId;
+            mailContent.TenantId = AbpSession.TenantId;
+            mailContent.Subject = string.IsNullOrEmpty(mailContent.Subject) ? $"{action} {content.Result.ContractName}" : mailContent.Subject;
+            mailContent.BodyMessage = CommonUtils.ReplaceBodyMessage(mailContent.BodyMessage, content.Result);
+            mailContent.MailHistory = CreateContractHistory(contractCreator, input.ContractId, content.Result.SendToEmail, content.Result.ContractRole, IsReSent);
+            _backgroundJobManager.Enqueue<SendMail, MailPreviewInfoDto>(mailContent, BackgroundJobPriority.High, TimeSpan.FromSeconds(0));
+        }
+
+        public async Task<long> SaveDraft(long contractId)
+        {
+            var contract = await WorkScope.GetAll<Contract>()
+                .Where(x => x.Id == contractId)
+                .FirstOrDefaultAsync();
+
+            contract.Status = ContractStatus.Draft;
+
+            await WorkScope.UpdateAsync(contract);
+
+            return contractId;
+        }
+
+        public async Task<object> SendMail(SendMailDto input)
+        {
+            var contract = WorkScope.GetAll<Contract>()
+                .Include(x => x.User)
+                .Where(x => x.Id == input.ContractId).FirstOrDefault();
+
+            string contractCreator = contract.User.EmailAddress;
+
+            var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
+
+            var signers = await WorkScope.GetAll<ContractSetting>()
+                .Include(x => x.Contract)
+                .Include(x => x.Contract.User)
+                .Where(x => x.ContractId == input.ContractId && x.ContractRole == ContractRole.Signer)
+                .OrderBy(x => x.ProcesOrder)
+                .ToListAsync();
+
+            var isOrder = signers.Any(x => x.ProcesOrder != 1);
+            List<ResultTemplateEmail<ContractMailTemplateDto>> maiContents = signers.Where(x => !x.IsComplete)
+            .Select(x => new ResultTemplateEmail<ContractMailTemplateDto>
+            {
+                Result = SetContractMailTemplate(x, baseUrl)
+            }).ToList();
+
+            var lastcontent = new ResultTemplateEmail<ContractMailTemplateDto>();
+            if (maiContents.Count == 0 && isOrder /*&& !isSendAll*/)
+            {
+                var lastSigner = signers.Last();
+                lastcontent = new ResultTemplateEmail<ContractMailTemplateDto>
                 {
-                    foreach (var file in listFile)
+                    Result = SetContractMailTemplate(lastSigner, baseUrl)
+                };
+                MailPreviewInfoDto mailInput = (MailPreviewInfoDto)input.MailContent.Clone();
+                mailInput.CurrentUserLoginId = AbpSession.UserId;
+                mailInput.TenantId = AbpSession.TenantId;
+                mailInput.Subject = string.IsNullOrEmpty(mailInput.Subject) ? $"[Ký tài liệu] {lastcontent.Result.ContractName}" : mailInput.Subject;
+                mailInput.BodyMessage = CommonUtils.ReplaceBodyMessage(mailInput.BodyMessage, lastcontent.Result);
+                mailInput.ContractSettingId = lastcontent.Result.ContractSettingId;
+                mailInput.MailHistory = CreateContractHistory(contractCreator, input.ContractId, lastcontent.Result.SendToEmail, ContractRole.Signer);
+                _backgroundJobManager.Enqueue<SendMail, MailPreviewInfoDto>(mailInput, BackgroundJobPriority.High, TimeSpan.FromSeconds(1));
+            }
+
+            var delaySendMail = 0;
+
+            if (maiContents.Count > 0 /*|| isSendAll*/)
+            {
+                foreach (var content in maiContents)
+                {
+                    MailPreviewInfoDto mailInput = (MailPreviewInfoDto)input.MailContent.Clone();
+                    mailInput.CurrentUserLoginId = AbpSession.UserId;
+                    mailInput.TenantId = AbpSession.TenantId;
+                    mailInput.BodyMessage = CommonUtils.ReplaceBodyMessage(mailInput.BodyMessage, content.Result);
+                    mailInput.ContractSettingId = content.Result.ContractSettingId;
+                    mailInput.SendToEmail = content.Result.SendToEmail;
+                    mailInput.Subject = string.IsNullOrEmpty(mailInput.Subject) ? $"[Ký tài liệu] {content.Result.ContractName}" : mailInput.Subject;
+                    mailInput.MailHistory = CreateContractHistory(contractCreator, input.ContractId, content.Result.SendToEmail, ContractRole.Signer);
+                    _backgroundJobManager.Enqueue<SendMail, MailPreviewInfoDto>(mailInput, BackgroundJobPriority.High, TimeSpan.FromSeconds(delaySendMail));
+
+                    delaySendMail += ECConsts.DELAY_SEND_MAIL_SECOND;
+
+                    var firstContent = WorkScope.GetAll<ContractHistory>()
+                        .Where(x => x.ContractId == input.ContractId && x.Action == HistoryAction.SendMail)
+                        .Where(x => string.IsNullOrEmpty(x.MailContent)).FirstOrDefault();
+
+                    if (firstContent == default)
                     {
-                        byte[] pdfBytes = Convert.FromBase64String(file.FileBase64);
-
-                        using (MemoryStream pdfMemoryStream = new MemoryStream(pdfBytes))
+                        var contentHistory = new CreaContractHistoryDto
                         {
-                            ZipArchiveEntry entry = zipArchive.CreateEntry(file.FileName, System.IO.Compression.CompressionLevel.Optimal);
-                            using (Stream entryStream = entry.Open())
-                            {
-                                await pdfMemoryStream.CopyToAsync(entryStream);
-                            }
-                        }
+                            MailContent = input.MailContent.ToJsonString(),
+                            Action = HistoryAction.SendMail,
+                            ContractId = input.ContractId,
+                            ContractStatus = ContractStatus.Inprogress,
+                            Note = "CreateEmailTemplate",
+                            TimeAt = Clock.Provider.Now,
+                            AuthorEmail = contractCreator
+                        };
+                        await _contractHistoryManager.Create(contentHistory);
                     }
-                }
+                    if (isOrder /*&& !isSendAll*/)
+                    {
+                        break;
+                    }
+                };
+            }
 
-                byte[] zipBytes = zipMemoryStream.ToArray();
+            var contractSettingId = signers.Where(x => x.SignerEmail == contractCreator)
+                .Select(x => x.Id)
+                .FirstOrDefault();
 
-                string zipBase64 = Convert.ToBase64String(zipBytes);
+            var isfirstSigner = signers.First().SignerEmail == contractCreator;
 
-                return "data:application/zip;base64," + zipBase64;
+            contract.Status = ContractStatus.Inprogress;
+            await WorkScope.UpdateAsync(contract);
+            return new
+            {
+                contractId = input.ContractId,
+                settingId = contractSettingId,
+                isAssigned = contractSettingId != default,
+                isOrder = isOrder,
+                isfirstSigner = isfirstSigner,
+                EmailContent = maiContents.Count > 0 ? maiContents[0].Result.SignUrl : lastcontent.Result.SignUrl,
+                Receivers = maiContents
+            };
+        }
+
+        public async Task SendMailToViewer(SendMailDto input)
+        {
+            //var emailTemplate = _emailManager.GetEmailTemplateDto(MailFuncEnum.Signing);
+            //if (emailTemplate == default)
+            //{
+            //    throw new UserFriendlyException($"Not found email template");
+            //}
+            var contract = WorkScope.GetAll<Contract>()
+                .Include(x => x.User)
+                .Where(x => x.Id == input.ContractId).FirstOrDefault();
+            string contractCreator = contract.User.EmailAddress;
+            var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
+
+            var viewers = await WorkScope.GetAll<ContractSetting>()
+                .Include(x => x.Contract)
+                .Include(x => x.Contract.User)
+                .Where(x => x.ContractId == input.ContractId && x.ContractRole == ContractRole.Viewer)
+                .ToListAsync();
+
+            if (viewers.Count > 0)
+            {
+                string notiReceivers = viewers.Select(x => x.SignerEmail).JoinAsString(", ");
+                List<ResultTemplateEmail<ContractMailTemplateDto>> maiContents = viewers.Select(x => new ResultTemplateEmail<ContractMailTemplateDto>
+                {
+                    Result = SetContractMailTemplate(x, baseUrl)
+                }).ToList();
+
+                var delaySendMail = 0;
+                foreach (var content in maiContents)
+                {
+                    MailPreviewInfoDto mailInput = (MailPreviewInfoDto)input.MailContent.Clone();
+                    mailInput.SendToEmail = content.Result.SendToEmail;
+                    mailInput.CurrentUserLoginId = AbpSession.UserId;
+                    mailInput.TenantId = AbpSession.TenantId;
+                    mailInput.Subject = string.IsNullOrEmpty(mailInput.Subject) ? $"[Nhận một bản sao] {content.Result.ContractName}" : mailInput.Subject;
+                    mailInput.BodyMessage = CommonUtils.ReplaceBodyMessage(mailInput.BodyMessage, content.Result);
+                    mailInput.ContractSettingId = content.Result.ContractSettingId;
+                    mailInput.MailHistory = CreateContractHistory(contractCreator, input.ContractId, notiReceivers, ContractRole.Viewer);
+                    _backgroundJobManager.Enqueue<SendMail, MailPreviewInfoDto>(mailInput, BackgroundJobPriority.High, TimeSpan.FromSeconds(delaySendMail));
+                    delaySendMail += ECConsts.DELAY_SEND_MAIL_SECOND;
+                    var item = await WorkScope.GetAsync<ContractSetting>(mailInput.ContractSettingId.Value);
+                    item.IsComplete = true;
+                    CurrentUnitOfWork.SaveChanges();
+                };
+                contract.Status = ContractStatus.Inprogress;
+                await WorkScope.UpdateAsync(contract);
             }
         }
 
-        private OrderSignerDto OrderSigner(List<SignerSignatureSetting> input)
+        public async Task SetNotiExpiredContract(long contractId)
         {
-            var grSignerSignatureSetting = input.GroupBy(x => x.ContractSettingId)
-                .Select(x => new
-                {
-                    ContractSettingId = x.Key,
-                    Signature = x.Select(y => y.SignatureType).ToList()
-                });
-            var contractSettingIdHaveInput = grSignerSignatureSetting.Where(x => x.Signature.Intersect(CommonUtils.InputSignature).Any() && !x.Signature.Intersect(CommonUtils.SigningSignature).Any()).OrderByDescending(x => x.ContractSettingId).Select(x => x.ContractSettingId).ToList();
-            var normalSignerId = grSignerSignatureSetting.Where(x => !x.Signature.Intersect(CommonUtils.InputSignature).Any() && x.Signature.Intersect(CommonUtils.SigningSignature).Any()).OrderByDescending(x => x.ContractSettingId).Select(x => x.ContractSettingId).ToList();
-            var contractSettingIdHaveBoth = grSignerSignatureSetting.Where(x => !contractSettingIdHaveInput.Contains(x.ContractSettingId) && !normalSignerId.Contains(x.ContractSettingId)).OrderByDescending(x => x.ContractSettingId).Select(x => x.ContractSettingId).ToList();
-
-            return new OrderSignerDto
+            var contract = await WorkScope.GetAsync<Contract>(contractId);
+            var input = new CancelExpiredContractDto
             {
-                ContractSettingIdHaveInput = contractSettingIdHaveInput,
-                ContractSettingIdHaveBoth = contractSettingIdHaveBoth,
-                NormalSignerId = normalSignerId,
+                ContractId = contract.Id,
+                CurrentUserLoginId = AbpSession.UserId,
+                ExpiredTime = contract.ExpriredTime,
+                TenantId = AbpSession.TenantId
             };
+            if (input.ExpiredTime.HasValue)
+            {
+                var delay = (input.ExpiredTime.Value - CommonUtils.GetNow()).TotalMilliseconds;
+                _backgroundJobManager.Enqueue<CancelExpiredContract, CancelExpiredContractDto>(input, BackgroundJobPriority.High, TimeSpan.FromMilliseconds(delay));
+            }
+        }
+
+        public async Task<UpdatECDto> Update(UpdatECDto input)
+        {
+            var oldContract = WorkScope.GetAll<Contract>().Where(x => x.Id == input.Id).FirstOrDefault();
+
+            //var isChangeFile = oldContract.FileBase64 != input.FileBase64;
+
+            //var entity = ObjectMapper.Map<Contract>(input);
+
+            //entity.ContractGuid = oldContract.ContractGuid;
+
+            if (oldContract.UserId == default)
+            {
+                oldContract.UserId = AbpSession.UserId.Value;
+            }
+
+            oldContract.ExpriredTime = input.ExpriedTime;
+            oldContract.Code = input.Code;
+            oldContract.File = input.File;
+            oldContract.Status = input.Status;
+            oldContract.ContractTemplateId = input.ContractTemplateId;
+            oldContract.Name = input.Name;
+
+            //if (isChangeFile)
+            //{
+            var location = new SignPositionDto
+            {
+                PositionX = 20,
+                PositionY = 10,
+                Page = 1
+            };
+            var fillInput = new FillInputDto
+            {
+                Color = "black",
+                Content = $"MetaSign Document ID: {oldContract.ContractGuid.ToString().ToUpper()}",
+                FontSize = 10,
+                PageHeight = 0,
+                SignerSignatureSettingId = 1,
+                IsCreateContract = true
+            };
+
+            var base64 = await SignUtils.FillPdfWithText(fillInput, location, input.FileBase64, _webHostEnvironment.WebRootPath);
+            var file = CommonUtils.ConvertBase64PdfToFile(base64.Split(",")[1], oldContract.File);
+            await _fileStoringManager.DeleteUnsignedContract(oldContract.Id);
+            await _fileStoringManager.UploadUnsignedContract(oldContract.Id, file);
+
+            //}
+
+            await WorkScope.UpdateAsync(oldContract);
+
+            //if (isChangeFile)
+            //{
+            var signatureSettings = WorkScope.GetAll<SignerSignatureSetting>()
+                .Where(x => x.ContractSetting.ContractId == input.Id)
+                .ToList();
+            foreach (var item in signatureSettings)
+            {
+                await WorkScope.DeleteAsync(item);
+            }
+            await SaveDraft(input.Id);
+
+            //}
+
+            return input;
         }
 
         public async Task UpdateProcessOrder(long contractId)
@@ -1635,246 +1680,162 @@ namespace EC.Manager.Contracts
             }
         }
 
-        public async Task<object> CheckHasInput(long contractId)
-        {
-            var hasInput = await WorkScope.GetAll<SignerSignatureSetting>()
-                .Where(x => x.ContractSetting.ContractId == contractId)
-                .AnyAsync(x => CommonUtils.InputSignature.Contains(x.SignatureType));
-            var hasSign = await WorkScope.GetAll<SignerSignatureSetting>()
-                .Where(x => x.ContractSetting.ContractId == contractId)
-                .AnyAsync(x => CommonUtils.SigningSignature.Contains(x.SignatureType));
-            return new
-            {
-                HasInput = hasInput,
-                HasSign = hasSign
-            };
-        }
-
-        public async Task RemoveAllSignature(long contractId)
-        {
-            var allSignature = await WorkScope.GetAll<SignerSignatureSetting>()
-                .Where(x => x.ContractSetting.ContractId == contractId)
-                .ToListAsync();
-            allSignature.ForEach(x =>
-            {
-                x.IsDeleted = true;
-            });
-            await CurrentUnitOfWork.SaveChangesAsync();
-        }
-
         public async Task<string> UploadAndConvert(IFormFile file)
         {
             return await _pDFConverterWebService.UploadAndConvert(file);
         }
 
-        public async Task<FileBase64Dto> DownLoadMassTemplate()
+        public async Task<object> UploadFile(IFormFile file)
         {
-            using (var package = new ExcelPackage(new FileInfo(Path.Combine(_webHostEnvironment.WebRootPath, "massTemplate", "Mass_Template_Contract.xlsx"))))
+            var fullFilePath = Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder, file.FileName);
+            using (var fileStream = new FileStream(fullFilePath, FileMode.Create))
             {
-                return new FileBase64Dto
-                {
-                    Base64 = Convert.ToBase64String(package.GetAsByteArray()),
-                    FileName = "Mass_Contract_Template.xlsx",
-                    FileType = "application/vnd.ms-excel"
-                };
+                await file.CopyToAsync(fileStream);
             }
+            var wordBase64 = "";
+            var matchMassField = "";
+            var fileType = Path.GetExtension(fullFilePath);
+            if (fileType == ".doc" || fileType == ".docx")
+            {
+                matchMassField = CommonUtils.GetMatchField(file);
+                wordBase64 = Convert.ToBase64String(File.ReadAllBytes(fullFilePath));
+            }
+            if (!CommonUtils.SupportFile.Contains(fileType))
+            {
+                File.Delete(fullFilePath);
+                throw new UserFriendlyException("ThisDocumentFormatIsNotSupported");
+            }
+            var outputPdfPath = Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder);
+            await ConvertToPdf(fullFilePath, Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder));
+            string pdfFilePath = Path.Combine(outputPdfPath, Path.GetFileNameWithoutExtension(fullFilePath) + ".pdf");
+            Logger.Log(LogSeverity.Debug, $"PDF Location: {pdfFilePath}");
+            byte[] pdfBytes = File.ReadAllBytes(pdfFilePath);
+            string pdfBase64 = Convert.ToBase64String(pdfBytes);
+            var pdfFileName = Path.GetFileName(pdfFilePath);
+            File.Delete(fullFilePath);
+            File.Delete(pdfFilePath);
+            return new
+            {
+                Base64String = "data:application/pdf;base64," + pdfBase64,
+                WordBase64 = "data:application/msword;base64," + wordBase64,
+                MatchMassField = matchMassField,
+                PageNumber = 0,
+                FileName = pdfFileName
+            };
         }
 
-        //public async Task ValidImportMassTemplate(UploadMassTemplateFileDto input)
-        public async Task<ValidImportMassContractTemplateDto> ValidImportMassTemplate(UploadFileDto input)
+        private async Task ConvertToPdf(string filePath, string outputPdfPath)
         {
-            using (var fileStream = new MemoryStream())
+            string libreOfficePath = _appConfiguration.GetValue<string>("LibreOfficeDir");
+            Logger.Log(LogSeverity.Debug, $"outputPdfPath Location: {outputPdfPath}");
+
+            string command = $" --headless --convert-to pdf " + $"\"{filePath}\"" + " --outdir " + $"\"{outputPdfPath}\"";
+
+            Process process = new Process();
+            ProcessStartInfo startInfo = new ProcessStartInfo
             {
-                input.File.CopyTo(fileStream);
-                using (var package = new ExcelPackage(fileStream))
-                {
-                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                    var worksheet = package.Workbook.Worksheets[0];
-                    var rowCount = worksheet.Dimension.End.Row;
-                    var colCount = worksheet.Dimension.End.Column;
-                    if (rowCount <= 3)
-                    {
-                        throw new UserFriendlyException("Data column is missed");
-                    }
-                    if(rowCount > 33)
-                    {
-                        throw new UserFriendlyException("Exceeding the allowed quantity (no more than 30 contracts)");
-                    }
-                    var result = new ValidImportMassContractTemplateDto()
-                    {
-                        FailList = new List<ResponseFailDto>(),
-                        SuccessList = new List<RowMassTemplateExportDto>()
-                    };
-                    for (int col = 2; col <= colCount; col += 3)
-                    {
-                        var contractRoleCell = worksheet.Cells[3, col + 2].GetCellValue<string>();
-                        var contractRole = ContractRole.Signer;
-                        if (string.IsNullOrEmpty(contractRoleCell))
-                        {
-                            result.FailList.Add(new ResponseFailDto { Row = 3, ReasonFail = "Contract Role is empty" });
-                        }
-                        else { contractRole = contractRoleCell == "Signer" ? ContractRole.Signer : ContractRole.Viewer; }
-                        var rowData = new List<MassTemplateRowDataDto>();
-                        for (int row = 4; row <= rowCount; row++)
-                        {
-                            var data = new MassTemplateRowDataDto();
-                            if (string.IsNullOrEmpty(worksheet.Cells[row, col].Value == null ? "" : worksheet.Cells[row, col].Value.ToString()))
-                            {
-                                result.FailList.Add(new ResponseFailDto { Row = row, ReasonFail = "Name is empty" });
-                            }
-                            else { data.Name = worksheet.Cells[row, col].Value.ToString(); }
-
-                            //Email
-
-                            if (!CommonUtils.IsValidEmail(worksheet.Cells[row, col + 1].Value == null ? "" : worksheet.Cells[row, col + 1].Value.ToString()))
-                            {
-                                result.FailList.Add(new ResponseFailDto { Row = row, ReasonFail = "Email is not valid" });
-                                continue;
-                            }
-                            else { data.Email = worksheet.Cells[row, col + 1].Value.ToString(); }
-                            rowData.Add(data);
-                        }
-                        result.SuccessList.Add(new RowMassTemplateExportDto { Role = worksheet.Cells[1, col].Value.ToString(), RowData = rowData, ContractRole = contractRole });
-                    }
-                    return result;
-                }
-            }
+                FileName = "soffice",
+                Arguments = command,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            process.StartInfo = startInfo;
+            Logger.Log(LogSeverity.Debug, $"Command: {command}");
+            process.Start();
+            string stdout = process.StandardOutput.ReadToEnd();
+            string stderr = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+            Logger.Log(LogSeverity.Debug, $"Error process: {stderr}");
+            Logger.Log(LogSeverity.Debug, $"Output process: {stdout}");
         }
 
-        public async Task CreateMassContract(long id)
+        private CreaContractHistoryDto CreateContractHistory(string loginUserEmail, long contractId, string receiver, ContractRole contractRole, bool IsReSent = false)
         {
-            var loginUserId = AbpSession.UserId.Value;
-            var template = WorkScope.GetAll<ContractTemplate>().Where(x => x.Id == id).FirstOrDefault();
-
-            var loginUserEmail = WorkScope.GetAll<User>()
-                .Where(x => x.Id == loginUserId)
-                .Select(x => x.EmailAddress)
-                .FirstOrDefault();
-            var massGuid = Guid.NewGuid();
-            var massTemplateSigner = WorkScope.GetAll<MassContractTemplateSigner>()
-                .Include(x => x.ContractTemplateSigner)
-                .ThenInclude(x => x.ContractTemplate)
-                .Where(x => x.ContractTemplateSigner.ContractTemplate.Id == id).ToList()
-                .GroupBy(x => x.ContractTemplateSignerId)
-                .Select(x => new GetGroupMassSignerDto
-                {
-                    ContractTemplateSignerId = x.Key,
-                    MassSigners = x.Select(y => new GetMassSignerDto
-                    {
-                        ContractTemplateSignerId = y.ContractTemplateSignerId,
-                        SignerName = y.SignerName,
-                        SignerEmail = y.SignerEmail,
-                        ContractRole = y.ContractTemplateSigner.ContractRole,
-                        Color = y.ContractTemplateSigner.Color
-                    }).ToList(),
-                    ProcessOrder = x.Select(y=>y.ContractTemplateSigner.ProcesOrder).FirstOrDefault()
-                }).ToList();
-            massTemplateSigner.ForEach(x =>
+            string sentedTranslate = "sent";
+            if (IsReSent)
             {
-                if (x.CanSignMultiple) { x.SignerMassGuid = Guid.NewGuid(); }
-            });
-            var numOfContracts = massTemplateSigner.FirstOrDefault().MassSigners.Count();
-            for (int i = 0; i < numOfContracts; i++)
+                sentedTranslate = "reSent";
+            };
+            return new CreaContractHistoryDto
             {
-                #region Create Contract
+                Action = HistoryAction.SendMail,
+                AuthorEmail = loginUserEmail,
+                ContractId = contractId,
+                ContractStatus = ContractStatus.Inprogress,
+                TimeAt = DateTimeUtils.GetNow(),
+                Note = contractRole == ContractRole.Signer ? $"{loginUserEmail} {sentedTranslate} theDocumentTo {receiver}" : $"{loginUserEmail} {sentedTranslate} aCopyOfTheDocumentTo {receiver}"
+            };
+        }
 
-                var entity = new Contract
+        private async Task<string> FillAndRepaceContent(string massWordContent, string massField, List<string> listFieldDto)
+        {
+            var filePath = Path.Combine(_webHostEnvironment.WebRootPath, "tempReplace", Guid.NewGuid().ToString() + ".docx");
+            var bytes = Convert.FromBase64String(massWordContent.Split(',')[1].Trim());
+            var fieldName = JsonConvert.DeserializeObject<List<string>>(massField);
+            File.WriteAllBytes(filePath, bytes);
+            using (Document doc = new Document())
+            {
+                doc.LoadFromFile(filePath);
+                for (int i = 0; i < fieldName.Count; i++)
                 {
-                    Name = template.Name,
-                    Status = ContractStatus.Draft,
-                    UserId = loginUserId,
-                    File = template.Name + ".pdf",
-                    ContractTemplateId = template.Id,
-                    ContractGuid = Guid.NewGuid(),
-                    MassGuid = massGuid
-                };
-
-                entity.Id = await WorkScope.InsertAndGetIdAsync(entity);
-
-                var location = new SignPositionDto
-                {
-                    PositionX = 20,
-                    PositionY = 10,
-                    Page = 1
-                };
-                var fillInput = new FillInputDto
-                {
-                    Color = "black",
-                    Content = $"MetaSign Document ID: {entity.ContractGuid.ToString().ToUpper()}",
-                    FontSize = 10,
-                    PageHeight = 0,
-                    SignerSignatureSettingId = 1,
-                    IsCreateContract = true
-                };
-                var base64 = await SignUtils.FillPdfWithText(fillInput, location, template.Content, _webHostEnvironment.WebRootPath);
-                var file = CommonUtils.ConvertBase64PdfToFile(base64.Split(",")[1], entity.File);
-                await _fileStoringManager.UploadUnsignedContract(entity.Id, file);
-
-                #endregion Create Contract
-
-                #region Create Contract History
-
-                var history = new CreaContractHistoryDto
-                {
-                    Action = HistoryAction.CreateContract,
-                    AuthorEmail = loginUserEmail,
-                    ContractId = entity.Id,
-                    ContractStatus = ContractStatus.Draft,
-                    TimeAt = DateTimeUtils.GetNow(),
-                    Note = $"{loginUserEmail} đã tạo tài liệu"
-                };
-                await _contractHistoryManager.Create(history);
-
-                #endregion Create Contract History
-
-                #region Create Signer and SignatureSetting
-                for (int j = 0; j < massTemplateSigner.Count; j++)
-                {
-                    var signer = new ContractSetting
-                    {
-                        ContractId = entity.Id,
-                        ContractRole = massTemplateSigner[j].MassSigners[i].ContractRole,
-                        SignerName = massTemplateSigner[j].MassSigners[i].SignerName,
-                        SignerEmail = massTemplateSigner[j].MassSigners[i].SignerEmail,
-                        Status = ContractSettingStatus.NotConfirmed,
-                        ProcesOrder = massTemplateSigner[j].ProcessOrder,
-                        Color = massTemplateSigner[j].MassSigners[i].Color,
-                        SignerMassGuid = massTemplateSigner[j].SignerMassGuid
-                    };
-                    signer.Id = WorkScope.InsertAndGetId(signer);
-                    var signatureSetting = WorkScope.GetAll<ContractTemplateSetting>()
-                    .Where(x => x.ContractTemplateSignerId == massTemplateSigner[j].MassSigners[i].ContractTemplateSignerId)
-                    .Select(x => new SignerSignatureSetting
-                    {
-                        ContractSettingId = signer.Id,
-                        SignatureType = x.SignatureType,
-                        Page = x.Page,
-                        PositionX = x.PositionX,
-                        PositionY = x.PositionY,
-                        Width = x.Width,
-                        Height = x.Height,
-                        FontSize = x.FontSize,
-                        FontFamily = x.FontFamily,
-                        FontColor = x.FontColor,
-                        ValueInput = x.ValueInput,
-                    }).ToList();
-                    WorkScope.InsertRange(signatureSetting);
+                    doc.Replace(fieldName[i], listFieldDto[i], false, true);
                 }
-
-                #endregion Create Signer and SignatureSetting
-
-                #region Send Mail
-
-                var sendMailDto = new SendMailDto
-                {
-                    ContractId = entity.Id,
-                    MailContent = GetContractMailContent(entity.Id)
-                };
-                await SendMailToViewer(sendMailDto);
-                await SendMail(sendMailDto);
-
-                #endregion Send Mail
+                doc.SaveToFile(filePath, FileFormat.Docx);
             }
+            await ConvertToPdf(filePath, Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder));
+            var outputFile = Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder, Path.GetFileNameWithoutExtension(filePath) + ".pdf");
+            var result = Convert.ToBase64String(File.ReadAllBytes(outputFile));
+            File.Delete(filePath);
+            File.Delete(outputFile);
+            return "data:application/pdf;base64," + result;
+        }
+
+        private OrderSignerDto OrderSigner(List<SignerSignatureSetting> input)
+        {
+            var grSignerSignatureSetting = input.GroupBy(x => x.ContractSettingId)
+                .Select(x => new
+                {
+                    ContractSettingId = x.Key,
+                    Signature = x.Select(y => y.SignatureType).ToList()
+                });
+            var contractSettingIdHaveInput = grSignerSignatureSetting.Where(x => x.Signature.Intersect(CommonUtils.InputSignature).Any() && !x.Signature.Intersect(CommonUtils.SigningSignature).Any()).OrderByDescending(x => x.ContractSettingId).Select(x => x.ContractSettingId).ToList();
+            var normalSignerId = grSignerSignatureSetting.Where(x => !x.Signature.Intersect(CommonUtils.InputSignature).Any() && x.Signature.Intersect(CommonUtils.SigningSignature).Any()).OrderByDescending(x => x.ContractSettingId).Select(x => x.ContractSettingId).ToList();
+            var contractSettingIdHaveBoth = grSignerSignatureSetting.Where(x => !contractSettingIdHaveInput.Contains(x.ContractSettingId) && !normalSignerId.Contains(x.ContractSettingId)).OrderByDescending(x => x.ContractSettingId).Select(x => x.ContractSettingId).ToList();
+
+            return new OrderSignerDto
+            {
+                ContractSettingIdHaveInput = contractSettingIdHaveInput,
+                ContractSettingIdHaveBoth = contractSettingIdHaveBoth,
+                NormalSignerId = normalSignerId,
+            };
+        }
+
+        private ContractMailTemplateDto SetContractMailTemplate(ContractSetting contractSetting, string baseUrl)
+        {
+            string tenantName = "";
+            if (AbpSession.TenantId.HasValue)
+            {
+                tenantName = _tenantManager.GetById(AbpSession.TenantId.Value).TenancyName;
+            }
+            return new ContractMailTemplateDto
+            {
+                AuthorName = contractSetting.Contract.User.FullName,
+                SendToName = contractSetting.SignerName,
+                ContractSettingId = contractSetting.Id,
+                ContractName = contractSetting.Contract.Name,
+                SendToEmail = contractSetting.SignerEmail,
+                ContractCode = contractSetting.Contract.Code,
+                ContractRole = contractSetting.ContractRole,
+                AuthorEmail = contractSetting.Contract.User.EmailAddress,
+                Subject = contractSetting.ContractRole == ContractRole.Signer ? $"[SignDocument] {contractSetting.Contract.Name}" : $"[ACopyDocument] {contractSetting.Contract.Name}",
+                SignUrl = $"{baseUrl}app/signging/email-valid?{HttpUtility.UrlEncode($"settingId={contractSetting.Id}&contractId={contractSetting.ContractId}&tenantName={tenantName}")}",
+                Message = contractSetting.ContractRole == ContractRole.Signer ? "YouHadDocumentNeedSign" : "YouHaveReceivedACopyOfTheDocument",
+                ContractGuid = contractSetting.Contract.ContractGuid,
+                ExpireTime = contractSetting.Contract.ExpriredTime,
+                LookupUrl = $"{baseUrl}app/email-login"
+            };
         }
     }
 }
