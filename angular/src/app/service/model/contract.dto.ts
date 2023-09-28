@@ -27,4 +27,6 @@ export interface ContractTempaleteDto {
     userId: number,
     isFavorite: boolean,
     massType?: number,
+    massField:string,
+    massWordContent: string,
 }

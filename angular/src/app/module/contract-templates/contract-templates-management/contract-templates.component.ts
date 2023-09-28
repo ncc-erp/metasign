@@ -15,7 +15,7 @@ export class ContractTemplatesComponent
   public statusCategorycontract: number | null;
   public contractTemplateList: ContractTemplates[];
   public contractCategory = ContractTemplateCategory;
-  
+
 
 
   constructor(
@@ -42,7 +42,7 @@ export class ContractTemplatesComponent
       },
       queryParamsHandling: "merge",
     });
-  } 
+  }
   handleCreateContract() {
     this.router.navigate(["/app/templates/templates-create/upload"], {
       queryParams: {

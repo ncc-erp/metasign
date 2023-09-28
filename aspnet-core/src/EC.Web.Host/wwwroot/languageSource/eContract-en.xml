@@ -604,10 +604,19 @@
 		<text name="Row" value="Row" />
 		<text name="Error" value="Error" />
 		<text name="ChooseSignType" value="Select sign type" />
-		<text name="SignMass" value="Apply to batch of contracts" />
-		<text name="SignSingle" value="Apply for current contract" />
+		<text name="SignMass" value="Apply sign to batch of contracts" />
+		<text name="SignSingle" value="Apply sign for current contract" />
 		<text name="PleaseFillCorectForm" value="Please fill in the correct form with the sample document download file" />
 		<text name="UploadSuccessFully" value="Upload Successfully" />
-		<text name="JustSupportXlsx" value="Only .xlsx files are supported" />
+		<text name="JustSupportXlsx" value="Only .xlsx, .xlsm files are supported" />
+		<text name="AutoFillField" value="Auto fill field" />
+		<text name="Cell" value="Cell" />
+		<text name="ContractNameIsEmpty" value="Contract name is empty!" />
+		<text name="NameIsEmpty" value="Signer name is empty!" />
+		<text name="EmailIsNotValid" value="Email is not valid!" />
+		<text name="AutoFillFieldValueIsEmpty" value="AutoFill field value is empty!" />
+		<text name="FileError" value="File has errors please check again!" />
+		<text name="NoData" value="No data!" />
+		<text name="SignerNotBeenSet" value="There exists a signer whose signing position has not been set!" />
 	</texts>
 </localizationDictionary>

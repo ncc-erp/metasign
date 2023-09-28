@@ -22,26 +22,26 @@ export class DialogContractEditorComponent extends DialogComponentBase<any> impl
   ngOnInit() {
   }
 
-  handleSaveContractTemplate() {
-    let contractPayload: ContractTempaleteDto = {
-      name: 'Mẫu hợp đồng',
-      fileName: 'Mẫu hợp đồng.pdf',
-      content: "",
-      htmlContent: this.contractTemplate,
-      type: ContractTemplateType.Me,
-      userId: this.appSession.userId,
-      isFavorite: false,
-      
-    };
-    if (this.contractTemplate) {
-      this.loadingTemplate = true;
-      this.contractTemplateService.createFileTemplate(contractPayload).subscribe(value => {
-        this.loadingTemplate = false;
-        this.dialogRef.close(value.result);
-      });
-    }
-    else {
-      abp.message.error(this.ecTransform("EmptyOrInvalidContent"))
-    }
-  }
+  // handleSaveContractTemplate() {
+  //   let contractPayload: ContractTempaleteDto = {
+  //     name: 'Mẫu hợp đồng',
+  //     fileName: 'Mẫu hợp đồng.pdf',
+  //     content: "",
+  //     htmlContent: this.contractTemplate,
+  //     type: ContractTemplateType.Me,
+  //     userId: this.appSession.userId,
+  //     isFavorite: false,
+
+  //   };
+  //   if (this.contractTemplate) {
+  //     this.loadingTemplate = true;
+  //     this.contractTemplateService.createFileTemplate(contractPayload).subscribe(value => {
+  //       this.loadingTemplate = false;
+  //       this.dialogRef.close(value.result);
+  //     });
+  //   }
+  //   else {
+  //     abp.message.error(this.ecTransform("EmptyOrInvalidContent"))
+  //   }
+  // }
 }

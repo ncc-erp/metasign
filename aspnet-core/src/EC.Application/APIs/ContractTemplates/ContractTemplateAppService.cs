@@ -1,4 +1,5 @@
-﻿using EC.Manager.ContractTemplates;
+﻿using EC.Manager.Contracts.Dto;
+using EC.Manager.ContractTemplates;
 using EC.Manager.ContractTemplates.Dto;
 using Microsoft.AspNetCore.Mvc;
 using NccCore.Paging;
@@ -69,6 +70,18 @@ namespace EC.APIs.ContractTemplates
         public async Task RemoveAllSignature(long contractTemplateId)
         {
             await _contractTemplateManager.RemoveAllSignature(contractTemplateId);
+        }
+
+        [HttpPost]
+        public async Task<FileBase64Dto> DownloadMassTemplate(long templateId)
+        {
+            return await _contractTemplateManager.DownloadMassTemplate(templateId);
+        }
+
+        [HttpPost]
+        public async Task<ValidImportMassContractTemplateDto> ValidImportMassTemplate([FromForm]UploadMassTemplateFileDto input)
+        {
+            return await _contractTemplateManager.ValidImportMassTemplate(input);
         }
     }
 }

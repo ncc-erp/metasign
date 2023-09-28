@@ -27,6 +27,7 @@
 		<PackageReference Include="Castle.Windsor.MsDependencyInjection" Version="3.4.0" />
 		<PackageReference Include="ChromeHtmlToPdf" Version="3.1.0" />
 		<PackageReference Include="EPPlus" Version="6.2.8" />
+		<PackageReference Include="FreeSpire.Doc" Version="11.6.0" />
 		<PackageReference Include="Google.Apis.Auth" Version="1.60.0" />
 		<PackageReference Include="iTextSharp" Version="5.5.13.3" />
 		<PackageReference Include="Microsoft.IdentityModel" Version="7.0.0" />

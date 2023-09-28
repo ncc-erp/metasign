@@ -6,6 +6,7 @@
   padding: 0 10px;
   border-bottom: 1px solid #ded4d4;
 }
+
 /* .wapper_header h5 {
   font-size: 22px;
   margin: 0;
@@ -32,6 +33,7 @@
 :host ::ng-deep .header {
   display: none !important;
 }
+
 :host ::ng-deep .contract {
   background-color: rgb(233, 233, 233) !important;
 }
@@ -68,6 +70,7 @@
   padding: 10px;
   overflow: auto;
 }
+
 .send_mail--signer h4 {
   margin-top: 5px;
   font-size: 18px;
@@ -108,6 +111,7 @@
   width: 90%;
   margin: 10px auto 0 auto;
 }
+
 .signer_form--list {
   border-left: 1px solid #e5e5e5;
   border-bottom: 1px solid #e5e5e5;
@@ -149,9 +153,60 @@
   transform: scale(0.3) !important;
   transform-origin: top center;
 }
+
 @media (max-width: 1585px) {
   :host ::ng-deep #design_viewer {
     transform: scale(0.2) !important;
     transform-origin: top center;
   }
+}
+
+.signer-item {
+  border-left: 10px solid;
+  transform: translateX(10px);
+}
+
+.signer_form--order {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  transform: translate(30%, 80%);
+  font-size: 18px;
+}
+
+.contract_signer--box {
+  margin-top: 10px;
+  /* padding: 10px; */
+  background-color: rgb(244, 244, 244);
+}
+
+.email_contract--Send {
+  margin-top: 10px;
+}
+
+.email_contract--signer {
+  margin-top: 20px;
+}
+.contract_name {
+  font-size: 18px;
+}
+.email_contract--view {
+  margin-top: 20px;
+}
+.contract_view--box {
+  padding: 10px 10px 10px 20px;
+  background-color: rgb(244, 244, 244);
+}
+
+.download_contract--excel {
+  padding: 3px;
+  border-left: 5px solid;
+  margin-bottom: 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 50%;
 }

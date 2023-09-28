@@ -1,6 +1,5 @@
 ﻿using Abp.AutoMapper;
 using EC.Entities;
-using EC.Manager.Contracts.Dto;
 using EC.Manager.ContractTemplateSettings.Dto;
 using System.Collections.Generic;
 using static EC.Constants.Enum;
@@ -39,7 +38,6 @@ namespace EC.Manager.ContractTemplateSigners.Dto
     {
         public long ContractTemplateId { get; set; }
         public List<UpdateContractTemplateSignerDto> ContractTemplateSigners { get; set; }
-        public List<RowMassTemplateExportDto> MassContractTemplateSigners { get; set; }
     }
 
     [AutoMapTo(typeof(ContractTemplateSigner))]
@@ -64,7 +62,7 @@ namespace EC.Manager.ContractTemplateSigners.Dto
         public int? ProcesOrder { get; set; }
         public string Color { get; set; }
         public long ContractTemplateId { get; set; }
-        public List<GetMassContractTemplateSignerDto> MassContractTemplateSigner { get; set; }
+        public List<string> MassField { get; internal set; }
     }
 
     public class GetMassContractTemplateSignerDto

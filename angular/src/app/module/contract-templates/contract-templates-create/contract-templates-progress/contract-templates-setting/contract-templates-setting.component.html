@@ -1,4 +1,4 @@
-<div *ngIf="batchContract; else setting_contract" class="wapper">
+<!-- <div *ngIf="batchContract; else setting_contract" class="wapper">
   <div *ngIf="!listBatchSigner; else batchSigner" class="wapper_upload">
     <div class="download_contract--excel">
       <div>
@@ -443,7 +443,5 @@
       {{ "Continue" | ecTranslate }}
     </button>
   </div>
-</div>
-<ng-template #setting_contract>
-  <app-setting-contract></app-setting-contract>
-</ng-template>
+</div> -->
+<app-setting-contract></app-setting-contract>

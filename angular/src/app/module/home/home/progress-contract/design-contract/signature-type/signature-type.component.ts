@@ -14,6 +14,7 @@ import { SignatureSettings } from "@app/service/model/design-contract.dto";
 import { AppComponentBase } from "@shared/app-component-base";
 import { PERMISSIONS_CONSTANT } from "@app/permission/permission";
 import { ActivatedRoute } from "@angular/router";
+import { AppConsts } from "@shared/AppConsts";
 
 @Component({
   selector: "app-signature-type",
@@ -138,8 +139,24 @@ export class SignatureTypeComponent extends AppComponentBase {
     this.width += offsetX;
     this.height += offsetY;
     this.signatureType.nativeElement.style.transform = `translate(0,0)`;
-    this.width <= this.initialInputWidth ? this.signatureValue.width = this.initialInputWidth : this.signatureValue.width = this.width
-    this.height <= this.initialInputHeight ? this.signatureValue.height = this.initialInputHeight : this.signatureValue.height = this.height
+    switch (this.signatureValue.signatureType) {
+      case ContractSettingType.Text:
+        this.width <= AppConsts.DEFAULT_INPUT_WIDTH ? this.signatureValue.width = AppConsts.DEFAULT_INPUT_WIDTH : this.signatureValue.width = this.width
+        this.height <= AppConsts.DEFAULT_INPUT_HEIGHT ? this.signatureValue.height = AppConsts.DEFAULT_INPUT_HEIGHT : this.signatureValue.height = this.height
+        break;
+      case ContractSettingType.Electronic:
+        this.width <= AppConsts.DEFAULT_SIGNATURE_WIDTH ? this.signatureValue.width = AppConsts.DEFAULT_SIGNATURE_WIDTH : this.signatureValue.width = this.width
+        this.height <= AppConsts.DEFAULT_SIGNATURE_HEIGHT ? this.signatureValue.height = AppConsts.DEFAULT_SIGNATURE_HEIGHT : this.signatureValue.height = this.height
+        break;
+      case ContractSettingType.Digital:
+        this.width <= AppConsts.DEFAULT_SIGNATURE_WIDTH_DIGITAL ? this.signatureValue.width = AppConsts.DEFAULT_SIGNATURE_WIDTH_DIGITAL : this.signatureValue.width = this.width
+        this.height <= AppConsts.DEFAULT_SIGNATURE_HEIGHT_DIGITAL ? this.signatureValue.height = AppConsts.DEFAULT_SIGNATURE_HEIGHT_DIGITAL : this.signatureValue.height = this.height
+        break;
+      case ContractSettingType.Stamp:
+        this.width <= AppConsts.DEFAULT_SIGNATURE_WIDTH ? this.signatureValue.width = AppConsts.DEFAULT_SIGNATURE_WIDTH : this.signatureValue.width = this.width
+        this.height <= AppConsts.DEFAULT_SIGNATURE_HEIGHT ? this.signatureValue.height = AppConsts.DEFAULT_SIGNATURE_HEIGHT : this.signatureValue.height = this.height
+        break;
+    }
     this.px = event.clientX
     this.py = event.clientY
   }
