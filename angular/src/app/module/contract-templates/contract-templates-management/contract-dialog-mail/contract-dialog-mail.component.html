@@ -10,87 +10,79 @@
     </div>
 
     <div class="wapper_send--mail">
-      <div
-        [ngClass]="{ center_element: isSignerEmpty }"
-        class="send_mail--signer"
-      >
-        <h5 *ngIf="isSignerEmpty; else listSigner">
-          {{"ContractBatchNotHaveSigner"|ecTranslate}}
-        </h5>
-        <ng-template #listSigner>
-          <h4>{{"ListSigner"|ecTranslate}}:</h4>
-          <div class="contract_signer">
-            <div
-              *ngFor="let signerGroup of listBatchSigner"
-              class="contract_signer--form"
-            >
-              <p
-                *ngIf="
-                  signerGroup.contractRole === contractRole.Viewer;
-                  else sign
-                "
-              >
-                <i class="fa-regular fa-closed-captioning pr-2"></i>
-                {{ "CopyRecipients" | ecTranslate }}
-              </p>
-              <ng-template #sign>
-                <p>
-                  <i class="fa-solid fa-user pr-2"></i>
-                  {{ "Signers " | ecTranslate }}
-                </p>
-              </ng-template>
-              <div class="signer_form--list">
-                <div
-                  [style.border-top-color]="signerGroup.color"
-                  class="signer_form--name mt-3"
-                >
-                  {{ signerGroup.role }}
+      <div [ngClass]="{ center_element: isSignerEmpty }" class="send_mail--signer">
+        <div class="email_contract--Send">
+          <div class="row">
+            <div class="col-6 d-flex align-items-center">
+              <input title="" (change)="onFileSelected($event)" type="file" style="display: none;"
+                accept=".xls, .xlsx, .xlsm" id="fileID" #fileInput />
+              <button class="button mr-3" mat-button (click)="fileInput.click()">
+                {{ "SelectFile" | ecTranslate }}
+              </button>
+              <span>{{file?.name}}</span>
+            </div>
+            <div class="col-6">
+              <div style="border-left: 5px solid; padding: 3px;">
+                {{ "UploadMassTemplateNotice" | ecTranslate }}
+                <br />
+                {{ "UploadMassTemplateNotice2" | ecTranslate }}
+              </div>
+              <button (click)="handleDownLoadMassTemplate()" mat-button>
+                <i class="fa-solid fa-download"></i>
+                {{ "DownloadMassTemplateNotice" | ecTranslate }}
+              </button>
+            </div>
+          </div>
+          <div class="email_contract--signer">
+            <h5 class="contract_signer--title">{{'Signers' | ecTranslate}}</h5>
+            <div *ngFor="let signer of signers; let i = index" class="contract_signer--box">
+              <div class="row">
+                <div *ngIf="isOrderSign" class="signer_form--order">
+                  {{ signer.procesOrder }}
                 </div>
-
-                <div
-                  *ngFor="let signer of signerGroup.rowData"
-                  class="signer_form--group"
-                >
-                  <div class="form_group--input">
-                    <div class="signer_name">
-                      <mat-form-field appearance="outline">
-                        <mat-label>{{"FullName"|ecTranslate}}</mat-label>
-                        <input
-                          readonly
-                          [value]="
-                            signer.name ? signer.name : signer.signerName
-                          "
-                          matInput
-                          placeholder="Placeholder"
-                        />
-                      </mat-form-field>
-                    </div>
-                    <div class="signer_email">
-                      <mat-form-field appearance="outline">
-                        <mat-label>{{"Email"|ecTranslate}}</mat-label>
-                        <input
-                          readonly
-                          [value]="
-                            signer.email ? signer.email : signer.signerEmail
-                          "
-                          matInput
-                          placeholder="Placeholder"
-                        />
-                      </mat-form-field>
-                    </div>
+                <div class="col-8 signer-item" [style.border-left-color]="signer.color">
+                  <div class="p-4">
+                    <b class="contract_name"> {{ signer.role }}</b>
                   </div>
+                </div>
+                <div  class="col-3">
+                  <span class="badge mt-3" style="
+                                              color: #007e65;
+                                              font-size: 16px;
+                                              transform: translateY(15px);
+                                            ">{{
+                    signer.contractRole == 1
+                    ? ("Signer" | ecTranslate)
+                    : signer.contractRole == 2
+                    ? ("ApprovedBy" | ecTranslate)
+                    : ("Viewers" | ecTranslate)
+                    }}</span>
                 </div>
               </div>
             </div>
           </div>
-        </ng-template>
+
+          <div class="email_contract--view" *ngIf="viewers?.length > 0">
+            <h5 class="contract_view--title">{{'CopyRecipients' | ecTranslate}}</h5>
+            <div *ngFor="let viewer of viewers" class="contract_view--box mt-2 p-3">
+              <b class="contract_name">{{ viewer.role }}</b>
+              <!-- <div class="contract_email">{{ viewer.signerEmail }}</div> -->
+            </div>
+          </div>
+          <div class="email_contract--view" *ngIf="massField?.length > 0">
+            <h5 class="contract_view--title">{{'AutoFillField' | ecTranslate}}</h5>
+            <div style="overflow-y: auto; max-height: 20vh;" class="mt-2">
+              <div *ngFor="let field of massField" class="contract_view--box mt-2 p-3">
+                <!-- <b class="contract_name">{{ viewer.signerName }}</b> -->
+                <div class="contract_email">{{ field }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="send_mail--contract">
-        <app-contract-preview
-          [contractName]="'contractName'"
-          [contractFile]="contractFile"
-          [contractSigner]="contractSigner"
-        ></app-contract-preview>
+        <app-contract-preview [contractName]="'contractName'" [contractFile]="contractFile"
+          [contractSigner]="contractSigner"></app-contract-preview>
       </div>
     </div>
     <div class="send_mail--btn">

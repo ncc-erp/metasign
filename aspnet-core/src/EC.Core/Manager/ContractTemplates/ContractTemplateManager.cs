@@ -1,4 +1,5 @@
 ﻿using Abp.Collections.Extensions;
+using Abp.UI;
 using EC.Entities;
 using EC.Manager.Contracts.Dto;
 using EC.Manager.ContractTemplates.Dto;
@@ -10,9 +11,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using NccCore.Extension;
 using NccCore.Paging;
+using OfficeOpenXml;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using static EC.Constants.Enum;
 
@@ -28,6 +32,23 @@ namespace EC.Manager.ContractTemplates
             _webHostEnvironment = webHostEnvironment;
         }
 
+        public static DateTime? TryParse(string text) => DateTime.TryParse(text, out var date) ? date : (DateTime?)null;
+
+        public async Task<object> CheckHasInput(long contractTemplateId)
+        {
+            var hasInput = await WorkScope.GetAll<ContractTemplateSetting>()
+                .Where(x => x.ContractTemplateSigner.ContractTemplateId == contractTemplateId)
+                .AnyAsync(x => CommonUtils.InputSignature.Contains(x.SignatureType));
+            var hasSign = await WorkScope.GetAll<ContractTemplateSetting>()
+                .Where(x => x.ContractTemplateSigner.ContractTemplateId == contractTemplateId)
+                .AnyAsync(x => CommonUtils.InputSignature.Contains(x.SignatureType));
+            return new
+            {
+                HasInput = hasInput,
+                hasSign = hasSign
+            };
+        }
+
         public async Task<long> Create(CreateContractTemplateDto input)
         {
             var entity = ObjectMapper.Map<ContractTemplate>(input);
@@ -39,6 +60,119 @@ namespace EC.Manager.ContractTemplates
             var templateId = await WorkScope.InsertAndGetIdAsync(entity);
 
             return templateId;
+        }
+
+        public async Task Delete(long id)
+        {
+            var signer = WorkScope.GetAll<ContractTemplateSigner>()
+                .Where(x => x.ContractTemplateId == id).ToList();
+            var settings = WorkScope.GetAll<ContractTemplateSetting>()
+                .Where(x => x.ContractTemplateSigner.ContractTemplateId == id).ToList();
+            settings.ForEach(x =>
+            {
+                x.IsDeleted = true;
+            });
+            signer.ForEach(x =>
+            {
+                x.IsDeleted = true;
+            });
+            await CurrentUnitOfWork.SaveChangesAsync();
+            await WorkScope.DeleteAsync<ContractTemplate>(id);
+        }
+
+        public async Task<FileBase64Dto> DownloadMassTemplate(long templateId)
+        {
+            var data = await Get(templateId);
+            if (data.SignerSettings.Count(x => x.ContractRole == ContractRole.Signer) == 0)
+            {
+                throw new UserFriendlyException("Not have signer yet!");
+            }
+            using (var excelPackage = new ExcelPackage())
+            {
+                var sheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+                sheet.Cells["A1:A2"].Merge = true;
+                sheet.Cells["A1:A2"].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
+                sheet.Cells["A1:A2"].Value = "No.";
+                sheet.Cells["B1:B2"].Merge = true;
+                sheet.Cells["B1:B2"].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
+                sheet.Cells["B1:B2"].Value = "Contract Name (*)";
+                sheet.Cells["C1:C2"].Merge = true;
+                sheet.Cells["C1:C2"].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
+                sheet.Cells["C1:C2"].Value = "Contract Code";
+                sheet.Cells["D1:D2"].Merge = true;
+                sheet.Cells["D1:D2"].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
+                sheet.Cells["D1:D2"].Value = "Expire Time";
+                var startCol = 5;
+                var startRow = 1;
+                foreach (var item in data.SignerSettings)
+                {
+                    sheet.Cells[startRow, startCol, startRow, startCol + 1].Merge = true;
+                    if (data.SignerSettings.IndexOf(item) == 0)
+                    {
+                        sheet.Names.Add("StartSigner", sheet.Cells[startRow, startCol]);
+                    }
+                    if (data.SignerSettings.IndexOf(item) == data.SignerSettings.Count() - 1)
+                    {
+                        sheet.Names.Add("EndSigner", sheet.Cells[startRow, startCol]);
+                    }
+                    var role = string.IsNullOrEmpty(item.Role)
+                        ? Enum.GetName(typeof(ContractRole), item.ContractRole) : item.Role;
+                    sheet.Cells[startRow, startCol].Value = role;
+                    sheet.Cells[startRow, startCol, startRow, startCol + 1].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
+                    sheet.Cells[startRow + 1, startCol].Value = $"Name ( {role} ) (*)";
+                    sheet.Cells[startRow + 1, startCol].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
+                    sheet.Cells[startRow + 1, startCol + 1].Value = $"Email ( {role} ) (*)";
+                    sheet.Cells[startRow + 1, startCol + 1].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
+                    startCol += 2;
+                }
+                foreach (var item in data.ContractTemplate.ListField)
+                {
+                    sheet.Cells[startRow, startCol, startRow + 1, startCol].Merge = true;
+                    sheet.Cells[startRow, startCol, startRow + 1, startCol].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
+                    sheet.Cells[startRow, startCol].Value = item;
+                    if (data.ContractTemplate.ListField.IndexOf(item) == 0)
+                    {
+                        sheet.Names.Add("StartListField", sheet.Cells[startRow, startCol]);
+                    }
+                    if (data.ContractTemplate.ListField.IndexOf(item) == data.ContractTemplate.ListField.Count() - 1)
+                    {
+                        sheet.Names.Add("EndListField", sheet.Cells[startRow, startCol]);
+                    }
+                    startCol++;
+                }
+                sheet.Cells[1, 1, 2, startCol - 1].Style.Font.Bold = true;
+                sheet.Cells[1, 1, 2, startCol - 1].Style.Locked = true;
+                excelPackage.Workbook.CreateVBAProject();
+                excelPackage.Workbook.CodeModule.Name = "Module1";
+                excelPackage.Workbook.CodeModule.Code = new StringBuilder().AppendLine("Private Sub Workbook_Open()")
+                                              .AppendLine("\tDim ws As Worksheet")
+                                              .AppendLine("\tOn Error Resume Next ' In case there are no worksheets")
+                                              .AppendLine("\tFor Each ws In ThisWorkbook.Worksheets")
+                                              .AppendLine("\t\tws.Cells.EntireColumn.Autofit")
+                                              .AppendLine("\t\tws.Cells.EntireRow.Autofit")
+                                              .AppendLine("\t\tws.Cells.HorizontalAlignment = xlCenter")
+                                              .AppendLine("\t\tws.Cells.VerticalAlignment = xlCenter")
+                                              .AppendLine("\tNext ws")
+                                              .AppendLine("\tOn Error GoTo 0 ' Reset error handling")
+                                              .AppendLine("End Sub")
+                                              .AppendLine("Private Sub Workbook_SheetSelectionChange(ByVal Sh As Object, ByVal Target As Range)")
+                                              .AppendLine("\tCells.EntireColumn.Autofit")
+                                              .AppendLine("\tCells.EntireRow.Autofit")
+                                              .AppendLine("\tCells.HorizontalAlignment = xlCenter")
+                                              .AppendLine("\tCells.VerticalAlignment = xlCenter")
+                                              .AppendLine("End Sub").ToString();
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    excelPackage.SaveAs(memoryStream);
+                    return new FileBase64Dto
+                    {
+                        Base64 = Convert.ToBase64String(memoryStream.ToArray()),
+                        FileName = $"{data.ContractTemplate.Name}_template.xlsm",
+                        FileType = "application/vnd.ms-excel.sheet.macroEnabled.12"
+                    };
+                }
+            }
         }
 
         public async Task<GetSignatureForContracttemplateDto> Get(long id)
@@ -57,7 +191,9 @@ namespace EC.Manager.ContractTemplates
                 UserId = item.UserId,
                 CreationTime = item.CreationTime,
                 LastModifycationTime = item.LastModificationTime,
-                MassType = item.MassType
+                MassType = item.MassType,
+                MassWordContent = item.MassWordContent,
+                MassField = item.MassField
             };
             var settings = WorkScope.GetAll<ContractTemplateSetting>()
                 .Where(x => x.ContractTemplateSigner.ContractTemplateId == id)
@@ -82,6 +218,7 @@ namespace EC.Manager.ContractTemplates
                 }).ToList();
             var signers = WorkScope.GetAll<ContractTemplateSigner>()
                 .Where(x => x.ContractTemplateId == id)
+                .OrderBy(x => x.ContractRole).ThenBy(x => x.ProcesOrder)
                 .Select(x => new GetContractTemplateSignerDto
                 {
                     Id = x.Id,
@@ -164,6 +301,18 @@ namespace EC.Manager.ContractTemplates
             return await query.GetGridResult(query, input.GridParam);
         }
 
+        public async Task RemoveAllSignature(long contractTemplateId)
+        {
+            var allSignature = await WorkScope.GetAll<ContractTemplateSetting>()
+                .Where(x => x.ContractTemplateSigner.ContractTemplateId == contractTemplateId)
+                .ToListAsync();
+            allSignature.ForEach(x =>
+            {
+                x.IsDeleted = true;
+            });
+            await CurrentUnitOfWork.SaveChangesAsync();
+        }
+
         public async Task Update(GetContractTemplateDto input)
         {
             var item = await WorkScope.GetAsync<ContractTemplate>(input.Id);
@@ -193,45 +342,9 @@ namespace EC.Manager.ContractTemplates
             item.Type = input.Type;
             item.IsFavorite = input.IsFavorite;
             item.UserId = input.UserId;
+            item.MassWordContent = input.MassWordContent;
+            item.MassField = input.MassField;
             await WorkScope.UpdateAsync(item);
-        }
-
-        public async Task Delete(long id)
-        {
-            var signer = WorkScope.GetAll<ContractTemplateSigner>()
-                .Where(x => x.ContractTemplateId == id).ToList();
-            var settings = WorkScope.GetAll<ContractTemplateSetting>()
-                .Where(x => x.ContractTemplateSigner.ContractTemplateId == id).ToList();
-            settings.ForEach(x =>
-            {
-                x.IsDeleted = true;
-            });
-            signer.ForEach(x =>
-            {
-                x.IsDeleted = true;
-            });
-            await CurrentUnitOfWork.SaveChangesAsync();
-            await WorkScope.DeleteAsync<ContractTemplate>(id);
-        }
-
-        private OrderSignerDto OrderSigner(List<ContractTemplateSetting> input)
-        {
-            var grSignerSignatureSetting = input.GroupBy(x => x.ContractTemplateSignerId)
-                .Select(x => new
-                {
-                    ContractTemplateSignerId = x.Key,
-                    Signature = x.Select(y => y.SignatureType).ToList()
-                });
-            var contractSettingIdHaveInput = grSignerSignatureSetting.Where(x => x.Signature.Intersect(CommonUtils.InputSignature).Any() && !x.Signature.Intersect(CommonUtils.SigningSignature).Any()).OrderByDescending(x => x.ContractTemplateSignerId).Select(x => x.ContractTemplateSignerId).ToList();
-            var normalSignerId = grSignerSignatureSetting.Where(x => !x.Signature.Intersect(CommonUtils.InputSignature).Any() && x.Signature.Intersect(CommonUtils.SigningSignature).Any()).OrderByDescending(x => x.ContractTemplateSignerId).Select(x => x.ContractTemplateSignerId).ToList();
-            var contractSettingIdHaveBoth = grSignerSignatureSetting.Where(x => !contractSettingIdHaveInput.Contains(x.ContractTemplateSignerId) && !normalSignerId.Contains(x.ContractTemplateSignerId)).OrderByDescending(x => x.ContractTemplateSignerId).Select(x => x.ContractTemplateSignerId).ToList();
-
-            return new OrderSignerDto
-            {
-                ContractSettingIdHaveInput = contractSettingIdHaveInput,
-                ContractSettingIdHaveBoth = contractSettingIdHaveBoth,
-                NormalSignerId = normalSignerId,
-            };
         }
 
         public async Task UpdateProcessOrder(long contractTemplateId)
@@ -261,31 +374,143 @@ namespace EC.Manager.ContractTemplates
             }
         }
 
-        public async Task<object> CheckHasInput(long contractTemplateId)
+        public async Task<ValidImportMassContractTemplateDto> ValidImportMassTemplate(UploadMassTemplateFileDto input)
         {
-            var hasInput = await WorkScope.GetAll<ContractTemplateSetting>()
-                .Where(x => x.ContractTemplateSigner.ContractTemplateId == contractTemplateId)
-                .AnyAsync(x => CommonUtils.InputSignature.Contains(x.SignatureType));
-            var hasSign = await WorkScope.GetAll<ContractTemplateSetting>()
-                .Where(x => x.ContractTemplateSigner.ContractTemplateId == contractTemplateId)
-                .AnyAsync(x => CommonUtils.InputSignature.Contains(x.SignatureType));
-            return new
+            var templateData = await Get(input.TemplateId);
+            using (var fileStream = new MemoryStream())
             {
-                HasInput = hasInput,
-                hasSign = hasSign
-            };
+                input.File.CopyTo(fileStream);
+                using (var package = new ExcelPackage(fileStream))
+                {
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                    var sheet = package.Workbook.Worksheets[0];
+                    var rowCount = sheet.Dimension.End.Row;
+                    var colCount = sheet.Dimension.End.Column;
+                    if (rowCount <= 2)
+                    {
+                        throw new UserFriendlyException("Data column is missed");
+                    }
+                    var result = new ValidImportMassContractTemplateDto()
+                    {
+                        FailList = new List<ResponseFailDto>(),
+                        SuccessList = new List<RowMassTemplateExportDto>()
+                    };
+                    for (int row = 3; row <= rowCount; row++)
+                    {
+                        var contractName = sheet.Cells[row, 2].GetCellValue<string>();
+                        if (contractName == null)
+                        { result.FailList.Add(new ResponseFailDto { Address = sheet.Cells[row, 2].Address, ReasonFail = "ContractNameIsEmpty" }); }
+                        var contractCode = sheet.Cells[row, 3].GetCellValue<string>();
+                        DateTime? expireTime = null;
+                        if (string.IsNullOrEmpty(sheet.Cells[row, 4].GetCellValue<string>()))
+                        {
+                        }
+                        if (!string.IsNullOrEmpty(sheet.Cells[row, 4].GetCellValue<string>()))
+                        {
+                            expireTime = DateTime.TryParse(sheet.Cells[row, 4].GetCellValue<string>(), out var dt) ? dt : (DateTime?)null;
+                        }
+                        result.SuccessList.Add(new RowMassTemplateExportDto { Contract = new CreatECDto { Name = contractName, Code = contractCode, ExpriedTime = expireTime, } });
+                    }
+                    var startColSigner = sheet.Names["StartSigner"].EntireColumn.StartColumn;
+                    var endColSigner = sheet.Names["EndSigner"].EntireColumn.StartColumn;
+                    if ((endColSigner - startColSigner) / 2 + 1 != templateData.SignerSettings.Count)
+                    {
+                        throw new UserFriendlyException("Wrong Template!");
+                    }
+                    var checkMultiple = new List<CheckMultiple>();
+                    for (int col = 0; col <= endColSigner - startColSigner; col += 2)
+                    {
+                        var colCheck = new CheckMultiple() { NameEmails = new List<NameEmail>() };
+                        for (int row = 3; row <= rowCount; row++)
+                        {
+                            var name = sheet.Cells[row, col + startColSigner].GetCellValue<string>();
+                            var email = sheet.Cells[row, col + startColSigner + 1].GetCellValue<string>();
+                            colCheck.NameEmails.Add(new NameEmail
+                            {
+                                Name = string.IsNullOrEmpty(name) ? "" : name.Trim(),
+                                Email = string.IsNullOrEmpty(email) ? "" : email.Trim(),
+                            });
+                        }
+                        colCheck.MassGuid = colCheck.NameEmails.GroupBy(x => new { x.Name, x.Email }).Count() == 1 ? Guid.NewGuid() : null;
+                        checkMultiple.Add(colCheck);
+                    }
+                    for (int row = 3; row <= rowCount; row++)
+                    {
+                        var startSigner = startColSigner;
+                        var signers = new List<SignerMassDto>();
+                        result.SuccessList[row - 3].Signers = new List<SignerMassDto>();
+                        while (startSigner <= endColSigner)
+                        {
+                            var signerName = sheet.Cells[row, startSigner].GetCellValue<string>();
+                            if (string.IsNullOrEmpty(signerName))
+                            {
+                                result.FailList.Add(new ResponseFailDto { Address = sheet.Cells[row, startSigner].Address, ReasonFail = "NameIsEmpty" });
+                            }
+                            var signerEmail = sheet.Cells[row, startSigner + 1].GetCellValue<string>();
+                            if (!CommonUtils.IsValidEmail(signerEmail))
+                            {
+                                result.FailList.Add(new ResponseFailDto { Address = sheet.Cells[row, startSigner + 1].Address, ReasonFail = "EmailIsNotValid" });
+                            }
+                            signers.Add(new SignerMassDto
+                            {
+                                Name = signerName,
+                                Email = signerEmail,
+                                Color = templateData.SignerSettings[(startSigner - startColSigner) / 2].Color,
+                                ContractRole = templateData.SignerSettings[(startSigner - startColSigner) / 2].ContractRole,
+                                ProcesOrder = templateData.SignerSettings[(startSigner - startColSigner) / 2].ProcesOrder,
+                                SignatureSettings = templateData.SignatureSettings.Where(x => x.ContractTemplateSignerId == templateData.SignerSettings[(startSigner - startColSigner) / 2].Id).ToList(),
+                                MassGuid = checkMultiple[(startSigner - startColSigner) / 2].MassGuid
+                            });
+                            startSigner += 2;
+                        }
+                        result.SuccessList[row - 3].Signers.AddRange(signers);
+                    }
+                    var startColListField = sheet.Names["StartListField"].EntireColumn.StartColumn;
+                    var endColListField = sheet.Names["EndListField"].EntireColumn.StartColumn;
+                    if ((endColListField - startColListField) + 1 != templateData.ContractTemplate.ListField.Count)
+                    {
+                        throw new UserFriendlyException("Wrong Template!");
+                    }
+                    for (int row = 3; row <= rowCount; row++)
+                    {
+                        var startListField = startColListField;
+                        result.SuccessList[row - 3].ListFieldDto = new List<string>();
+                        var listField = new List<string>();
+                        while (startListField <= endColListField)
+                        {
+                            var fieldValue = sheet.Cells[row, startListField].GetCellValue<string>();
+                            if (string.IsNullOrEmpty(fieldValue))
+                            {
+                                result.FailList.Add(new ResponseFailDto { Address = sheet.Cells[row, startListField].Address, ReasonFail = "AutoFillFieldValueIsEmpty" });
+                            }
+                            startListField++;
+                            listField.Add(fieldValue);
+                        }
+                        result.SuccessList[row - 3].ListFieldDto.AddRange(listField);
+                    }
+                    return result;
+                }
+            }
         }
 
-        public async Task RemoveAllSignature(long contractTemplateId)
+        private OrderSignerDto OrderSigner(List<ContractTemplateSetting> input)
         {
-            var allSignature = await WorkScope.GetAll<ContractTemplateSetting>()
-                .Where(x => x.ContractTemplateSigner.ContractTemplateId == contractTemplateId)
-                .ToListAsync();
-            allSignature.ForEach(x =>
+            var grSignerSignatureSetting = input.GroupBy(x => x.ContractTemplateSignerId)
+                .Select(x => new
+                {
+                    ContractTemplateSignerId = x.Key,
+                    Signature = x.Select(y => y.SignatureType).ToList()
+                });
+            var contractSettingIdHaveInput = grSignerSignatureSetting.Where(x => x.Signature.Intersect(CommonUtils.InputSignature).Any() && !x.Signature.Intersect(CommonUtils.SigningSignature).Any()).OrderByDescending(x => x.ContractTemplateSignerId).Select(x => x.ContractTemplateSignerId).ToList();
+            var normalSignerId = grSignerSignatureSetting.Where(x => !x.Signature.Intersect(CommonUtils.InputSignature).Any() && x.Signature.Intersect(CommonUtils.SigningSignature).Any()).OrderByDescending(x => x.ContractTemplateSignerId).Select(x => x.ContractTemplateSignerId).ToList();
+            var contractSettingIdHaveBoth = grSignerSignatureSetting.Where(x => !contractSettingIdHaveInput.Contains(x.ContractTemplateSignerId) && !normalSignerId.Contains(x.ContractTemplateSignerId)).OrderByDescending(x => x.ContractTemplateSignerId).Select(x => x.ContractTemplateSignerId).ToList();
+
+            return new OrderSignerDto
             {
-                x.IsDeleted = true;
-            });
-            await CurrentUnitOfWork.SaveChangesAsync();
+                ContractSettingIdHaveInput = contractSettingIdHaveInput,
+                ContractSettingIdHaveBoth = contractSettingIdHaveBoth,
+                NormalSignerId = normalSignerId,
+            };
         }
     }
 }

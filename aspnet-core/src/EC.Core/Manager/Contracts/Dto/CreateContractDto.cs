@@ -1,7 +1,7 @@
 ﻿using Abp.AutoMapper;
 using EC.Entities;
 using System;
-using static EC.Constants.Enum;
+using System.Collections.Generic;
 
 namespace EC.Manager.Contracts.Dto
 {
@@ -22,11 +22,17 @@ namespace EC.Manager.Contracts.Dto
         public float Width { get; set; }
         public float Height { get; set; }
     }
-    public class CreateContractFromTemplateDto{
+    public class CreateContractFromTemplateDto
+    {
         public long ContractTemplateId { get; set; }
         public string Name { get; set; }
         public string Code { get; set; }
         public DateTime? ExpriedTime { get; set; }
 
+    }
+    public class CreateMassContractDto
+    {
+        public long Id { get; set; }
+        public List<RowMassTemplateExportDto> RowData { get; set; }
     }
 }

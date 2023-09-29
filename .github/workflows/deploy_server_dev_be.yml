@@ -1,0 +1,78 @@
+name: Build Metasign_BE Dev
+on:
+  push:
+    branches:
+      - dev
+    paths:
+    - 'aspnet-core/**'
+    - '.github/workflows/deploy_server_dev_be.yml'
+
+jobs:
+  build:
+    runs-on: dev-metasign
+    name: Build Metasign_BE Dev
+    environment: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Backup Log
+        run: |
+          cp -r /var/www/backend_git/App_Data/Logs/* /home/nccsoft/data/metasign/Logs/
+
+      - name: Build Migrator
+        run: |
+          cd aspnet-core/src/EC.Migrator
+          dotnet build
+          dotnet publish
+
+      - name: Copy New Migrator
+        run: |
+          cd aspnet-core/src/EC.Migrator/bin/Debug/net6.0/publish/
+          rm -rf appsettings.json
+          cp -r * /var/www/migrator_git/
+
+      - name: Build Host
+        run: |
+          cd aspnet-core/src/EC.Web.Host
+          dotnet build
+          dotnet publish
+
+      - name: Copy New Host
+        run: |
+          cd aspnet-core/src/EC.Web.Host/bin/Debug/net6.0/publish/
+          rm -rf appsettings.json
+          cp -r * /var/www/backend_git/
+    
+          
+  deploy:
+    runs-on: dev-metasign
+    name: Deploy Metasign_BE Dev
+    environment: dev
+    needs:
+      - build
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: Up Data appsettings.json
+        run: |
+          cd aspnet-core/
+          echo '${{ secrets.APP_SETTING_DEV }}' > appsettings.json
+
+      - name: Migrate Database
+        run: |
+          cd aspnet-core/
+          cp appsettings.json /var/www/migrator_git/
+          cd /var/www/migrator_git/
+          dotnet EC.Migrator.dll -q
+
+      - name: Restart Server
+        run: |
+          cd aspnet-core/
+          cp appsettings.json /var/www/backend_git/
+          cd /var/www/backend_git/
+          mkdir -p /var/www/backend_git/App_Data/Logs/
+          cp -r /home/nccsoft/data/metasign/Logs/* /var/www/backend_git/App_Data/Logs/
+          chmod 777 -R App_Data/
+          sudo systemctl restart backend-git.service

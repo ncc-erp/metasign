@@ -41,6 +41,8 @@ export class UploadContractComponent
   public isConverting: boolean = false;
   public isUploadComplete: boolean = false;
   public templateContract: boolean;
+  public wordBase64 = "";
+  public matchMassField = "";
   templateContractId: number;
   templateContractEdit: boolean;
   useTemplateContract: boolean;
@@ -126,6 +128,8 @@ export class UploadContractComponent
         );
         this.fileContract = rs.result.contractTemplate.content;
         this.fileName = rs.result.contractTemplate.fileName;
+        this.matchMassField = rs.result.contractTemplate.massField;
+        this.wordBase64 = rs.result.contractTemplate.massWordContent;
         this.isSaved = true;
         this.activeFrom = true;
         this.isUploadComplete = true;
@@ -239,9 +243,6 @@ export class UploadContractComponent
       return
     }
 
-
- 
-
     if (this.contractId && this.templateContractId) {
       this.isClicked = true;
       fileUpload.id = this.contractId;
@@ -260,12 +261,16 @@ export class UploadContractComponent
         userId: this.appSession.userId,
         isFavorite: false,
         htmlContent: this.htmlContent ? this.htmlContent : null,
-        massType: this.batchContract ? MassType.Multiple : MassType.Singel
+        massType: this.batchContract ? MassType.Multiple : MassType.Singel,
+        massField: this.matchMassField,
+        massWordContent:this.wordBase64
       };
       this.isClicked = true
       if (this.templateContractId) {
         contractPayload.id = this.templateContractId;
         contractPayload.content = this.fileContract;
+        contractPayload.massWordContent = this.wordBase64
+        contractPayload.massField =this.matchMassField
         this.contractTemplateService
           .updateFileTemplate(contractPayload)
           .subscribe(() => {
@@ -416,6 +421,8 @@ export class UploadContractComponent
           this.isConverting = false;
           this.fileName = rs.result.fileName;
           this.fileContract = rs.result.base64String;
+          this.matchMassField = rs.result.matchMassField;
+          this.wordBase64 = rs.result.wordBase64;
           let contractName = this.fileName?.split(".")[0];
           this.contractForm.controls["name"].setValue(contractName);
 
@@ -562,7 +569,7 @@ export class UploadContractComponent
         if (this.contractId + 1) {
           const payload = {
             contractId: this.contractId,
-            reason:""
+            reason: ""
           }
           this.contractService.CancelContract(payload).subscribe(res => {
             abp.notify.success(this.ecTransform('DocumentDeletedSuccessfully'));

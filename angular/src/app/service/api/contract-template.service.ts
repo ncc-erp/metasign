@@ -29,27 +29,33 @@ export class ContractTemplateService extends BaseApiService {
   }
 
   public getAllPagingContractTemplate(payload): Observable<ApiResponseDto<any>> {
-    return this.processGetAllPaging(`GetAllPaging`,payload);
+    return this.processGetAllPaging(`GetAllPaging`, payload);
   }
-
-
 
   public getContractTemplate(id: number): Observable<ApiResponseDto<any>> {
     return this.processGet(`Get?id=${id}`);
   }
-
 
   public deleteFileTemplate(id: number): Observable<ApiResponseDto<any>> {
     return this.processDelete(`Delete?id=${id}`);
   }
 
   public updateProcessOrder(id: number): Observable<ApiResponseDto<any>> {
-    return this.processPut(`UpdateProcessOrder?contractTemplateId=${id}`,{})
+    return this.processPut(`UpdateProcessOrder?contractTemplateId=${id}`, {})
   }
   public checkHasInput(id: number): Observable<ApiResponseDto<any>> {
     return this.processGet(`CheckHasInput?contractTemplateId=${id}`)
   }
-  public removeAllSignature(id: number): Observable<ApiResponseDto<any>>{
+  public removeAllSignature(id: number): Observable<ApiResponseDto<any>> {
     return this.processDelete(`RemoveAllSignature?contractTemplateId=${id}`);
+  }
+
+  public downloadMassTemplate(templateId: number): Observable<ApiResponseDto<any>>{
+    return this.processPost(`DownloadMassTemplate?templateId=${templateId}`, null);
+  }
+
+  public validImportMassTemplate(input): Observable<ApiResponseDto<any>>
+  {
+    return this.processPost(`ValidImportMassTemplate`, input);
   }
 }
