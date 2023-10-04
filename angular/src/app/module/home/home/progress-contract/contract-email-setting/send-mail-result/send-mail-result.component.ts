@@ -40,4 +40,12 @@ export class SendMailResultComponent implements OnInit {
     this.contractService._currentQuickFilter.next(-1)
     this.contractService._currentStatus.next(-1)
   }
+
+  signNow() {
+    if (localStorage.getItem("notSignNow")) {
+      localStorage.removeItem("notSignNow")
+    }
+    localStorage.setItem("notSignNow", "0");
+    window.open(this.signUrl, "_blank");
+  }
 }

@@ -1,11 +1,6 @@
 ﻿using EC.Manager.ContractSignings;
 using EC.Manager.ContractSignings.Dto;
-using EC.WebService.DesktopApp.Dto;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace EC.APIs.ContractSignings
@@ -13,11 +8,11 @@ namespace EC.APIs.ContractSignings
     public class ContractSigningAppService : ECAppServiceBase
     {
         private readonly ContractSigningManager _contractSigningManager;
+
         public ContractSigningAppService(ContractSigningManager contractSigningManager)
         {
             _contractSigningManager = contractSigningManager;
         }
-
 
         [HttpPost]
         public async Task<string> SignMultiple(SignMultipleDto input)
@@ -37,7 +32,6 @@ namespace EC.APIs.ContractSignings
             return _contractSigningManager.ValidContract(contractId);
         }
 
-
         [HttpGet]
         public string GetSignatureBase64()
         {
@@ -54,13 +48,18 @@ namespace EC.APIs.ContractSignings
         public async Task<bool> InsertSigningResult(InputSigningResultDto input)
         {
             return await _contractSigningManager.InsertSigningResultForInput(input);
-
         }
 
         [HttpPost]
         public async Task<string> SignInput(SignInputsDto input)
         {
             return await _contractSigningManager.SignInput(input);
+        }
+
+        [HttpGet]
+        public async Task<string> GetSignerEmail(long settingId)
+        {
+            return await _contractSigningManager.GetSignerEmail(settingId);
         }
     }
 }
