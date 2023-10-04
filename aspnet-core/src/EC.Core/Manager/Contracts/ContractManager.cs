@@ -907,7 +907,6 @@ namespace EC.Manager.Contracts
                 .Where(x => x.ContractId == contractId)
                 .Select(x => x.Id)
                 .FirstOrDefaultAsync();
-
             var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
             var signUrl = "";
 
@@ -1782,7 +1781,7 @@ namespace EC.Manager.Contracts
                 {
                     doc.Replace(fieldName[i], listFieldDto[i], false, true);
                 }
-                doc.SaveToFile(filePath, FileFormat.Docx);
+                doc.SaveToFile(filePath, FileFormat.Auto);
             }
             await ConvertToPdf(filePath, Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder));
             var outputFile = Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder, Path.GetFileNameWithoutExtension(filePath) + ".pdf");

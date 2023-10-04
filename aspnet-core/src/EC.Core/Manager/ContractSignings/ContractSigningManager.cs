@@ -36,19 +36,18 @@ namespace EC.Manager.ContractSignings
 {
     public class ContractSigningManager : BaseManager
     {
-        private readonly SignServerWebService _signServerWebService;
-        private readonly SignServerWorkerManager _signServerWorkerManager;
-        private readonly ContractHistoryManager _contractHistoryManager;
-        private readonly EmailManager _emailManager;
-        private readonly BackgroundJobManager _backgroundJobManager;
-        private readonly SignatureUserManager _signatureUserManager;
         private readonly IConfiguration _appConfiguration;
+        private readonly BackgroundJobManager _backgroundJobManager;
+        private readonly ContractHistoryManager _contractHistoryManager;
         private readonly ContractManager _contractManager;
         private readonly DesktopAppService _desktopAppService;
+        private readonly EmailManager _emailManager;
+        private readonly FileStoringManager _fileStoringManager;
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly NotificationManager _notificationManager;
-        private readonly FileStoringManager _fileStoringManager;
-
+        private readonly SignatureUserManager _signatureUserManager;
+        private readonly SignServerWebService _signServerWebService;
+        private readonly SignServerWorkerManager _signServerWorkerManager;
         public ContractSigningManager(IWorkScope workScope,
             SignServerWebService signServerWebService,
             SignServerWorkerManager signServerWorkerManager,
@@ -75,6 +74,107 @@ namespace EC.Manager.ContractSignings
             _hostingEnvironment = webHostEnvironment;
             _notificationManager = notificationManager;
             _fileStoringManager = fileStoringManager;
+        }
+
+        public async Task CompleteContract(long contractId)
+        {
+            var allComplete = true;
+            var settings = await WorkScope.GetAll<ContractSetting>()
+                .Where(x => x.ContractId == contractId)
+                .Where(x => x.ContractRole == ContractRole.Signer)
+                .Select(x => x.IsComplete)
+                .ToListAsync();
+
+            foreach (var item in settings)
+            {
+                if (item == false)
+                {
+                    allComplete = false; break;
+                }
+            }
+
+            if (allComplete)
+            {
+                var contract = await WorkScope.GetAll<Entities.Contract>()
+                    .Where(x => x.Id == contractId)
+                    .FirstOrDefaultAsync();
+
+                if (contract.Status != ContractStatus.Complete)
+                {
+                    contract.Status = ContractStatus.Complete;
+
+                    await WorkScope.UpdateAsync(contract);
+
+                    var history = new CreaContractHistoryDto
+                    {
+                        Action = HistoryAction.Complete,
+                        AuthorEmail = "",
+                        ContractId = contractId,
+                        ContractStatus = ContractStatus.Complete,
+                        TimeAt = DateTimeUtils.GetNow(),
+                        Note = $"TheDocumentHasBeenCompleted"
+                    };
+                    await _contractHistoryManager.Create(history);
+                }
+                await _notificationManager.RemoveOldJob(contractId);
+                await _notificationManager.NotifyCompleteContract(contractId);
+            }
+        }
+
+        public string ConvertImageToBase64(string imagePath)
+        {
+            try
+            {
+                string wwwRootPath = _hostingEnvironment.WebRootPath;
+                string imagePathInWebRoot = Path.Combine(wwwRootPath, imagePath);
+
+                byte[] imageBytes = File.ReadAllBytes(imagePathInWebRoot);
+                string base64String = Convert.ToBase64String(imageBytes);
+                return base64String;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error converting image to Base64: " + ex.Message);
+                return null;
+            }
+        }
+
+        public async Task CreateUserSignature(string base64Signature, SignatureTypeSetting sigatureType, string email, bool setDefault)
+        {
+            var userId = await WorkScope.GetAll<User>()
+                .Where(x => x.EmailAddress.ToLower().Trim() == email.ToLower().Trim())
+                .Select(x => x.Id)
+                .FirstOrDefaultAsync();
+
+            if (userId != default)
+            {
+                var newSignatureUser = new SignatureUser
+                {
+                    SignatureType = sigatureType,
+                    UserId = userId,
+                    FileBase64 = base64Signature,
+                    IsDefault = setDefault,
+                };
+                long id = await WorkScope.InsertAndGetIdAsync(newSignatureUser);
+
+                if (newSignatureUser.IsDefault)
+                {
+                    await _signatureUserManager.UnDefaultSignatures(id);
+                }
+            }
+        }
+
+        public string GetSignatureBase64()
+        {
+            string signatureBase64 = ConvertImageToBase64("digitalSignatureImg/signature.png");
+
+            return signatureBase64;
+        }
+
+        public async Task<string> GetSignerEmail(long settingId)
+        {
+            return WorkScope.GetAll<ContractSetting>()
+                .Where(x => x.Id == settingId).FirstOrDefault().SignerEmail.Trim();
         }
 
         public SignMethod GetSignMethod(SignatureTypeSetting type)
@@ -106,106 +206,38 @@ namespace EC.Manager.ContractSignings
             }
         }
 
-        public async Task<string> SignMultiple(SignMultipleDto input)
+        public string GetSignPosition(float x, float y, float width, float height)
         {
-            string contractBase64 = "";
-
-            if (!String.IsNullOrEmpty(input.ContractBase64))
+            if (width == default)
             {
-                contractBase64 = input.ContractBase64;
-            }
-            else
-            {
-                contractBase64 = WorkScope.GetAll<ContractSigning>()
-                .Where(x => x.ContractId == input.ContractId)
-                .OrderByDescending(x => x.TimeAt)
-                .Select(x => x.SigningResult)
-                .FirstOrDefault();
-
-                if (contractBase64 == default)
-                {
-                    contractBase64 = await WorkScope.GetAll<Entities.Contract>()
-                           .Where(x => x.Id == input.ContractId)
-                           .Select(x => x.FileBase64)
-                           .FirstOrDefaultAsync();
-                    if (string.IsNullOrEmpty(contractBase64))
-                    {
-                        contractBase64 =  await _fileStoringManager.DownloadLatestContractBase64(input.ContractId);
-                    }
-                }
-                else if (string.IsNullOrEmpty(contractBase64))
-                {
-                    contractBase64 = await _fileStoringManager.DownloadLatestContractBase64(input.ContractId);
-                }
+                width = 120;
             }
 
-            var contractSettingId = await WorkScope.GetAll<SignerSignatureSetting>()
-                .Where(x => x.Id == input.SignSignatures.FirstOrDefault().SignerSignatureSettingId)
-                .Select(x => x.ContractSettingId)
-                .FirstOrDefaultAsync();
-
-            var contractSetting = await WorkScope.GetAll<ContractSetting>()
-                .Where(x => x.Id == contractSettingId)
-                .FirstOrDefaultAsync();
-
-            var contract = await WorkScope.GetAsync<Entities.Contract>(contractSetting.ContractId);
-
-            foreach (var item in input.SignSignatures)
+            if (height == default)
             {
-                var guid = Guid.NewGuid();
-
-                var signMethod = GetSignMethod(item.SignatureType);
-
-                contractBase64 = await SignProcess(item, contractBase64, guid);
-
-                await InsertSigningResult(contractSetting.ContractId, guid, contractBase64, signMethod, item.SignartureBase64, contractSetting.SignerEmail);
+                height = 90;
             }
 
-            SigningDto newSignature = input.SignSignatures.FirstOrDefault(x => x.IsNewSignature.Value);
+            var rectangleCoordinates = CommonUtils.GetRectangleCoordinates(x, y, width, height);
 
-            if (newSignature != default)
+            return rectangleCoordinates;
+        }
+
+        public async Task InsertSigningResult(long contractId, Guid guid, string signingResult, SignMethod signatureType, string signatureBase64 = "", string email = "")
+        {
+            var entity = new ContractSigning
             {
-                await CreateUserSignature(newSignature.SignartureBase64, newSignature.SignatureType, contractSetting.SignerEmail, newSignature.SetDefault);
-            }
-
-            contractSetting.Status = ContractSettingStatus.Confirmed;
-            contractSetting.IsComplete = true;
-            contractSetting.UpdateDate = Clock.Provider.Now;
-            contract.LastModificationTime = Clock.Provider.Now;
-
-            await CurrentUnitOfWork.SaveChangesAsync();
-
-            await UpdateSignedSignature(contractSettingId);
-
-            var history = new CreaContractHistoryDto
-            {
-                Action = HistoryAction.Sign,
-                AuthorEmail = contractSetting.SignerEmail,
-                ContractId = contractSetting.ContractId,
-                ContractStatus = ContractStatus.Inprogress,
+                ContractId = contractId,
+                SignartureBase64 = signatureBase64,
+                Email = email,
                 TimeAt = DateTimeUtils.GetNow(),
-                Note = $"{contractSetting.SignerEmail} signedTheDocument"
+                Guid = guid,
+                SignatureType = signatureType
             };
-            await _contractHistoryManager.Create(history);
-            var signers = await WorkScope.GetAll<ContractSetting>()
-                .Include(x => x.Contract)
-                .Include(x => x.Contract.User)
-                .Where(x => x.ContractId == contractSetting.ContractId && x.ContractRole == ContractRole.Signer && !x.IsComplete && x.IsSendMail == false)
-                .ToListAsync();
-
-            var isOrder = signers.Any(x => x.ProcesOrder != 1);
-
-            if (isOrder && signers.Count > 0)
-            {
-                var firstContent = WorkScope.GetAll<ContractHistory>()
-                .Where(x => x.ContractId == contractSetting.ContractId && x.Action == HistoryAction.SendMail)
-                .Where(x => !string.IsNullOrEmpty(x.MailContent)).FirstOrDefault();
-                var mailContent = JsonSerializer.Deserialize<MailPreviewInfoDto>(firstContent.MailContent);
-                await _contractManager.SendMail(new Contracts.Dto.SendMailDto { ContractId = contractSetting.ContractId, MailContent = mailContent });
-            }
-            await CompleteContract(contractSetting.ContractId);
-
-            return contractBase64;
+            var fileName = WorkScope.GetAll<Contract>().Where(x => x.Id == contractId).FirstOrDefault().File;
+            var file = CommonUtils.ConvertBase64PdfToFile(signingResult.Split(",")[1], fileName);
+            await _fileStoringManager.UploadContract(contractId, file);
+            await WorkScope.InsertAsync(entity);
         }
 
         public async Task<bool> InsertSigningResultAndComplete(InputSigningResultDto input)
@@ -283,110 +315,151 @@ namespace EC.Manager.ContractSignings
             return true;
         }
 
-        public async Task CreateUserSignature(string base64Signature, SignatureTypeSetting sigatureType, string email, bool setDefault)
+        public async Task<string> SignDigitalSignature(SignFromCertDto input)
         {
-            var userId = await WorkScope.GetAll<User>()
-                .Where(x => x.EmailAddress.ToLower().Trim() == email.ToLower().Trim())
-                .Select(x => x.Id)
-                .FirstOrDefaultAsync();
+            var cert = CertUtils.getX509Certificate(input.CertSerial);
 
-            if (userId != default)
-            {
-                var newSignatureUser = new SignatureUser
-                {
-                    SignatureType = sigatureType,
-                    UserId = userId,
-                    FileBase64 = base64Signature,
-                    IsDefault = setDefault,
-                };
-                long id = await WorkScope.InsertAndGetIdAsync(newSignatureUser);
+            var result = SignUtils.SignPdfFromBase64(input.PdfBase64, input.SignatureBase64, cert, input.Page, input.Position);
 
-                if (newSignatureUser.IsDefault)
-                {
-                    await _signatureUserManager.UnDefaultSignatures(id);
-                }
-            }
+            return result;
         }
 
-        public async Task UpdateSignedSignature(long contractSettingId)
+        public async Task<string> SignInput(SignInputsDto input)
         {
-            var SignedSettingIds = WorkScope.GetAll<SignerSignatureSetting>()
-                .Where(x => x.ContractSettingId == contractSettingId)
-                .Select(x => x.Id)
-                .ToList();
+            string result = input.Base64Pdf;
 
-            var signatureSetting = WorkScope.GetAll<SignerSignatureSetting>()
-                .Where(x => SignedSettingIds.Contains(x.Id));
+            var filledSetting = input.ListInput.Select(x => x.SignerSignatureSettingId).ToList();
 
-            foreach (var item in signatureSetting)
-            {
-                item.IsSigned = true;
-                await WorkScope.UpdateAsync(item);
-            }
-        }
-
-        public async Task InsertSigningResult(long contractId, Guid guid, string signingResult, SignMethod signatureType, string signatureBase64 = "", string email = "")
-        {
-            var entity = new ContractSigning
-            {
-                ContractId = contractId,
-                SignartureBase64 = signatureBase64,
-                Email = email,
-                TimeAt = DateTimeUtils.GetNow(),
-                Guid = guid,
-                SignatureType = signatureType
-            };
-            var fileName = WorkScope.GetAll<Contract>().Where(x => x.Id == contractId).FirstOrDefault().File;
-            var file = CommonUtils.ConvertBase64PdfToFile(signingResult.Split(",")[1], fileName);
-            await _fileStoringManager.UploadContract(contractId,file);
-            await WorkScope.InsertAsync(entity);
-        }
-
-        public async Task CompleteContract(long contractId)
-        {
-            var allComplete = true;
-            var settings = await WorkScope.GetAll<ContractSetting>()
-                .Where(x => x.ContractId == contractId)
-                .Where(x => x.ContractRole == ContractRole.Signer)
-                .Select(x => x.IsComplete)
+            var settings = await WorkScope.GetAll<SignerSignatureSetting>()
+                .Where(x => filledSetting.Contains(x.Id))
                 .ToListAsync();
+
+            foreach (var item in input.ListInput)
+            {
+                var signLocation = await WorkScope.GetAll<SignerSignatureSetting>()
+                    .Where(x => x.Id == item.SignerSignatureSettingId)
+                    .Select(x => new SignPositionDto
+                    {
+                        PositionX = x.PositionX,
+                        PositionY = x.PositionY,
+                        Page = x.Page,
+                    })
+                    .FirstOrDefaultAsync();
+
+                result = await SignUtils.FillPdfWithText(item, signLocation, result, _hostingEnvironment.WebRootPath);
+            }
 
             foreach (var item in settings)
             {
-                if (item == false)
-                {
-                    allComplete = false; break;
-                }
+                item.IsSigned = true;
             }
 
-            if (allComplete)
-            {
-                var contract = await WorkScope.GetAll<Entities.Contract>()
-                    .Where(x => x.Id == contractId)
-                    .FirstOrDefaultAsync();
+            await CurrentUnitOfWork.SaveChangesAsync();
 
-                if (contract.Status != ContractStatus.Complete)
-                {
-                    contract.Status = ContractStatus.Complete;
-
-                    await WorkScope.UpdateAsync(contract);
-
-                    var history = new CreaContractHistoryDto
-                    {
-                        Action = HistoryAction.Complete,
-                        AuthorEmail = "",
-                        ContractId = contractId,
-                        ContractStatus = ContractStatus.Complete,
-                        TimeAt = DateTimeUtils.GetNow(),
-                        Note = $"TheDocumentHasBeenCompleted"
-                    };
-                    await _contractHistoryManager.Create(history);
-                }
-                await _notificationManager.RemoveOldJob(contractId);
-                await _notificationManager.NotifyCompleteContract(contractId);
-            }
+            return result;
         }
 
+        public async Task<string> SignMultiple(SignMultipleDto input)
+        {
+            string contractBase64 = "";
+
+            if (!String.IsNullOrEmpty(input.ContractBase64))
+            {
+                contractBase64 = input.ContractBase64;
+            }
+            else
+            {
+                contractBase64 = WorkScope.GetAll<ContractSigning>()
+                .Where(x => x.ContractId == input.ContractId)
+                .OrderByDescending(x => x.TimeAt)
+                .Select(x => x.SigningResult)
+                .FirstOrDefault();
+
+                if (contractBase64 == default)
+                {
+                    contractBase64 = await WorkScope.GetAll<Entities.Contract>()
+                           .Where(x => x.Id == input.ContractId)
+                           .Select(x => x.FileBase64)
+                           .FirstOrDefaultAsync();
+                    if (string.IsNullOrEmpty(contractBase64))
+                    {
+                        contractBase64 = await _fileStoringManager.DownloadLatestContractBase64(input.ContractId);
+                    }
+                }
+                else if (string.IsNullOrEmpty(contractBase64))
+                {
+                    contractBase64 = await _fileStoringManager.DownloadLatestContractBase64(input.ContractId);
+                }
+            }
+
+            var contractSettingId = await WorkScope.GetAll<SignerSignatureSetting>()
+                .Where(x => x.Id == input.SignSignatures.FirstOrDefault().SignerSignatureSettingId)
+                .Select(x => x.ContractSettingId)
+                .FirstOrDefaultAsync();
+
+            var contractSetting = await WorkScope.GetAll<ContractSetting>()
+                .Where(x => x.Id == contractSettingId)
+                .FirstOrDefaultAsync();
+
+            var contract = await WorkScope.GetAsync<Entities.Contract>(contractSetting.ContractId);
+
+            foreach (var item in input.SignSignatures)
+            {
+                var guid = Guid.NewGuid();
+
+                var signMethod = GetSignMethod(item.SignatureType);
+
+                contractBase64 = await SignProcess(item, contractBase64, guid);
+
+                await InsertSigningResult(contractSetting.ContractId, guid, contractBase64, signMethod, item.SignartureBase64, contractSetting.SignerEmail);
+            }
+
+            SigningDto newSignature = input.SignSignatures.FirstOrDefault(x => x.IsNewSignature.Value);
+
+            if (newSignature != default)
+            {
+                await CreateUserSignature(newSignature.SignartureBase64, newSignature.SignatureType, contractSetting.SignerEmail, newSignature.SetDefault);
+            }
+
+            contractSetting.Status = ContractSettingStatus.Confirmed;
+            contractSetting.IsComplete = true;
+            contractSetting.UpdateDate = Clock.Provider.Now;
+            contract.LastModificationTime = Clock.Provider.Now;
+
+            await CurrentUnitOfWork.SaveChangesAsync();
+
+            await UpdateSignedSignature(contractSettingId);
+
+            var history = new CreaContractHistoryDto
+            {
+                Action = HistoryAction.Sign,
+                AuthorEmail = contractSetting.SignerEmail,
+                ContractId = contractSetting.ContractId,
+                ContractStatus = ContractStatus.Inprogress,
+                TimeAt = DateTimeUtils.GetNow(),
+                Note = $"{contractSetting.SignerEmail} signedTheDocument"
+            };
+            await _contractHistoryManager.Create(history);
+            var signers = await WorkScope.GetAll<ContractSetting>()
+                .Include(x => x.Contract)
+                .Include(x => x.Contract.User)
+                .Where(x => x.ContractId == contractSetting.ContractId && x.ContractRole == ContractRole.Signer && !x.IsComplete && x.IsSendMail == false)
+                .ToListAsync();
+
+            var isOrder = signers.Any(x => x.ProcesOrder != 1);
+
+            if (isOrder && signers.Count > 0)
+            {
+                var firstContent = WorkScope.GetAll<ContractHistory>()
+                .Where(x => x.ContractId == contractSetting.ContractId && x.Action == HistoryAction.SendMail)
+                .Where(x => !string.IsNullOrEmpty(x.MailContent)).FirstOrDefault();
+                var mailContent = JsonSerializer.Deserialize<MailPreviewInfoDto>(firstContent.MailContent);
+                await _contractManager.SendMail(new Contracts.Dto.SendMailDto { ContractId = contractSetting.ContractId, MailContent = mailContent });
+            }
+            await CompleteContract(contractSetting.ContractId);
+
+            return contractBase64;
+        }
         public async Task<string> SignProcess(SigningDto input, string contractBase64, Guid guid)
         {
             if (input.SignartureBase64 == default && input.SignerSignatureSettingId == default)
@@ -477,73 +550,22 @@ namespace EC.Manager.ContractSignings
             return result;
         }
 
-        public string GetSignatureBase64()
+        public async Task UpdateSignedSignature(long contractSettingId)
         {
-            string signatureBase64 = ConvertImageToBase64("digitalSignatureImg/signature.png");
+            var SignedSettingIds = WorkScope.GetAll<SignerSignatureSetting>()
+                .Where(x => x.ContractSettingId == contractSettingId)
+                .Select(x => x.Id)
+                .ToList();
 
-            return signatureBase64;
-        }
+            var signatureSetting = WorkScope.GetAll<SignerSignatureSetting>()
+                .Where(x => SignedSettingIds.Contains(x.Id));
 
-        public string ConvertImageToBase64(string imagePath)
-        {
-            try
+            foreach (var item in signatureSetting)
             {
-                string wwwRootPath = _hostingEnvironment.WebRootPath;
-                string imagePathInWebRoot = Path.Combine(wwwRootPath, imagePath);
-
-                byte[] imageBytes = File.ReadAllBytes(imagePathInWebRoot);
-                string base64String = Convert.ToBase64String(imageBytes);
-                return base64String;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error converting image to Base64: " + ex.Message);
-                return null;
+                item.IsSigned = true;
+                await WorkScope.UpdateAsync(item);
             }
         }
-
-        public async Task<string> SignDigitalSignature(SignFromCertDto input)
-        {
-            var cert = CertUtils.getX509Certificate(input.CertSerial);
-
-            var result = SignUtils.SignPdfFromBase64(input.PdfBase64, input.SignatureBase64, cert, input.Page, input.Position);
-
-            return result;
-        }
-
-        public string GetSignPosition(float x, float y, float width, float height)
-        {
-            if (width == default)
-            {
-                width = 120;
-            }
-
-            if (height == default)
-            {
-                height = 90;
-            }
-
-            var rectangleCoordinates = CommonUtils.GetRectangleCoordinates(x, y, width, height);
-
-            return rectangleCoordinates;
-        }
-
-        public bool ValidEmail(ValidEmailDto input)
-        {
-            string userEmail = WorkScope.GetAll<ContractSetting>()
-                .Where(x => x.Id == input.ContractSettingId)
-                .Select(x => x.SignerEmail)
-                .FirstOrDefault();
-            var isOwner = WorkScope.GetAll<ContractSetting>()
-                .Where(x => x.Id == input.ContractSettingId).Any(x => x.Contract.User.EmailAddress.ToLower().Trim() == input.Email.ToLower().Trim());
-            if (userEmail.ToLower().Trim() == input.Email.ToLower().Trim() || isOwner)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
         public object ValidContract(long contractId)
         {
             string message = "";
@@ -572,39 +594,20 @@ namespace EC.Manager.ContractSignings
             };
         }
 
-        public async Task<string> SignInput(SignInputsDto input)
+        public bool ValidEmail(ValidEmailDto input)
         {
-            string result = input.Base64Pdf;
-
-            var filledSetting = input.ListInput.Select(x => x.SignerSignatureSettingId).ToList();
-
-            var settings = await WorkScope.GetAll<SignerSignatureSetting>()
-                .Where(x => filledSetting.Contains(x.Id))
-                .ToListAsync();
-
-            foreach (var item in input.ListInput)
+            string userEmail = WorkScope.GetAll<ContractSetting>()
+                .Where(x => x.Id == input.ContractSettingId)
+                .Select(x => x.SignerEmail)
+                .FirstOrDefault();
+            var isOwner = WorkScope.GetAll<ContractSetting>()
+                .Where(x => x.Id == input.ContractSettingId).Any(x => x.Contract.User.EmailAddress.ToLower().Trim() == input.Email.ToLower().Trim());
+            if (userEmail.ToLower().Trim() == input.Email.ToLower().Trim() || isOwner)
             {
-                var signLocation = await WorkScope.GetAll<SignerSignatureSetting>()
-                    .Where(x => x.Id == item.SignerSignatureSettingId)
-                    .Select(x => new SignPositionDto
-                    {
-                        PositionX = x.PositionX,
-                        PositionY = x.PositionY,
-                        Page = x.Page,
-                    })
-                    .FirstOrDefaultAsync();
-
-                result = await SignUtils.FillPdfWithText(item, signLocation, result, _hostingEnvironment.WebRootPath);
+                return true;
             }
 
-            foreach (var item in settings)
-            {
-                item.IsSigned = true;
-            }
-
-            await CurrentUnitOfWork.SaveChangesAsync();
-
-            return result;
+            return false;
         }
     }
 }
