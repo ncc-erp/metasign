@@ -176,7 +176,7 @@ export class ContractManageComponent extends PagedListingComponentBase<any> {
 
   private _filter(value: string): string[] {
     const filterValue = value.toLowerCase().trim();
-    return this.listSigners.filter(option =>
+    return this.listSigners.filter(option => 
       {
        return option.email?.toLowerCase().includes(filterValue)
       }
@@ -452,13 +452,6 @@ export class ContractManageComponent extends PagedListingComponentBase<any> {
 
   handleShowDaysLeft(contract) {
     return contract?.expriedTime && contract.isExprireSoon && this.currentFilter !== EContractFilterType.Completed && (this.currentStatus === -1 || contract?.status === ContractStatus.Inprogress)
-  }
-  signNow(signUrl) {
-    if (localStorage.getItem("notSignNow")) {
-      localStorage.removeItem("notSignNow")
-    }
-    localStorage.setItem("notSignNow", "0");
-    window.open(signUrl, "_blank");
   }
 }
 

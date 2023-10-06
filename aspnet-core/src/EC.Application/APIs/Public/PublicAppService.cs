@@ -1,15 +1,20 @@
-﻿using Abp.Authorization;
-using Abp.UI;
+﻿using Abp.UI;
 using EC.Manager.ContactManager;
 using EC.Manager.ContactManager.Dto;
+using EC.Utils;
 using EC.WebService.DesktopApp;
 using EC.WebService.DesktopApp.Dto;
 using EC.WebService.Goggle;
+using EC.WebService.Goggle.Dto;
+using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text;
+using iTextSharp.text;
 using System.Threading.Tasks;
 
 namespace EC.APIs.Public
@@ -17,8 +22,8 @@ namespace EC.APIs.Public
     public class PublicAppService : ECAppServiceBase
     {
         private readonly ContactManager _contactManager;
-        private readonly DesktopAppService _desktopAppService;
         private readonly GoogleWebService _googleWebService;
+        private readonly DesktopAppService _desktopAppService;
         private readonly IWebHostEnvironment _hostingEnvironment;
         public PublicAppService(ContactManager contactManager,
             DesktopAppService desktopAppService,
@@ -29,6 +34,12 @@ namespace EC.APIs.Public
             _desktopAppService = desktopAppService;
             _googleWebService = googleWebService;
             _hostingEnvironment = webHostEnvironment;
+        }
+
+        [HttpGet]
+        public async Task<List<ContactDto>> GetAll()
+        {
+            return await _contactManager.GetAll();
         }
 
         [HttpPost]
@@ -50,6 +61,12 @@ namespace EC.APIs.Public
         }
 
         [HttpGet]
+        public async Task<GetCertificateInfo> GetCertInfo()
+        {
+            return await _desktopAppService.GetCertInfo();
+        }
+
+        [HttpGet]
         public dynamic DownloadApp()
         {
             string filePath = Path.Combine(_hostingEnvironment.WebRootPath, "exe/metasign.exe");
@@ -61,25 +78,6 @@ namespace EC.APIs.Public
 
             byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
             return fileBytes;
-        }
-
-        [HttpGet]
-        public async Task<List<ContactDto>> GetAll()
-        {
-            return await _contactManager.GetAll();
-        }
-        [HttpGet]
-        [AbpAllowAnonymous]
-        public string GetAppVersion()
-        {
-            var versionInfo = FileVersionInfo.GetVersionInfo(Path.Combine(_hostingEnvironment.WebRootPath, "exe", "metasign.exe"));
-            return versionInfo.ProductVersion.Trim();
-        }
-
-        [HttpGet]
-        public async Task<GetCertificateInfo> GetCertInfo()
-        {
-            return await _desktopAppService.GetCertInfo();
         }
     }
 }

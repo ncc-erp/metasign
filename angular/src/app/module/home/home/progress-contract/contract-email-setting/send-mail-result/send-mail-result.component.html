@@ -6,7 +6,7 @@
   <h2 class="noti-success">{{ "ContractHasBeenSent" | ecTranslate }}</h2>
 
   <div class="d-flex justify-content-center">
-    <a (click)="signNow()" class="signUrl button mr-2 mt-3">{{
+    <a target="_blank" [href]="signUrl" class="signUrl button mr-2 mt-3">{{
       "SignNow" | ecTranslate
     }}</a>
     <a

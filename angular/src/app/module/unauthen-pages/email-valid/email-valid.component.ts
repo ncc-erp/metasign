@@ -42,34 +42,16 @@ export class EmailValidComponent extends AppComponentBase implements OnInit {
     this.statusContract = JSON.parse(
       decodeURIComponent(this.route.snapshot.queryParamMap.get("status"))
     );
-    const data: any = this.getParamsFromUrl(
-      decodeURIComponent(this.router.url)
-    );
-    this.contracId = +data.contractId;
-    this.contractSettingId = +data.settingId;
-    this.tenantName = data.tenantName == "" ? undefined : data.tenantName;
   }
 
   ngOnInit() {
-    let jwt = localStorage.getItem("JWT");
-    if (!jwt || jwt == "") {
-    }
-    else {
-      let json = this.parseJwt(jwt);
-      if (localStorage.getItem("typeLoginSigning")) {
-        localStorage.removeItem('typeLoginSigning');
-      }
-      json?.email ? localStorage.setItem("typeLoginSigning", String(loginApp.google)) : localStorage.setItem("typeLoginSigning", String(loginApp.microsoft));
-      const email = json?.email ? json.email : json.preferred_username;
-      this.contractSigningService.getSignerEmail(this.contractSettingId).subscribe(rs => {
-        if (rs.result == email) {
-          let isSignNow = localStorage.getItem("notSignNow")
-          if (isSignNow == "0") {
-            this.validEmail(email)
-          }
-        }
-      })
-    }
+    const data: any = this.getParamsFromUrl(
+      decodeURIComponent(this.router.url)
+    );
+
+    this.contracId = +data.contractId;
+    this.contractSettingId = +data.settingId;
+    this.tenantName = data.tenantName == "" ? undefined : data.tenantName;
     if (this.statusContract) {
       this.contractSettingId = JSON.parse(
         decodeURIComponent(this.route.snapshot.queryParamMap.get("settingId"))
@@ -148,7 +130,7 @@ export class EmailValidComponent extends AppComponentBase implements OnInit {
     const googleLoginWrapper = document.createElement("div");
     googleLoginWrapper.style.display = "none";
     googleLoginWrapper.classList.add("custom-google-button");
-    document.body.appendChild(googleLoginWrapper);
+    document.body.appendChild(googleLoginWrapper);  
     // @ts-ignore
     google.accounts.id.initialize({
       client_id: this.appSessionService.googleClientId,
@@ -160,7 +142,7 @@ export class EmailValidComponent extends AppComponentBase implements OnInit {
     google.accounts.id.renderButton(
       // @ts-ignore
       googleLoginWrapper,
-      { theme: "outline", size: "large", width: document.getElementById("google_button--parent")?.offsetWidth }
+      { theme: "outline", size: "large",  width: document.getElementById("google_button--parent")?.offsetWidth }
     );
     // @ts-ignore
     google.accounts.id.prompt((notification: PromptMomentNotification) => { });
@@ -168,14 +150,15 @@ export class EmailValidComponent extends AppComponentBase implements OnInit {
   }
 
   handleCredentialResponse(response: CredentialResponse) {
-    if (localStorage.getItem("typeLoginSigning")) {
+    if(localStorage.getItem("typeLoginSigning"))
+    {
       localStorage.removeItem('typeLoginSigning');
     }
-    localStorage.setItem("typeLoginSigning", String(loginApp.google))
+    localStorage.setItem("typeLoginSigning",String(loginApp.google))
     localStorage.setItem("JWT", response.credential);
     let result = this.parseJwt(response.credential);
     if (result.email_verified) {
-      this.validEmail(result.email);
+      this.validEamail(result.email);
     }
   }
 
@@ -195,7 +178,7 @@ export class EmailValidComponent extends AppComponentBase implements OnInit {
       });
   }
 
-  validEmail(email: string) {
+  validEamail(email: string) {
     let dto = {
       email: email,
       contractSettingId: this.contractSettingId,
@@ -210,6 +193,7 @@ export class EmailValidComponent extends AppComponentBase implements OnInit {
     this.contractSigningService.ValidEmail(dto).subscribe((rs) => {
       if (rs.result) {
         this.ngZone.run(() => {
+          let url = `contractId=${this.contracId}&settingId=${this.contractSettingId}&tenantName=${this.tenantName}`;
 
           this.router.navigate(["app/signging/unAuthen-signing"], {
             queryParams: {
@@ -227,26 +211,29 @@ export class EmailValidComponent extends AppComponentBase implements OnInit {
     });
   }
 
-  handleLoginGoogle() {
+  handleLoginGoogle()
+  {
     this.buttonLoginGoogle.click();
   }
 
-  handleLoginMicrosoft() {
+  handleLoginMicrosoft()
+  {
     const loginRequest = {
       scopes: ['openid', 'profile'],
       prompt: 'select_account', // Tắt chế độ tự động đăng nhập
     };
-    this.msalService.loginPopup(loginRequest).subscribe(value => {
+    this.msalService.loginPopup(loginRequest).subscribe(value=>{
 
-      if (localStorage.getItem("typeLoginSigning")) {
+      if(localStorage.getItem("typeLoginSigning"))
+      {
         localStorage.removeItem('typeLoginSigning');
       }
 
-      localStorage.setItem("typeLoginSigning", String(loginApp.microsoft))
+      localStorage.setItem("typeLoginSigning",String(loginApp.microsoft))
       localStorage.setItem("JWT", value.idToken);
       let result = this.parseJwt(value.idToken);
       if (value) {
-        this.validEmail(result.preferred_username);
+        this.validEamail(result.preferred_username);
       }
 
     })

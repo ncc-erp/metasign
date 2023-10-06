@@ -54,7 +54,5 @@ export class ContractSigningService extends BaseApiService {
   {
     return this.processPost(`InsertSigningResultAndComplete`,data);
   }
-  public getSignerEmail(settingId): Observable<ApiResponseDto<any>> {
-    return this.processGet(`GetSignerEmail?settingId=${settingId}`);
-  }
+
 }

@@ -268,11 +268,4 @@ export class DetailContractComponent extends AppComponentBase implements OnInit 
     }
     return ""
   }
-  signNow(signUrl) {
-    if (localStorage.getItem("notSignNow")) {
-      localStorage.removeItem("notSignNow")
-    }
-    localStorage.setItem("notSignNow", "0");
-    window.open(signUrl, "_blank");
-  }
 }

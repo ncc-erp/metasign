@@ -1,21 +1,32 @@
 <div class="height-91vh wrapper card container-fluid not-full-width">
   <div class="wrapper-content card-body row justify-content-between">
     <div class="sidebar col-2 bg-light">
-      <button (click)="addNewContract()" *ngIf="iShowCreateBtn()" mat-raised-button class="btn-add button">
+      <button
+        (click)="addNewContract()"
+        *ngIf="iShowCreateBtn()"
+        mat-raised-button
+        class="btn-add button"
+      >
         <i class="fa-solid fa-plus"></i>{{ "CreateContract" | ecTranslate }}
       </button>
       <mat-divider class="line"></mat-divider>
       <h5 class="title-sidebar">{{ "Contracts" | ecTranslate }}</h5>
       <ul class="status sidebar-list">
-        <li *ngFor="let statusItem of listStatusContract" class="sidebar-item status-item row text-color {{
+        <li
+          *ngFor="let statusItem of listStatusContract"
+          class="sidebar-item status-item row text-color {{
             statusItem.id === currentStatus && 'color-select'
-          }}" (click)="handleClickStatus(statusItem.id)">
+          }}"
+          (click)="handleClickStatus(statusItem.id)"
+        >
           <i class="{{ statusItem.icon }} pr-2 col-xl-2 col-lg-3 col-md-2"></i>
           <span>{{ statusItem.name | ecTranslate }}</span>
         </li>
       </ul>
       <h5 class="title-sidebar">{{ "QuickFilters" | ecTranslate }}</h5>
-      <button *ngFor="let quickViewsItem of listQuickFilter" matTooltip="{{ handleShowTooltip(quickViewsItem.id) | ecTranslate }}
+      <button
+        *ngFor="let quickViewsItem of listQuickFilter"
+        matTooltip="{{ handleShowTooltip(quickViewsItem.id) | ecTranslate }}
          {{
           quickViewsItem.id === contractFilterType.ExpirgingSoon
             ? expriedTime
@@ -24,10 +35,15 @@
           quickViewsItem.id === contractFilterType.ExpirgingSoon
             ? ('Day' | ecTranslate)
             : ''
-        }}" class=" sidebar-item row text-color button-quick-view {{
+        }}"
+        class=" sidebar-item row text-color button-quick-view {{
           quickViewsItem.id === currentFilter && 'color-select'
-        }}" (click)="handleClickQuickFilter(quickViewsItem.id)">
-        <i class="{{ quickViewsItem.icon }} pr-2 col-xl-2 col-lg-3 col-md-2"></i>
+        }}"
+        (click)="handleClickQuickFilter(quickViewsItem.id)"
+      >
+        <i
+          class="{{ quickViewsItem.icon }} pr-2 col-xl-2 col-lg-3 col-md-2"
+        ></i>
         <span>{{ quickViewsItem.name | ecTranslate }}</span>
       </button>
     </div>
@@ -36,54 +52,99 @@
         <div class="d-flex justify-content-between">
           <span class="title-page text-color-title">{{
             currentStatus === -1
-            ? ("All" | ecTranslate)
-            : (listStatusContract[currentStatus]?.name ||
-            listQuickFilter[currentFilter - 1]?.name ||
-            "Completed" | ecTranslate)
-            }}</span>
+              ? ("All" | ecTranslate)
+              : (listStatusContract[currentStatus]?.name ||
+                  listQuickFilter[currentFilter - 1]?.name ||
+                  "Completed" | ecTranslate)
+          }}</span>
 
           <div class="d-flex w-50 align-items-center justify-content-end">
-            <div *ngIf="!listQuickFilterId.includes(currentFilter)" class="filter_select">
-              <mat-form-field appearance="outline" class="filter-contract mr-1" id="filter">
+            <div
+              *ngIf="!listQuickFilterId.includes(currentFilter)"
+              class="filter_select"
+            >
+              <mat-form-field
+                appearance="outline"
+                class="filter-contract mr-1"
+                id="filter"
+              >
                 <mat-label>{{ "Signer" | ecTranslate }}</mat-label>
-                <mat-select [placeholder]="'Signer' | ecTranslate" disableOptionCentering [(ngModel)]="filterSigner"
-                  (selectionChange)="getDataPage(1)">
-                  <mat-form-field appearance="outline" floatLabel="never" class="w-100 px-3" style="
+                <mat-select
+                  [placeholder]="'Signer' | ecTranslate"
+                  disableOptionCentering
+                  [(ngModel)]="filterSigner"
+                  (selectionChange)="getDataPage(1)"
+                >
+                  <mat-form-field
+                    appearance="outline"
+                    floatLabel="never"
+                    class="w-100 px-3"
+                    style="
                       position: sticky;
                       top: 0;
                       z-index: 2;
                       background-color: white;
-                    ">
-                    <input id="searchSigner" matInput [formControl]="searchSinger" name="searchSigner"
-                      [placeholder]="'Search' | ecTranslate" (keydown)="$event.stopPropagation()" />
+                    "
+                  >
+                    <input
+                      id="searchSigner"
+                      matInput
+                      [formControl]="searchSinger"
+                      name="searchSigner"
+                      [placeholder]="'Search' | ecTranslate"
+                      (keydown)="$event.stopPropagation()"
+                    />
                   </mat-form-field>
                   <mat-option hidden [value]="filterSigner">
                     {{ filterSigner | ecTranslate }}
                   </mat-option>
                   <mat-option hidden [value]="'All' | ecTranslate">{{
                     "All" | ecTranslate
-                    }}</mat-option>
-                  <mat-option [ngClass]="{ active: filterSigner === 'Me' }"
-                    *ngIf="($filterSigner | async)?.length !== 0" [value]="'Me'">@{{ "me" | ecTranslate }}</mat-option>
-                  <mat-option [ngClass]="{ active: filterSigner === signer.email }"
-                    *ngFor="let signer of $filterSigner | async" [value]="signer.email">
+                  }}</mat-option>
+                  <mat-option
+                    [ngClass]="{ active: filterSigner === 'Me' }"
+                    *ngIf="($filterSigner | async)?.length !== 0"
+                    [value]="'Me'"
+                    >@{{ "me" | ecTranslate }}</mat-option
+                  >
+                  <mat-option
+                    [ngClass]="{ active: filterSigner === signer.email }"
+                    *ngFor="let signer of $filterSigner | async"
+                    [value]="signer.email"
+                  >
                     {{ signer.email }}
                   </mat-option>
-                  <mat-option disabled *ngIf="($filterSigner | async)?.length === 0">
+                  <mat-option
+                    disabled
+                    *ngIf="($filterSigner | async)?.length === 0"
+                  >
                     {{ messTable | ecTranslate }}
                   </mat-option>
                 </mat-select>
               </mat-form-field>
-              <div *ngIf="filterSigner !== 'All'" (click)="handleResetOption()" class="reset_signer">
+              <div
+                *ngIf="filterSigner !== 'All'"
+                (click)="handleResetOption()"
+                class="reset_signer"
+              >
                 <i class="fa-solid fa-xmark"></i>
               </div>
             </div>
 
-            <mat-form-field id="search" class="search-contract float-right" appearance="outline">
+            <mat-form-field
+              id="search"
+              class="search-contract float-right"
+              appearance="outline"
+            >
               <span matPrefix>
-                <i class="fa-solid fa-magnifying-glass icon-search"></i></span>
-              <input matInput [placeholder]="'SearchByContractCodeContractName' | ecTranslate" [(ngModel)]="search"
-                (keyup.enter)="getDataPage(1)" />
+                <i class="fa-solid fa-magnifying-glass icon-search"></i
+              ></span>
+              <input
+                matInput
+                [placeholder]="'SearchByContractCodeContractName' | ecTranslate"
+                [(ngModel)]="search"
+                (keyup.enter)="getDataPage(1)"
+              />
             </mat-form-field>
           </div>
         </div>
@@ -91,19 +152,37 @@
       <table class="table table-header">
         <thead class="head-table bg-light">
           <tr>
-            <th class="head-table-item text-color-title" [style.width.%]="columnItem.width"
-              *ngFor="let columnItem of displayedColumns">
+            <th
+              class="head-table-item text-color-title"
+              [style.width.%]="columnItem.width"
+              *ngFor="let columnItem of displayedColumns"
+            >
               {{ columnItem.name | ecTranslate }}
-              <ng-container [ngSwitch]="columnItem.statusSort" *ngIf="columnItem.isCheckedSort">
-                <span [class.checked-sort-item]="columnItem.isCheckedSort" (click)="
+              <ng-container
+                [ngSwitch]="columnItem.statusSort"
+                *ngIf="columnItem.isCheckedSort"
+              >
+                <span
+                  [class.checked-sort-item]="columnItem.isCheckedSort"
+                  (click)="
                     handleChangeSortContract(
                       columnItem.name,
                       columnItem.isCheckedSort
                     )
-                  ">
-                  <i *ngSwitchCase="checkedNumberSort.Default" class="fas fa-sort"></i>
-                  <i *ngSwitchCase="checkedNumberSort.Up" class="fas fa-sort-amount-up"></i>
-                  <i *ngSwitchCase="checkedNumberSort.Down" class="fas fa-sort-amount-down"></i>
+                  "
+                >
+                  <i
+                    *ngSwitchCase="checkedNumberSort.Default"
+                    class="fas fa-sort"
+                  ></i>
+                  <i
+                    *ngSwitchCase="checkedNumberSort.Up"
+                    class="fas fa-sort-amount-up"
+                  ></i>
+                  <i
+                    *ngSwitchCase="checkedNumberSort.Down"
+                    class="fas fa-sort-amount-down"
+                  ></i>
                 </span>
               </ng-container>
             </th>
@@ -121,7 +200,8 @@
                 </span>
               </td>
             </tr>
-            <tr *ngFor="
+            <tr
+              *ngFor="
                 let contract of listContract
                   | paginate
                     : {
@@ -130,43 +210,72 @@
                         currentPage: pageNumber,
                         totalItems: totalItems
                       }
-              " class="text-color">
+              "
+              class="text-color"
+            >
               <td style="width: 5%">{{ contract.position }}</td>
               <td style="width: 22.5%" class="td-name">
-                <a (click)="viewDetailContract(contract.id)" class="contract-name hyperlink">{{ contract.name }}</a>
+                <a
+                  (click)="viewDetailContract(contract.id)"
+                  class="contract-name hyperlink"
+                  >{{ contract.name }}</a
+                >
               </td>
               <td style="width: 12.5%">{{ contract.code }}</td>
               <td style="width: 15%">
-                <div class="status-label {{
+                <div
+                  class="status-label {{
                     listStatusContract[contract.status]?.color
-                  }}">
+                  }}"
+                >
                   {{ listStatusContract[contract.status]?.name | ecTranslate }}
                 </div>
-                <span *ngIf="listStatusContract[contract.status]?.id !== 1" class="pl-2 pr-2 row"><mat-progress-bar
-                    id="progress-bar" class="progress-status" value="{{
+                <span
+                  *ngIf="listStatusContract[contract.status]?.id !== 1"
+                  class="pl-2 pr-2 row"
+                  ><mat-progress-bar
+                    id="progress-bar"
+                    class="progress-status"
+                    value="{{
                       (contract.countCompleted / contract.numberOfSetting) * 100
-                    }}"></mat-progress-bar><span class="text-dark number-progress">{{ contract.countCompleted }} /
-                    {{ contract.numberOfSetting }}</span></span>
+                    }}"
+                  ></mat-progress-bar
+                  ><span class="text-dark number-progress"
+                    >{{ contract.countCompleted }} /
+                    {{ contract.numberOfSetting }}</span
+                  ></span
+                >
               </td>
               <td style="width: 15%">
                 {{ contract.creationTime | formatDateHourSeconds }}
                 <br />
-                <span *ngIf="contract.creatorUser" class="user-contract"><i>{{ "By" | ecTranslate }} </i><b>{{
-                    contract.creatorUser }}</b></span>
+                <span *ngIf="contract.creatorUser" class="user-contract"
+                  ><i>{{ "By" | ecTranslate }} </i
+                  ><b>{{ contract.creatorUser }}</b></span
+                >
               </td>
               <td style="width: 15%">
                 {{ contract.updatedTime | formatDateHourSeconds }} <br />
               </td>
               <td style="width: 10%">
                 <div>{{ contract.expriedTime | formatDate }}</div>
-                <span *ngIf="handleShowDaysLeft(contract)" class="{{ contract.isExprireSoon ? 'text-danger' : '' }}">
-                  <strong>{{
-                    calculateRemainingTime(currentDate, contract.expriedTime)
+                <span
+                  *ngIf="handleShowDaysLeft(contract)"
+                  class="{{ contract.isExprireSoon ? 'text-danger' : '' }}"
+                >
+                  <strong
+                    >{{
+                      calculateRemainingTime(currentDate, contract.expriedTime)
                     }}
-                    days left</strong></span>
+                    days left</strong
+                  ></span
+                >
               </td>
               <td style="width: 7.5%" class="td-action">
-                <button mat-icon-button [matMenuTriggerFor]="menu" *ngIf="
+                <button
+                  mat-icon-button
+                  [matMenuTriggerFor]="menu"
+                  *ngIf="
                     isshowViewHistoryBtn() ||
                     isShowEditBtn(contract.status) ||
                     isShowCancelBtn(contract.status) ||
@@ -174,64 +283,100 @@
                     isShowSignBtn() ||
                     isShowDownloadBtn() ||
                     isShowResendMail(contract.status)
-                  ">
+                  "
+                >
                   <i class="fa-solid fa-bars icon-menu"></i>
                 </button>
                 <mat-menu #menu="matMenu">
-                  <a *ngIf="
+                  <a
+                    *ngIf="
                       contract.isAllowSigning &&
                       listStatusContract[contract.status]?.id === 2 &&
                       isShowSignBtn()
-
-                    "(click)="signNow(contract?.signUrl)" >
+                    "
+                    href="{{ contract?.signUrl }}"
+                    target="_blank"
+                  >
                     <button mat-menu-item class="btn-actions-item row">
-                      <i class="fas fa-file-signature col-2"></i><span class="col-10 pl-3">{{
+                      <i class="fas fa-file-signature col-2"></i
+                      ><span class="col-10 pl-3">{{
                         "SignNow" | ecTranslate
-                        }}</span>
+                      }}</span>
                     </button>
                   </a>
-                  <button *ngIf="isshowViewHistoryBtn()" mat-menu-item class="btn-actions-item row"
-                    (click)="viewHistoryContract(contract.id)">
-                    <i class="fas fa-clock-rotate-left col-2"></i><span class="col-10 pl-3">{{
+                  <button
+                    *ngIf="isshowViewHistoryBtn()"
+                    mat-menu-item
+                    class="btn-actions-item row"
+                    (click)="viewHistoryContract(contract.id)"
+                  >
+                    <i class="fas fa-clock-rotate-left col-2"></i
+                    ><span class="col-10 pl-3">{{
                       "History" | ecTranslate
-                      }}</span>
+                    }}</span>
                   </button>
-                  <button *ngIf="
+                  <button
+                    *ngIf="
                       isShowResendMail(contract.status, contract.isMyContract)
-                    " mat-menu-item class="btn-actions-item row" (click)="handleSendMailAll(contract.id)">
+                    "
+                    mat-menu-item
+                    class="btn-actions-item row"
+                    (click)="handleSendMailAll(contract.id)"
+                  >
                     <i class="fa-solid fa-envelope col-2"></i>
                     <span class="col-10 pl-3">{{
                       "Resend" | ecTranslate
-                      }}</span>
+                    }}</span>
                   </button>
-                  <button *ngIf="isShowEditBtn(contract.status)" mat-menu-item class="btn-actions-item btn-edit row"
-                    (click)="handleEditContract(contract.id)">
-                    <i class="fa-solid fa-pen icon-pen col-2"></i><span class="col-10 pl-3">{{ "Edit" | ecTranslate
-                      }}</span>
+                  <button
+                    *ngIf="isShowEditBtn(contract.status)"
+                    mat-menu-item
+                    class="btn-actions-item btn-edit row"
+                    (click)="handleEditContract(contract.id)"
+                  >
+                    <i class="fa-solid fa-pen icon-pen col-2"></i
+                    ><span class="col-10 pl-3">{{ "Edit" | ecTranslate }}</span>
                   </button>
-                  <button *ngIf="isShowDownloadBtn()" mat-menu-item class="btn-actions-item btn-remove row" (click)="
+                  <button
+                    *ngIf="isShowDownloadBtn()"
+                    mat-menu-item
+                    class="btn-actions-item btn-remove row"
+                    (click)="
                       downloadPdf(
                         contract?.id,
                         contract?.name,
                         contract?.isHasSigned
                       )
-                    ">
-                    <i class="fas fa-download col-2"></i><span class="col-10 pl-3">{{
+                    "
+                  >
+                    <i class="fas fa-download col-2"></i
+                    ><span class="col-10 pl-3">{{
                       "Download" | ecTranslate
-                      }}</span>
+                    }}</span>
                   </button>
-                  <button *ngIf="
+                  <button
+                    *ngIf="
                       isShowCancelBtn(contract.status) && contract.isMyContract
-                    " mat-menu-item class="btn-actions-item btn-remove row" (click)="cancelContract(contract)">
-                    <i class="fas fa-times col-2"></i><span class="col-10 pl-3">{{
+                    "
+                    mat-menu-item
+                    class="btn-actions-item btn-remove row"
+                    (click)="cancelContract(contract)"
+                  >
+                    <i class="fas fa-times col-2"></i
+                    ><span class="col-10 pl-3">{{
                       "Cancel" | ecTranslate
-                      }}</span>
+                    }}</span>
                   </button>
-                  <button *ngIf="isShowDeleteBtn(contract.status)" mat-menu-item class="btn-actions-item btn-remove row"
-                    (click)="deleteContract(contract)">
-                    <i class="fa-solid fa-trash-can icon-trash col-2"></i><span class="col-10 pl-3">{{
+                  <button
+                    *ngIf="isShowDeleteBtn(contract.status)"
+                    mat-menu-item
+                    class="btn-actions-item btn-remove row"
+                    (click)="deleteContract(contract)"
+                  >
+                    <i class="fa-solid fa-trash-can icon-trash col-2"></i
+                    ><span class="col-10 pl-3">{{
                       "Delete" | ecTranslate
-                      }}</span>
+                    }}</span>
                   </button>
                 </mat-menu>
               </td>
@@ -253,7 +398,10 @@
           </div>
           <div class="col-sm-4 col-12 float-right">
             <div class="float-sm-right m-auto pagination" id="change-page">
-              <abp-pagination-controls id="server" (pageChange)="getDataPage($event)">
+              <abp-pagination-controls
+                id="server"
+                (pageChange)="getDataPage($event)"
+              >
               </abp-pagination-controls>
             </div>
           </div>

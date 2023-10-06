@@ -55,7 +55,7 @@ namespace EC.Utils
             {
                 file.CopyTo(ms);
                 Document doc = new Document();
-                doc.LoadFromStream(ms, FileFormat.Auto);
+                doc.LoadFromStream(ms, FileFormat.Docx);
 
                 var matchList = new List<string>();
                 foreach (Section section in doc.Sections)

@@ -2,25 +2,44 @@
   <div class="wrapper-content card-body">
     <div class="header">
       <h4 class="title">
-        <i class="fa-sharp fa-solid fa-arrow-left icon-back" (click)="handleClickBack()"></i>
+        <i
+          class="fa-sharp fa-solid fa-arrow-left icon-back"
+          (click)="handleClickBack()"
+        ></i>
         {{ contract?.contractName }}
       </h4>
       <header class="header-content">
-        <h6 class="header_content--id" cdkOverlayOrigin #trigger="cdkOverlayOrigin" (click)="handleOpenContractId()">
+        <h6
+          class="header_content--id"
+          cdkOverlayOrigin
+          #trigger="cdkOverlayOrigin"
+          (click)="handleOpenContractId()"
+        >
           {{ "ContractId" | ecTranslate }}
         </h6>
-        <ng-template [cdkConnectedOverlayPositions]="positions" cdkConnectedOverlay
-          [cdkConnectedOverlayOrigin]="trigger" [cdkConnectedOverlayOpen]="isOpen"
-          [cdkConnectedOverlayHasBackdrop]="true" cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
-          (detach)="isOpen = false" (backdropClick)="isOpen = false">
+        <ng-template
+          [cdkConnectedOverlayPositions]="positions"
+          cdkConnectedOverlay
+          [cdkConnectedOverlayOrigin]="trigger"
+          [cdkConnectedOverlayOpen]="isOpen"
+          [cdkConnectedOverlayHasBackdrop]="true"
+          cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+          (detach)="isOpen = false"
+          (backdropClick)="isOpen = false"
+        >
           <div class="contract_id">
             <h3>{{ "ContractId" | ecTranslate }}</h3>
             <div class="d-flex align-items-center justify-content-between">
               <div>
                 {{ contractGuid }}
               </div>
-              <button (click)="handleCopyValue(contractGuid)" id="contract_id--copy" [cdkCopyToClipboard]="contractGuid"
-                mat-button class="">
+              <button
+                (click)="handleCopyValue(contractGuid)"
+                id="contract_id--copy"
+                [cdkCopyToClipboard]="contractGuid"
+                mat-button
+                class=""
+              >
                 {{ "Copy" | ecTranslate }}
               </button>
             </div>
@@ -40,35 +59,58 @@
           {{ contract?.expriedTime | formatDate }}
         </h6>
         <h6>
-          <span class="status {{ listStatusContract[contract?.status]?.color }}">{{
-            listStatusContract[contract?.status]?.name | ecTranslate
-            }}</span>
+          <span
+            class="status {{ listStatusContract[contract?.status]?.color }}"
+            >{{
+              listStatusContract[contract?.status]?.name | ecTranslate
+            }}</span
+          >
           <span class="ml-2">{{ contractNote | ecTranslate }}</span>
         </h6>
         <div class="list-button row justify-content-between">
           <div class="btn-action-left">
             <span *ngFor="let button of listButtonActions">
-              <a *ngIf="button.id === 2; else elseNotLink" (click)="signNow( contract?.signUrl)">
-                <button mat-raised-button class="button" *ngIf="handleShowButton(button.id)"
-                  (click)="handleClickListButtonLeft(button.id)">
+              <a
+                target="_blank"
+                *ngIf="button.id === 2; else elseNotLink"
+                href="{{ contract?.signUrl }}"
+              >
+                <button
+                  mat-raised-button
+                  class="button"
+                  *ngIf="handleShowButton(button.id)"
+                  (click)="handleClickListButtonLeft(button.id)"
+                >
                   {{ button.name | ecTranslate }}
                 </button>
               </a>
               <ng-template #elseNotLink>
-                <button mat-raised-button [ngClass]="{ button: button.id === 2 }" *ngIf="handleShowButton(button.id)"
-                  (click)="handleClickListButtonLeft(button.id)">
+                <button
+                  mat-raised-button
+                  [ngClass]="{ button: button.id === 2 }"
+                  *ngIf="handleShowButton(button.id)"
+                  (click)="handleClickListButtonLeft(button.id)"
+                >
                   {{ button.name | ecTranslate }}
                 </button>
               </ng-template>
             </span>
           </div>
           <div class="btn-action-right">
-            <button *ngIf="isShowViewHistoryBtn()" [matTooltip]="'History' | ecTranslate" mat-raised-button
-              (click)="viewHistoryContract()">
+            <button
+              *ngIf="isShowViewHistoryBtn()"
+              [matTooltip]="'History' | ecTranslate"
+              mat-raised-button
+              (click)="viewHistoryContract()"
+            >
               <i class="fas fa-clock-rotate-left"></i>
             </button>
-            <button *ngIf="isShowDownloadBtn()" [matTooltip]="'Download' | ecTranslate" mat-raised-button
-              (click)="downloadPdf(contract.contractName)">
+            <button
+              *ngIf="isShowDownloadBtn()"
+              [matTooltip]="'Download' | ecTranslate"
+              mat-raised-button
+              (click)="downloadPdf(contract.contractName)"
+            >
               <i class="fas fa-download"></i>
             </button>
           </div>
@@ -85,10 +127,16 @@
           <li *ngFor="let recipient of contract?.recipients; let i = index">
             <div *ngIf="recipient.role === 1">
               <div class="row justify-content-between pl-5 py-3">
-                <span *ngIf="isOrderSign" style="width: 24px; transform: translateY(25%)">{{ recipient.processOrder
-                  }}</span>
+                <span
+                  *ngIf="isOrderSign"
+                  style="width: 24px; transform: translateY(25%)"
+                  >{{ recipient.processOrder }}</span
+                >
                 <div class="info-recipient col-7">
-                  <i *ngIf="recipient.isComplete" class="fa-solid fa-check icon-check text-success"></i>
+                  <i
+                    *ngIf="recipient.isComplete"
+                    class="fa-solid fa-check icon-check text-success"
+                  ></i>
                   {{ recipient.name }}
                   <br />
                   <span class="text-secondary">{{ recipient.email }}</span>
@@ -97,48 +145,66 @@
                   <div class="d-flex flex-column">
                     <div class="d-flex">
                       <div>
-                        <i *ngIf="!recipient.isComplete && !recipient.isCanceled"
-                          class="fa-solid fa-spinner text-warning"></i>
-                        <i *ngIf="recipient.isCanceled" class="fa-solid fa-ban" style="color: #c41c1c">
+                        <i
+                          *ngIf="!recipient.isComplete && !recipient.isCanceled"
+                          class="fa-solid fa-spinner text-warning"
+                        ></i>
+                        <i
+                          *ngIf="recipient.isCanceled"
+                          class="fa-solid fa-ban"
+                          style="color: #c41c1c"
+                        >
                         </i>
-                        <i *ngIf="recipient.isComplete" class="fa-solid fa-circle-check text-success"></i>
+                        <i
+                          *ngIf="recipient.isComplete"
+                          class="fa-solid fa-circle-check text-success"
+                        ></i>
                       </div>
                       <div class="d-flex flex-column">
-                        <b style="font-weight: 500">{{
-                          recipient.isComplete
-                          ? ("Completed" | ecTranslate)
-                          : recipient.isCanceled
-                          ? ("VoidToSign" | ecTranslate)
-                          : ("WaitingToSign" | ecTranslate)
+                        <b style="font-weight: 500"
+                          >{{
+                            recipient.isComplete
+                              ? ("Completed" | ecTranslate)
+                              : recipient.isCanceled
+                              ? ("VoidToSign" | ecTranslate)
+                              : ("WaitingToSign" | ecTranslate)
                           }}
                         </b>
                         <b style="font-weight: 500; color: rgb(124, 124, 124)">
                           {{
-                          (getContentTime(
-                          recipient.isComplete,
-                          recipient.isSendMail,
-                          recipient.isCanceled
-                          ) | ecTranslate) +
-                          formatDate(
-                          recipient.isCanceled
-                          ? recipient.cancelTime
-                          : recipient.updateDate
-                          )
-                          }}</b>
+                            (getContentTime(
+                              recipient.isComplete,
+                              recipient.isSendMail,
+                              recipient.isCanceled
+                            ) | ecTranslate) +
+                              formatDate(
+                                recipient.isCanceled
+                                  ? recipient.cancelTime
+                                  : recipient.updateDate
+                              )
+                          }}</b
+                        >
                       </div>
-                      <button (click)="handleSendMailOne(recipient)" *ngIf="
+                      <button
+                        (click)="handleSendMailOne(recipient)"
+                        *ngIf="
                           contract.status !== 3 &&
                           recipient.isSendMail &&
                           !recipient.isComplete &&
                           contract.isMyContract
-                        " class="ml-5" mat-raised-button>
+                        "
+                        class="ml-5"
+                        mat-raised-button
+                      >
                         {{ "Resend" | ecTranslate }}
                       </button>
                     </div>
                   </div>
                 </div>
               </div>
-              <mat-divider style="width: 100%; display: inline-block"></mat-divider>
+              <mat-divider
+                style="width: 100%; display: inline-block"
+              ></mat-divider>
             </div>
           </li>
         </ul>
@@ -153,15 +219,21 @@
             <div *ngIf="recipient.role === 3">
               <div class="row justify-content-between pl-5 py-3">
                 <div class="info-recipient col-4">
-                  <i *ngIf="recipient.isComplete" class="fa-solid fa-check icon-check text-success"></i>
+                  <i
+                    *ngIf="recipient.isComplete"
+                    class="fa-solid fa-check icon-check text-success"
+                  ></i>
                   {{ recipient.name }}
                   <br />
                   <span class="text-secondary">{{ recipient.email }}</span>
                 </div>
-                <div *ngIf="
+                <div
+                  *ngIf="
                     listStatusContract[contract?.status]?.id !== 1;
                     else notComplete
-                  " class="action col-4 d-flex">
+                  "
+                  class="action col-4 d-flex"
+                >
                   <div>
                     <i class="fa-solid fa-circle-check text-success"></i>
                   </div>
@@ -171,17 +243,23 @@
                     </b>
                     <b style="font-weight: 500; color: rgb(124, 124, 124)">
                       {{
-                      recipient.isSendMail
-                      ? ("SentOn " | ecTranslate) +
-                      formatDate(recipient.updateDate)
-                      : ""
-                      }}</b>
+                        recipient.isSendMail
+                          ? ("SentOn " | ecTranslate) +
+                            formatDate(recipient.updateDate)
+                          : ""
+                      }}</b
+                    >
                   </div>
-                  <button *ngIf="
+                  <button
+                    *ngIf="
                       contract.status !== 4 &&
                       contract.isMyContract &&
                       contract.status !== 3
-                    " (click)="handleSendMailOne(recipient)" class="ml-5" mat-raised-button>
+                    "
+                    (click)="handleSendMailOne(recipient)"
+                    class="ml-5"
+                    mat-raised-button
+                  >
                     {{ "Resend" | ecTranslate }}
                   </button>
                 </div>
@@ -194,7 +272,9 @@
                   </div>
                 </ng-template>
               </div>
-              <mat-divider style="width: 100%; display: inline-block"></mat-divider>
+              <mat-divider
+                style="width: 100%; display: inline-block"
+              ></mat-divider>
             </div>
           </li>
         </ul>
