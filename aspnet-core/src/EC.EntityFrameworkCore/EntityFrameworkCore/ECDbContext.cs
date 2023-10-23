@@ -23,6 +23,7 @@ namespace EC.EntityFrameworkCore
         public DbSet<ContractTemplateSetting> ContractTemplateSettings { get; set; }
         public DbSet<ContractTemplateSigner> ContractTemplateSigners { get; set; }
         public DbSet<MassContractTemplateSigner> MassContractTemplateSigners { get; set; }
+        public DbSet<ApiKey> ApiKeys { get; set; }
         public ECDbContext(DbContextOptions<ECDbContext> options)
             : base(options)
         {
