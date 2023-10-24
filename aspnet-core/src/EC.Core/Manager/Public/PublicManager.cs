@@ -37,7 +37,7 @@ namespace EC.Manager.Public
             _contractHistoryManager = contractHistoryManager;
         }
 
-        public async Task<Contract> CreateContract(string apiKey, CreatePublicContractDto input)
+        public async Task<CreatePublicContractDto> CreateContract(string apiKey, CreatePublicContractDto input)
         {
             var userAccess = await WorkScope.GetAll<ApiKey>()
                 .Where(x => x.Value.ToLower().Trim() == apiKey.ToLower().Trim())
@@ -45,7 +45,20 @@ namespace EC.Manager.Public
 
             if (userAccess == default)
             {
-                throw new UserFriendlyException("Api key không hợp lệ!");
+                throw new UserFriendlyException("Api key not valid!");
+            }
+
+            if(string.IsNullOrEmpty(input.FileBase64)) {
+                throw new UserFriendlyException("File not valid");
+            }
+
+            if (!input.FileBase64.Contains(",")) {
+                input.FileBase64 += "data:application/pdf;base64,";
+            }
+
+            if(!input.FileName.Contains("."))
+            {
+                input.FileName += ".pdf";
             }
 
             var loginUserId = userAccess.UserId;
@@ -63,7 +76,7 @@ namespace EC.Manager.Public
                 ExpriredTime = input.ExpriedTime,
                 ContractGuid = guid,
                 Code = input.Code,
-                File = input.FileName + ".pdf",
+                File = input.FileName,
                 Name = input.Name,
             };
 
@@ -99,7 +112,7 @@ namespace EC.Manager.Public
             };
             await _contractHistoryManager.Create(history);
 
-            return entity;
+            return input;
         }
     }
 }

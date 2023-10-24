@@ -18,9 +18,11 @@ namespace EC.Manager.ApiKeys
 
         }
 
-        public async Task GenerateApiKey()
+        public async Task<string> GenerateApiKey()
         {
             long loginUserId = AbpSession.UserId.Value;
+
+            string result = "";
 
             var existApiKey = await WorkScope.GetAll<ApiKey>()
                 .Where(x => x.UserId == loginUserId)
@@ -35,13 +37,17 @@ namespace EC.Manager.ApiKeys
                 };
 
                 await WorkScope.InsertAsync(dto);
+                result = dto.Value;
             }
             else
             {
                 existApiKey.Value = Guid.NewGuid().ToString();
 
                 await WorkScope.UpdateAsync(existApiKey);
+                result = existApiKey.Value;
             }
+
+            return result;
         }
 
         public async Task<string> GetApiKey()

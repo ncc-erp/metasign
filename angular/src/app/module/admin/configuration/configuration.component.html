@@ -1,4 +1,4 @@
-<div class="page-wrapper">
+<div class="page-wrapper pb-4">
   <!-- Email Setting -->
   <div class="wrapper not-full-width">
     <header class="header position-relative">
@@ -144,7 +144,7 @@
           </mat-form-field>
         </div>
       </form>
-      <footer 
+      <footer
       *ngIf="!isDisabledFormS3"
        class="footer">
         <button
@@ -158,7 +158,7 @@
           mat-raised-button
           type="submit"
           class="btn-primary button"
-          form="fromS3" 
+          form="fromS3"
         >
           {{ "Save" | ecTranslate }}
         </button>
@@ -261,7 +261,7 @@
         </footer>
       </div>
     </div>
-  
+
 
   <!-- Expried Time -->
   <div class="wrapper not-full-width">
@@ -293,6 +293,26 @@
           {{ "Save" | ecTranslate }}
         </button>
       </footer>
+    </div>
+  </div>
+
+
+  <div class="wrapper not-full-width">
+    <header class="header">
+      <div class="label-header">Api Key</div>
+      <button
+        mat-raised-button
+        (click)="generateApiKey()"
+        class="button button-edit"
+      >
+        <i class="fa-sharp fa-solid fa-pen-to-square"></i>
+        Generate Api Key
+      </button>
+    </header>
+    <div class="content card">
+        <div >
+            {{apiKey}}
+        </div>
     </div>
   </div>
 </div>
