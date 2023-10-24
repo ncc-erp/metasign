@@ -18,9 +18,9 @@ namespace EC.APIs.ApiKeys
         }
 
         [HttpPost]
-        public async Task GenerateApiKey()
+        public async Task<string> GenerateApiKey()
         {
-            await _apiKeyManager.GenerateApiKey();
+            return await _apiKeyManager.GenerateApiKey();
         }
 
         [HttpGet]

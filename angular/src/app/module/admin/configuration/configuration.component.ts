@@ -1,3 +1,4 @@
+import { ApiKeyService } from './../../../service/api/api-key.service';
 import { Component, Injector, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
@@ -27,6 +28,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   tempRemiderExpriedTime: number
   isDisabledFormMicrosoftId: boolean = true
   microsoftClientId: string = ''
+  apiKey: string = ""
   formAwsS3
 
   dataForm = [{
@@ -126,8 +128,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     accessKeyId: new FormControl({ value: '', disabled: true }, Validators.required),
     secretKey: new FormControl({ value: '', disabled: true }, Validators.required),
     region: new FormControl({ value: '', disabled: true }, Validators.required),
-    bucketName : new FormControl({ value: '', disabled: true }, Validators.required),
-    prefix : new FormControl({ value: '', disabled: true }, Validators.required),
+    bucketName: new FormControl({ value: '', disabled: true }, Validators.required),
+    prefix: new FormControl({ value: '', disabled: true }, Validators.required),
   })
 
   formSignServerClientIdSetting = this.fb.group({
@@ -139,7 +141,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     microsoftClientId: new FormControl({ value: '', disabled: true }, Validators.required),
   })
 
-  constructor(injector: Injector, private fb: FormBuilder, private configurationService: ConfigurationService) {
+  constructor(injector: Injector, private fb: FormBuilder, private configurationService: ConfigurationService,
+    private _apikeyService: ApiKeyService) {
     super(injector);
   }
 
@@ -156,7 +159,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
 
     this.configurationService.getSignServerUrlDto().subscribe(res => {
       this.SignServerClientId = res.result
-      this.formSignServerClientIdSetting.patchValue({  AdminAPI: res.result.adminAPI , BaseAddress:res.result.baseAddress })
+      this.formSignServerClientIdSetting.patchValue({ AdminAPI: res.result.adminAPI, BaseAddress: res.result.baseAddress })
     })
 
 
@@ -169,17 +172,18 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       this.tempRemiderExpriedTime = this.remiderExpriedTime
     })
 
-    this.configurationService.getAWSCredential().subscribe(value=>{
+    this.configurationService.getAWSCredential().subscribe(value => {
       this.formAwsS3 = value.result
 
-        this.formAwsS3Credential.patchValue(value.result);
+      this.formAwsS3Credential.patchValue(value.result);
     })
 
-    this.configurationService.getMicrosoftClientId().subscribe(value=>{
+    this.configurationService.getMicrosoftClientId().subscribe(value => {
       this.microsoftClientId = value.result.microsoftClientId
       this.formMicrosoftClientIdSetting.patchValue({ microsoftClientId: this.microsoftClientId })
     })
 
+    this.getApiKey();
   }
 
   handleClickEdit(config) {
@@ -201,16 +205,16 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       case EFormConfiguration.fromS3:
         this.isDisabledFormS3 = false;
         this.isDisabledFormS3 ? this.formAwsS3Credential.disable() : this.formAwsS3Credential.enable()
-       break
+        break
 
-       case EFormConfiguration.SignServerClientId:
+      case EFormConfiguration.SignServerClientId:
         this.isDisabledFormSignServer = false;
         this.isDisabledFormSignServer ? this.formSignServerClientIdSetting.disable() : this.formSignServerClientIdSetting.enable();
-       break
+        break
       case EFormConfiguration.MicrosoftClientId:
         this.isDisabledFormMicrosoftId = !this.isDisabledFormMicrosoftId
         this.isDisabledFormMicrosoftId ? this.formMicrosoftClientIdSetting.disable() : this.formMicrosoftClientIdSetting.enable()
-       break
+        break
 
     }
   }
@@ -266,19 +270,17 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.isDisabledRemiderExpriedTime = true;
   }
 
-  saveChangeFromS3(formS3)
-  {
-    this.configurationService.setAWSCredential(formS3).subscribe(value =>{
+  saveChangeFromS3(formS3) {
+    this.configurationService.setAWSCredential(formS3).subscribe(value => {
       abp.notify.success('Edit AWS S3 Successfully')
       this.isDisabledFormS3 = true;
       this.isDisabledFormS3 ? this.formAwsS3Credential.disable() : this.formAwsS3Credential.enable();
     })
   }
 
-  saveChangeSignServerId(data)
-  {
+  saveChangeSignServerId(data) {
 
-    this.configurationService.setSignServerUrlDto({ baseAddress: data.BaseAddress , adminAPI:data.AdminAPI  }).subscribe(res => {
+    this.configurationService.setSignServerUrlDto({ baseAddress: data.BaseAddress, adminAPI: data.AdminAPI }).subscribe(res => {
       this.SignServerClientId = data.SignServerClientId
       abp.notify.success(this.ecTransform("EditSignServerClientIdSuccessfully"))
       this.isDisabledFormSignServer = true;
@@ -286,8 +288,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     })
   }
 
-  saveChangeMicrosoftId(data)
-  {
+  saveChangeMicrosoftId(data) {
     this.configurationService.setMicrosoftClientId({ microsoftClientId: data.microsoftClientId }).subscribe(res => {
       this.microsoftClientId = data.microsoftClientId
       this.isDisabledFormMicrosoftId = true
@@ -319,21 +320,21 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
         break
 
       case EFormConfiguration.fromS3:
-        this.formAwsS3Credential.patchValue({ accessKeyId: this.formAwsS3.accessKeyId,secretKey: this.formAwsS3.secretKey})
+        this.formAwsS3Credential.patchValue({ accessKeyId: this.formAwsS3.accessKeyId, secretKey: this.formAwsS3.secretKey })
         this.isDisabledFormS3 = true;
         this.isDisabledFormS3 ? this.formAwsS3Credential.disable() : this.formAwsS3Credential.enable();
         break
 
       case EFormConfiguration.SignServerClientId:
-        this.formSignServerClientIdSetting.patchValue({ AdminAPI: this.SignServerClientId.adminAPI,BaseAddress: this.SignServerClientId.baseAddress})
+        this.formSignServerClientIdSetting.patchValue({ AdminAPI: this.SignServerClientId.adminAPI, BaseAddress: this.SignServerClientId.baseAddress })
         this.isDisabledFormSignServer = true;
         this.isDisabledFormSignServer ? this.formSignServerClientIdSetting.disable() : this.formSignServerClientIdSetting.enable();
         break
 
       case EFormConfiguration.MicrosoftClientId:
-          this.formMicrosoftClientIdSetting.patchValue({ microsoftClientId: this.microsoftClientId })
-          this.isDisabledFormMicrosoftId = true
-          this.isDisabledFormMicrosoftId ? this.formMicrosoftClientIdSetting.disable() : this.formMicrosoftClientIdSetting.enable()
+        this.formMicrosoftClientIdSetting.patchValue({ microsoftClientId: this.microsoftClientId })
+        this.isDisabledFormMicrosoftId = true
+        this.isDisabledFormMicrosoftId ? this.formMicrosoftClientIdSetting.disable() : this.formMicrosoftClientIdSetting.enable()
         break
     }
   }
@@ -355,5 +356,18 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       event.preventDefault();
       return
     }
+  }
+
+  getApiKey() {
+    this._apikeyService.GetApiKey().subscribe(rs => {
+      this.apiKey = rs.result
+    })
+  }
+
+  generateApiKey() {
+    this._apikeyService.GenerateApiKey().subscribe(rs => {
+      abp.message.success(`Generate thành công, api key của bạn là:<h5>${rs.result}</h5>`, "Success", { isHTML: true })
+      this.getApiKey()
+    })
   }
 }

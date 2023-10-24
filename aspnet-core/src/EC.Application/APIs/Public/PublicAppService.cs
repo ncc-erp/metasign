@@ -89,7 +89,7 @@ namespace EC.APIs.Public
         }
 
         [HttpPost]
-        public async Task<Contract> CreateContract(string apiKey, CreatePublicContractDto input)
+        public async Task<CreatePublicContractDto> CreateContract(string apiKey, CreatePublicContractDto input)
         {
             return await _publicManager.CreateContract(apiKey, input);
         }
