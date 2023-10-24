@@ -166,7 +166,8 @@ export enum EFormConfiguration {
   RemiderContractTerm = 'RemiderContractTerm',
   fromS3 = 'fromS3',
   SignServerClientId = 'SignServerClientId',
-  MicrosoftClientId = "MicrosoftClientId"
+  MicrosoftClientId = "MicrosoftClientId",
+  UserNormalLogin='UserNormalLogin'
 }
 
 export enum EFormControlNameFormEmailSetting {

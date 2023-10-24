@@ -29,7 +29,12 @@ export class ConfigurationService extends BaseApiService {
   public setGoogleClientId(data): Observable<ApiResponseDto<any>> {
     return this.processPost('SetGoogleClientId', data)
   }
-
+  public getNormalLogin(): Observable<ApiResponseDto<any>> {
+    return this.processGet('GetIsEnableLoginByUsername')
+  }
+  public setNormalLogin(data): Observable<ApiResponseDto<any>> {
+    return this.processPost('SetIsEnableLoginByUsername', data)
+  }
   public getCurrentPdfSignerName(): Observable<ApiResponseDto<any>> {
     return this.processGet('GetCurrentPdfSignerName')
   }
