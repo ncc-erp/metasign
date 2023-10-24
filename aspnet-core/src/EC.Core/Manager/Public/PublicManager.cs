@@ -71,7 +71,7 @@ namespace EC.Manager.Public
 
             if (!input.FileBase64.Contains(","))
             {
-                input.FileBase64 += "data:application/pdf;base64,";
+                input.FileBase64 = "data:application/pdf;base64," + input.FileBase64;
             }
 
             if (!input.FileName.Contains("."))
