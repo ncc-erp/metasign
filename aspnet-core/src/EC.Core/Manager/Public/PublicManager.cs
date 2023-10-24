@@ -1,4 +1,6 @@
 ﻿using Abp.Domain.Uow;
+using Abp.MultiTenancy;
+using Abp.Runtime.Session;
 using Abp.UI;
 using EC.Authorization.Users;
 using EC.Entities;
@@ -6,7 +8,9 @@ using EC.Manager.ContractHistories;
 using EC.Manager.ContractHistories.Dto;
 using EC.Manager.ContractSignings.Dto;
 using EC.Manager.FileStoring;
+using EC.Manager.Notifications.ExpiredContract;
 using EC.Manager.Public.Dto;
+using EC.MultiTenancy;
 using EC.Utils;
 using HRMv2.NccCore;
 using Microsoft.AspNetCore.Hosting;
@@ -27,45 +31,59 @@ namespace EC.Manager.Public
         private readonly FileStoringManager _fileStoringManager;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ContractHistoryManager _contractHistoryManager;
+        private readonly IAbpSession _abpSession;
+        private readonly IUnitOfWorkManager _unitOfWork;
 
         public PublicManager(IWorkScope workScope,
             FileStoringManager fileStoringManager,
             IWebHostEnvironment webHostEnvironment,
+            IAbpSession abpSession,
+            IUnitOfWorkManager unitOfWork,
             ContractHistoryManager contractHistoryManager) : base(workScope)
         {
             _fileStoringManager = fileStoringManager;
             _webHostEnvironment = webHostEnvironment;
             _contractHistoryManager = contractHistoryManager;
+            _abpSession = abpSession;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<CreatePublicContractDto> CreateContract(string apiKey, CreatePublicContractDto input)
         {
+            ApiKey userAccess = default;
+
             using (CurrentUnitOfWork.DisableFilter(AbpDataFilters.MayHaveTenant))
             {
-                var userAccess = await WorkScope.GetAll<ApiKey>()
-                .Where(x => x.Value.ToLower().Trim() == apiKey.ToLower().Trim())
-                .FirstOrDefaultAsync();
+                userAccess = await WorkScope.GetAll<ApiKey>()
+               .Where(x => x.Value.ToLower().Trim() == apiKey.ToLower().Trim())
+               .FirstOrDefaultAsync();
+            }
 
-                if (userAccess == default)
-                {
-                    throw new UserFriendlyException("Api key not valid!");
-                }
+            if (userAccess == default)
+            {
+                throw new UserFriendlyException("Api key not valid!");
+            }
 
-                if (string.IsNullOrEmpty(input.FileBase64))
-                {
-                    throw new UserFriendlyException("File not valid");
-                }
+            if (string.IsNullOrEmpty(input.FileBase64))
+            {
+                throw new UserFriendlyException("File not valid");
+            }
 
-                if (!input.FileBase64.Contains(","))
-                {
-                    input.FileBase64 += "data:application/pdf;base64,";
-                }
+            if (!input.FileBase64.Contains(","))
+            {
+                input.FileBase64 += "data:application/pdf;base64,";
+            }
 
-                if (!input.FileName.Contains("."))
-                {
-                    input.FileName += ".pdf";
-                }
+            if (!input.FileName.Contains("."))
+            {
+                input.FileName += ".pdf";
+            }
 
+            _abpSession.Use(userAccess.TenantId, userAccess.UserId);
+            var uow = _unitOfWork.Current;
+
+            using (uow.SetTenantId(userAccess.TenantId))
+            {
                 var loginUserId = userAccess.UserId;
 
                 var loginUserEmail = await WorkScope.GetAll<User>()
@@ -116,6 +134,8 @@ namespace EC.Manager.Public
                     Note = $"{loginUserEmail} createdTheDocument"
                 };
                 await _contractHistoryManager.Create(history);
+
+                uow.SaveChanges();
             }
 
             return input;
