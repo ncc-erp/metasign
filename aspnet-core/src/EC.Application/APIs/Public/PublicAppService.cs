@@ -1,7 +1,10 @@
 ﻿using Abp.Authorization;
 using Abp.UI;
+using EC.Entities;
 using EC.Manager.ContactManager;
 using EC.Manager.ContactManager.Dto;
+using EC.Manager.Public;
+using EC.Manager.Public.Dto;
 using EC.WebService.DesktopApp;
 using EC.WebService.DesktopApp.Dto;
 using EC.WebService.Goggle;
@@ -16,6 +19,7 @@ namespace EC.APIs.Public
 {
     public class PublicAppService : ECAppServiceBase
     {
+        private readonly PublicManager _publicManager;
         private readonly ContactManager _contactManager;
         private readonly DesktopAppService _desktopAppService;
         private readonly GoogleWebService _googleWebService;
@@ -23,12 +27,14 @@ namespace EC.APIs.Public
         public PublicAppService(ContactManager contactManager,
             DesktopAppService desktopAppService,
             GoogleWebService googleWebService,
+            PublicManager publicManager,
             IWebHostEnvironment webHostEnvironment)
         {
             _contactManager = contactManager;
             _desktopAppService = desktopAppService;
             _googleWebService = googleWebService;
             _hostingEnvironment = webHostEnvironment;
+            _publicManager = publicManager;
         }
 
         [HttpPost]
@@ -80,6 +86,12 @@ namespace EC.APIs.Public
         public async Task<GetCertificateInfo> GetCertInfo()
         {
             return await _desktopAppService.GetCertInfo();
+        }
+
+        [HttpPost]
+        public async Task<CreatePublicContractDto> CreateContract(string apiKey, CreatePublicContractDto input)
+        {
+            return await _publicManager.CreateContract(apiKey, input);
         }
     }
 }
