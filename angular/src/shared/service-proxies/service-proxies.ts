@@ -3024,7 +3024,6 @@ export interface IRegisterOutput {
 }
 
 export class ResetPasswordDto implements IResetPasswordDto {
-    adminPassword: string;
     userId: number;
     newPassword: string;
 
@@ -3039,7 +3038,6 @@ export class ResetPasswordDto implements IResetPasswordDto {
 
     init(_data?: any) {
         if (_data) {
-            this.adminPassword = _data["adminPassword"];
             this.userId = _data["userId"];
             this.newPassword = _data["newPassword"];
         }
@@ -3054,7 +3052,6 @@ export class ResetPasswordDto implements IResetPasswordDto {
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
-        data["adminPassword"] = this.adminPassword;
         data["userId"] = this.userId;
         data["newPassword"] = this.newPassword;
         return data;
@@ -3069,7 +3066,6 @@ export class ResetPasswordDto implements IResetPasswordDto {
 }
 
 export interface IResetPasswordDto {
-    adminPassword: string;
     userId: number;
     newPassword: string;
 }
