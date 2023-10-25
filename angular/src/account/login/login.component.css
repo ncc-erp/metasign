@@ -89,7 +89,7 @@ p {
 }
 
 .wrapper_login--img {
-  margin-top: 70px;
+  margin-top: 30px;
 }
 
 :host ::ng-deep .mx-auto {

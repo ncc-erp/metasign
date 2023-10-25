@@ -115,7 +115,54 @@
       </footer>
     </div>
   </div>
-
+  <!-- EnableNormalLogin -->
+  <div class="wrapper not-full-width">
+    <header class="header">
+      <div class="label-header">Enable Normal Login</div>
+      <button
+        mat-raised-button
+        (click)="handleClickEdit('UserNormalLogin')"
+        class="button button-edit"
+        *ngIf="isDisabledFormUserNormalLogin"
+      >
+        <i class="fa-sharp fa-solid fa-pen-to-square"></i>
+        {{ "Edit" | ecTranslate }}
+      </button>
+    </header>
+    <div class="content card">
+      <form
+        id="formUserEnableLoginSetting"
+        class="card-body"
+        [formGroup]="formUserEnableLoginSetting"
+        (ngSubmit)="saveChangeNormalLogin(formUserEnableLoginSetting.value)"
+      >
+        <mat-checkbox
+          class="checkbox-enable-normal-login pt-2"
+          formControlName="enableNormalLogin"
+          [checked]="isEnableNormalLogin"
+          (change)="checkEnableNormalLogin($event)"
+          >{{ "IsEnableLoginByUsername" | ecTranslate }}</mat-checkbox
+        >
+      </form>
+      <footer *ngIf="!isDisabledFormUserNormalLogin" class="footer">
+        <button
+          mat-raised-button
+          color="secondary"
+          (click)="cancelChange('UserNormalLogin')"
+        >
+          {{ "Cancel" | ecTranslate }}
+        </button>
+        <button
+          form="formUserEnableLoginSetting"
+          mat-raised-button
+          type="submit"
+          class="btn-primary button"
+        >
+          {{ "Save" | ecTranslate }}
+        </button>
+      </footer>
+    </div>
+  </div>
   <!-- AWS S3 Credential -->
   <div class="wrapper not-full-width">
     <header class="header">
