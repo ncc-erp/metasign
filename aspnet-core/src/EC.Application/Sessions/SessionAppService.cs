@@ -1,4 +1,5 @@
 ﻿using Abp.Auditing;
+using Abp.Configuration;
 using EC.Configuration;
 using EC.Sessions.Dto;
 using System.Collections.Generic;
@@ -24,6 +25,20 @@ namespace EC.Sessions
             if (AbpSession.TenantId.HasValue)
             {
                 output.Tenant = ObjectMapper.Map<TenantLoginInfoDto>(await GetCurrentTenantAsync());
+
+                output.GoogleClientId = await SettingManager.GetSettingValueForTenantAsync(AppSettingNames.GoogleClientId, output.Tenant.Id);
+
+                output.MicrosoftClientId = await SettingManager.GetSettingValueForTenantAsync(AppSettingNames.MicrosoftClientId, output.Tenant.Id);
+
+                output.IsEnableLoginByUsername = await SettingManager.GetSettingValueForTenantAsync(AppSettingNames.IsEnableLoginByUsername, output.Tenant.Id);
+            }
+            else
+            {
+                output.GoogleClientId = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.GoogleClientId);
+
+                output.MicrosoftClientId = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.MicrosoftClientId);
+
+                output.IsEnableLoginByUsername = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.IsEnableLoginByUsername);
             }
 
             if (AbpSession.UserId.HasValue)
@@ -31,11 +46,7 @@ namespace EC.Sessions
                 output.User = ObjectMapper.Map<UserLoginInfoDto>(await GetCurrentUserAsync());
             }
 
-            output.GoogleClientId = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.GoogleClientId);
-
-            output.MicrosoftClientId = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.MicrosoftClientId);
-
-            output.IsEnableLoginByUsername = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.IsEnableLoginByUsername);
+           
 
             return output;
         }
