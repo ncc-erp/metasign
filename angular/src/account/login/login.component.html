@@ -46,7 +46,7 @@
     <h3>{{ "WelcomeToMetaSign" | ecTranslate }}</h3>
     <p class="wrapper_login--text">{{ "ToGetStartedPleaseLogIn" | ecTranslate }}</p>
 
-    <div class="wrapper_login--btn">
+    <div class="wrapper_login--btn" style="max-width: 100vw;">
       <app-buttom-login *ngIf="!tenancyName" class="btn_tenant" (click)="handleOpenTenant()" [type]="buttomType.tenant"
         [text]="'SelectACompany' | ecTranslate">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
