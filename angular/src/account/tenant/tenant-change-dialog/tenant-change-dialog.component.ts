@@ -27,13 +27,13 @@ export class TenantChangeDialogComponent extends AppComponentBase {
   });
 
   ngOnInit(): void {
-    
+
     this.tenancyName = this.appSession.tenant?.tenancyName;
     if(this.tenancyName)
     {
       this.changeTenantForm.patchValue({tenancyName: this.tenancyName})
     }
-    
+
   }
 
   constructor(
@@ -57,7 +57,7 @@ export class TenantChangeDialogComponent extends AppComponentBase {
     }
 
     const input = new IsTenantAvailableInput();
-    input.tenancyName = this.changeTenantForm.value.tenancyName;
+    input.tenancyName = this.changeTenantForm.value.tenancyName.trim();
 
     this.saving = true;
     this._accountService.isTenantAvailable(input).subscribe(
@@ -69,16 +69,12 @@ export class TenantChangeDialogComponent extends AppComponentBase {
             return;
           case AppTenantAvailabilityState.InActive:
             this.message.warn(
-              this.ecTransform(
-                "TenantIsNotActive"
-              )
+              "Tenant is not active"
             );
             break;
           case AppTenantAvailabilityState.NotFound:
             this.message.warn(
-              this.ecTransform(
-                "ThereIsNoTenantDefinedWithName"
-              )
+              "Can not find tenant"
             );
             break;
         }

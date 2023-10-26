@@ -16,12 +16,14 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   emailSetting = []
   isDisabledFormEmail: boolean = true
   isDisabledFormGoogleId: boolean = true
+  isDisabledFormUserNormalLogin: boolean = true
   isDisabledFormS3: boolean = true
   isCheckedEnableSsl: boolean = false
   isCheckedUseDefault: boolean = false
   googleClientId: string = ''
   SignServerClientId
   isEnableLoginByUsername: boolean = false
+  isEnableNormalLogin: boolean = false
   isDisabledRemiderExpriedTime: boolean = true
   isDisabledFormSignServer: boolean = true
   remiderExpriedTime: number
@@ -123,6 +125,9 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     googleClientId: new FormControl({ value: '', disabled: true }, Validators.required),
     enableLoginByUsername: new FormControl({ value: false, disabled: true }, Validators.required)
   })
+  formUserEnableLoginSetting = this.fb.group({
+    enableNormalLogin: new FormControl({ value: false, disabled: true }, Validators.required)
+  })
 
   formAwsS3Credential = this.fb.group({
     accessKeyId: new FormControl({ value: '', disabled: true }, Validators.required),
@@ -156,7 +161,11 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       this.googleClientId = res.result.googleClientId
       this.formGoogleClientIdSetting.patchValue({ googleClientId: this.googleClientId })
     })
+    this.configurationService.getNormalLogin().subscribe(res => {
+      this.isEnableNormalLogin = res.result.isEnableLoginByUsername.toLowerCase() === 'true' ? true : false
+      this.formUserEnableLoginSetting.patchValue({ enableNormalLogin: this.isEnableNormalLogin })
 
+    })
     this.configurationService.getSignServerUrlDto().subscribe(res => {
       this.SignServerClientId = res.result
       this.formSignServerClientIdSetting.patchValue({ AdminAPI: res.result.adminAPI, BaseAddress: res.result.baseAddress })
@@ -197,7 +206,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
         this.isDisabledFormGoogleId = !this.isDisabledFormGoogleId
         this.isDisabledFormGoogleId ? this.formGoogleClientIdSetting.disable() : this.formGoogleClientIdSetting.enable()
         break;
-
+      case EFormConfiguration.UserNormalLogin:
+        this.isDisabledFormUserNormalLogin = !this.isDisabledFormUserNormalLogin
+        this.isDisabledFormUserNormalLogin ? this.formUserEnableLoginSetting.disable() : this.formUserEnableLoginSetting.enable()
+        break;
       case EFormConfiguration.RemiderContractTerm:
         this.isDisabledRemiderExpriedTime = !this.isDisabledRemiderExpriedTime
         break;
@@ -244,6 +256,9 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   checkEnableLoginByUsername(event: MatCheckboxChange) {
     this.isEnableLoginByUsername = event.checked
   }
+  checkEnableNormalLogin(event: MatCheckboxChange) {
+    this.isEnableNormalLogin = event.checked
+  }
 
   saveChangeEmail(data: any) {
     this.configurationService.setEmailSetting({ ...data, enableSsl: this.isCheckedEnableSsl.toString(), useDefaultCredentials: this.isCheckedUseDefault.toString() }).subscribe(res => {
@@ -265,7 +280,12 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.isDisabledFormGoogleId = true
     this.isDisabledFormGoogleId ? this.formGoogleClientIdSetting.disable() : this.formGoogleClientIdSetting.enable()
   }
+  saveChangeNormalLogin(data: any) {
 
+    this.configurationService.setNormalLogin({ isEnableLoginByUsername: data.enableNormalLogin.toString() }).subscribe(res => {
+      abp.notify.success(this.ecTransform("EditUserNormalLoginSuccessfully"))
+    })
+  }
   saveChangeRemiderTime() {
     this.isDisabledRemiderExpriedTime = true;
   }
@@ -313,7 +333,12 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
         this.isDisabledFormGoogleId = true
         this.isDisabledFormGoogleId ? this.formGoogleClientIdSetting.disable() : this.formGoogleClientIdSetting.enable()
         break;
-
+      case EFormConfiguration.UserNormalLogin:
+        // this.handleCheckbox(this.emailSetting)
+        this.formUserEnableLoginSetting.patchValue({ enableNormalLogin: this.isEnableNormalLogin })
+        this.isDisabledFormUserNormalLogin = true
+        this.isDisabledFormUserNormalLogin ? this.formUserEnableLoginSetting.disable() : this.formUserEnableLoginSetting.enable()
+        break;
       case EFormConfiguration.RemiderContractTerm:
         this.isDisabledRemiderExpriedTime = true;
         this.remiderExpriedTime = this.tempRemiderExpriedTime;
