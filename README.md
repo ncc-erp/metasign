@@ -19,7 +19,7 @@ signServer is an enterprise-grade electronic signature solution that enables dig
  - It utilizes advanced PKI technology and adheres to certificate policies such as X.509, ensuring valid digital identities.
  - signServer leverages high-grade encryption algorithms like RSA and SHA-256 to secure documents and signatures.
  - Timestamps, digital seals, and digital certificate validation prevent tampering and ensure non-repudiation.
-![navbar](_screenshots/MetaSign3.jpg)
+![navbar](_screenshots/Mo-hinh-signserver.jpg)
 
  
 ## Table of Contents
