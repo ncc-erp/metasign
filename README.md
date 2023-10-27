@@ -12,16 +12,21 @@ Metasign can serve a wide range of customers' needs:
  - Generating reports
  - Creating contracts in a batch
 
+## High level design
+
+![navbar](_screenshots/signServer.png)
+
  
 ## Table of Contents
 
 - [Metasign](#metasign)
 
-  
 
 - [Overview](#overview)
 
-  
+
+- [High level design](#signServer)
+
 
 - [Table of Contents](#table-of-contents)
 
