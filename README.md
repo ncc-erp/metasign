@@ -14,7 +14,7 @@ Metasign can serve a wide range of customers' needs:
 
 ## High level design
 
-![navbar](_screenshots/Mo-hinh-signserver.jpg)
+![navbar](_screenshots/signServer.png)
 
  
 ## Table of Contents
