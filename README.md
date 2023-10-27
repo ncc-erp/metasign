@@ -12,13 +12,8 @@ Metasign can serve a wide range of customers' needs:
  - Generating reports
  - Creating contracts in a batch
 
-## signServer
-signServer is an enterprise-grade electronic signature solution that enables digital signing of documents and contracts.  By leveraging signServer's standards-based signing capabilities, Metasign can assure customers of the authenticity, integrity and security of signed documents: 
- - standards-based signing capabilities, Metasign can assure customers of the authenticity, integrity and security of signed documents.
- - signServer enables digital signing that is compliant with global standards including eIDAS, UETA, and ESIGN Act.
- - It utilizes advanced PKI technology and adheres to certificate policies such as X.509, ensuring valid digital identities.
- - signServer leverages high-grade encryption algorithms like RSA and SHA-256 to secure documents and signatures.
- - Timestamps, digital seals, and digital certificate validation prevent tampering and ensure non-repudiation.
+## High level design
+
 ![navbar](_screenshots/Mo-hinh-signserver.jpg)
 
  
@@ -26,12 +21,11 @@ signServer is an enterprise-grade electronic signature solution that enables dig
 
 - [Metasign](#metasign)
 
-  
 
 - [Overview](#overview)
 
 
-- [SignServer](#signServer)
+- [High level design](#signServer)
 
 
 - [Table of Contents](#table-of-contents)
