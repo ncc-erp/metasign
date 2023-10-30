@@ -178,65 +178,68 @@ namespace EC.Manager.ContractTemplates
 
         public async Task<GetSignatureForContracttemplateDto> Get(long id)
         {
-            var item = WorkScope.GetAll<ContractTemplate>()
+            using (CurrentUnitOfWork.DisableFilter(AbpDataFilters.MayHaveTenant))
+            {
+                var item = WorkScope.GetAll<ContractTemplate>()
                 .Where(x => x.Id == id).FirstOrDefault();
-            var contractTemplate = new GetContractTemplateDto
-            {
-                Id = item.Id,
-                Name = item.Name,
-                FileName = item.FileName,
-                Content = item.Content,
-                HtmlContent = item.HtmlContent,
-                IsFavorite = item.IsFavorite,
-                Type = item.Type,
-                UserId = item.UserId,
-                CreationTime = item.CreationTime,
-                LastModifycationTime = item.LastModificationTime,
-                MassType = item.MassType,
-                MassWordContent = item.MassWordContent,
-                MassField = item.MassField
-            };
-            var settings = WorkScope.GetAll<ContractTemplateSetting>()
-                .Where(x => x.ContractTemplateSigner.ContractTemplateId == id)
-                .Select(x => new GetContractTemplateSettingDto
+                var contractTemplate = new GetContractTemplateDto
                 {
-                    Id = x.Id,
-                    Width = x.Width,
-                    Height = x.Height,
-                    PositionX = x.PositionX,
-                    PositionY = x.PositionY,
-                    IsSigned = x.IsSigned,
-                    ContractTemplateSignerId = x.ContractTemplateSignerId,
-                    FontSize = x.FontSize,
-                    FontFamily = x.FontFamily,
-                    FontColor = x.FontColor,
-                    Page = x.Page,
-                    SignatureType = x.SignatureType,
-                    SignerEmail = x.ContractTemplateSigner.SignerEmail,
-                    SignerName = x.ContractTemplateSigner.SignerName,
-                    Color = x.ContractTemplateSigner.Color,
-                    ValueInput = x.ValueInput
-                }).ToList();
-            var signers = WorkScope.GetAll<ContractTemplateSigner>()
-                .Where(x => x.ContractTemplateId == id)
-                .OrderBy(x => x.ContractRole).ThenBy(x => x.ProcesOrder)
-                .Select(x => new GetContractTemplateSignerDto
+                    Id = item.Id,
+                    Name = item.Name,
+                    FileName = item.FileName,
+                    Content = item.Content,
+                    HtmlContent = item.HtmlContent,
+                    IsFavorite = item.IsFavorite,
+                    Type = item.Type,
+                    UserId = item.UserId,
+                    CreationTime = item.CreationTime,
+                    LastModifycationTime = item.LastModificationTime,
+                    MassType = item.MassType,
+                    MassWordContent = item.MassWordContent,
+                    MassField = item.MassField
+                };
+                var settings = WorkScope.GetAll<ContractTemplateSetting>()
+                    .Where(x => x.ContractTemplateSigner.ContractTemplateId == id)
+                    .Select(x => new GetContractTemplateSettingDto
+                    {
+                        Id = x.Id,
+                        Width = x.Width,
+                        Height = x.Height,
+                        PositionX = x.PositionX,
+                        PositionY = x.PositionY,
+                        IsSigned = x.IsSigned,
+                        ContractTemplateSignerId = x.ContractTemplateSignerId,
+                        FontSize = x.FontSize,
+                        FontFamily = x.FontFamily,
+                        FontColor = x.FontColor,
+                        Page = x.Page,
+                        SignatureType = x.SignatureType,
+                        SignerEmail = x.ContractTemplateSigner.SignerEmail,
+                        SignerName = x.ContractTemplateSigner.SignerName,
+                        Color = x.ContractTemplateSigner.Color,
+                        ValueInput = x.ValueInput
+                    }).ToList();
+                var signers = WorkScope.GetAll<ContractTemplateSigner>()
+                    .Where(x => x.ContractTemplateId == id)
+                    .OrderBy(x => x.ContractRole).ThenBy(x => x.ProcesOrder)
+                    .Select(x => new GetContractTemplateSignerDto
+                    {
+                        Id = x.Id,
+                        Role = x.Role,
+                        SignerName = x.SignerName,
+                        SignerEmail = x.SignerEmail,
+                        ContractRole = x.ContractRole,
+                        ProcesOrder = x.ProcesOrder,
+                        Color = x.Color,
+                        ContractTemplateId = x.ContractTemplateId
+                    }).ToList();
+                return new GetSignatureForContracttemplateDto
                 {
-                    Id = x.Id,
-                    Role = x.Role,
-                    SignerName = x.SignerName,
-                    SignerEmail = x.SignerEmail,
-                    ContractRole = x.ContractRole,
-                    ProcesOrder = x.ProcesOrder,
-                    Color = x.Color,
-                    ContractTemplateId = x.ContractTemplateId
-                }).ToList();
-            return new GetSignatureForContracttemplateDto
-            {
-                ContractTemplate = contractTemplate,
-                SignatureSettings = settings,
-                SignerSettings = signers
-            };
+                    ContractTemplate = contractTemplate,
+                    SignatureSettings = settings,
+                    SignerSettings = signers
+                };
+            }
         }
 
         public async Task<List<GetContractTemplateDto>> GetAll(ContractTemplateFilterType? input)
