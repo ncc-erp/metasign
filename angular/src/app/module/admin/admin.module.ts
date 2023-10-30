@@ -16,6 +16,8 @@ import { PropertiesWorkerComponent } from './sign-server/properties-worker/prope
 import { CreatePropertiesComponent } from './sign-server/properties-worker/create-properties/create-properties.component';
 import { CreateWorkerComponent } from './sign-server/create-worker/create-worker.component';
 import { SignServerDataService } from './sign-server/services/sign-server.service';
+import { ContractTemplateComponent } from './contract-template/contract-template.component';
+import { UploadTemplateComponent } from './contract-template/upload-template/upload-template.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +28,9 @@ import { SignServerDataService } from './sign-server/services/sign-server.servic
     SignServerComponent,
     PropertiesWorkerComponent,
     CreatePropertiesComponent,
-    CreateWorkerComponent
+    CreateWorkerComponent,
+    ContractTemplateComponent,
+    UploadTemplateComponent
   ],
   imports: [
     CommonModule,
