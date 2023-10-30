@@ -79,6 +79,12 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
           'Admin.Configuration.View'
         ),
         new MenuItem(
+          'Contract Template',
+          '/app/admin/contract-template',
+          'fa-solid fa-sliders',
+          'Admin.ContractTemplate'
+        ),
+        new MenuItem(
           this.l(`${this.ecTransform('SignServer')}`),
           '/app/admin/sign-server',
           '',

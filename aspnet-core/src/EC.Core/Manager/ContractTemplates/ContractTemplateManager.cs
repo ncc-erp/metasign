@@ -1,4 +1,5 @@
 ﻿using Abp.Collections.Extensions;
+using Abp.Domain.Uow;
 using Abp.UI;
 using EC.Entities;
 using EC.Manager.Contracts.Dto;
@@ -265,40 +266,44 @@ namespace EC.Manager.ContractTemplates
 
         public async Task<GridResult<GetContractTemplateDto>> GetAllPaging(GetContractTemplateByFilterDto input)
         {
-            var loginUserId = AbpSession.UserId;
-            var query = WorkScope.GetAll<ContractTemplate>()
-                .OrderByDescending(x => x.CreationTime)
-                .Where(x => x.UserId == loginUserId || x.UserId == null)
-                .Select(x => new GetContractTemplateDto
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    FileName = x.FileName,
-                    Content = x.Content,
-                    HtmlContent = x.HtmlContent,
-                    IsFavorite = x.IsFavorite,
-                    Type = x.Type,
-                    UserId = x.UserId,
-                    CreationTime = x.CreationTime,
-                    CreationUserName = x.CreatorUser.FullName,
-                    LastModifycationTime = x.LastModificationTime,
-                    LastModifyCationUserName = x.LastModifierUser.FullName,
-                    MassType = x.MassType
-                });
-            switch (input.FilterType)
+
+            using (CurrentUnitOfWork.DisableFilter(AbpDataFilters.MayHaveTenant))
             {
-                case ContractTemplateFilterType.Me:
+                var loginUserId = AbpSession.UserId;
+                var query = WorkScope.GetAll<ContractTemplate>()
+                    .OrderByDescending(x => x.CreationTime)
+                    .Where(x => x.UserId == loginUserId || x.UserId == null)
+                    .Select(x => new GetContractTemplateDto
                     {
-                        query = query.Where(x => x.UserId == loginUserId);
-                        break;
-                    }
-                case ContractTemplateFilterType.System:
-                    {
-                        query = query.Where(x => x.UserId == null);
-                        break;
-                    }
+                        Id = x.Id,
+                        Name = x.Name,
+                        FileName = x.FileName,
+                        Content = x.Content,
+                        HtmlContent = x.HtmlContent,
+                        IsFavorite = x.IsFavorite,
+                        Type = x.Type,
+                        UserId = x.UserId,
+                        CreationTime = x.CreationTime,
+                        CreationUserName = x.CreatorUser.FullName,
+                        LastModifycationTime = x.LastModificationTime,
+                        LastModifyCationUserName = x.LastModifierUser.FullName,
+                        MassType = x.MassType
+                    });
+                switch (input.FilterType)
+                {
+                    case ContractTemplateFilterType.Me:
+                        {
+                            query = query.Where(x => x.UserId == loginUserId);
+                            break;
+                        }
+                    case ContractTemplateFilterType.System:
+                        {
+                            query = query.Where(x => x.UserId == null);
+                            break;
+                        }
+                }
+                return await query.GetGridResult(query, input.GridParam);
             }
-            return await query.GetGridResult(query, input.GridParam);
         }
 
         public async Task RemoveAllSignature(long contractTemplateId)

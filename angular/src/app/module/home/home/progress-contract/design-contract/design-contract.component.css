@@ -189,7 +189,8 @@
 
 .btn_step {
   display: flex;
-  position: absolute;
+  position: fixed;
+  background-color: #ffff;
   bottom: 1px;
   left: 0;
   right: 0;
@@ -243,7 +244,7 @@
   .btn_step {
     display: flex;
     position: absolute;
-    bottom: 50px;
+    bottom: 15px;
     left: 0;
     right: 0;
     height: 50px;

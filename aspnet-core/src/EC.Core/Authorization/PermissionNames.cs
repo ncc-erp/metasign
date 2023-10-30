@@ -53,6 +53,9 @@ namespace EC.Authorization
         //SignServer
         public const string Admin_SignServer = "Admin.SignServer";
 
+        // Contract template
+        public const string Admin_ContractTemplate = "Admin.ContractTemplate";
+
         // home
         public const string Home = "Home";
         public const string Home_View_Statistic = "Home.ViewStatistic";
@@ -161,6 +164,9 @@ namespace EC.Authorization
 
                                 PermissionNames.Admin_SignServer,
 
+                                PermissionNames.Admin_ContractTemplate,
+
+
                                 PermissionNames.Contact,
                                 PermissionNames.Contact_View,
                                 PermissionNames.Contact_Create,
@@ -258,6 +264,9 @@ namespace EC.Authorization
                 new SystemPermission {Name = PermissionNames.Admin_Configuration_View, MultiTenancySides = MultiTenancySides.Host | MultiTenancySides.Tenant, DisplayName = "View"},
                 new SystemPermission {Name = PermissionNames.Admin_Configuration_Edit, MultiTenancySides = MultiTenancySides.Host | MultiTenancySides.Tenant, DisplayName = "EditOrUpdate"},
                 new SystemPermission {Name = PermissionNames.Admin_SignServer, MultiTenancySides = MultiTenancySides.Host | MultiTenancySides.Tenant, DisplayName = "SignServer"},
+
+                new SystemPermission {Name = PermissionNames.Admin_ContractTemplate, MultiTenancySides = MultiTenancySides.Host | MultiTenancySides.Tenant, DisplayName = "Contract Template"},
+
 
                 //email template
                 new SystemPermission {Name = PermissionNames.Admin_EmailTemplate, MultiTenancySides = MultiTenancySides.Host | MultiTenancySides.Tenant, DisplayName = "Email Template"},
@@ -382,7 +391,10 @@ namespace EC.Authorization
                                         new SystemPermission {Name = PermissionNames.Admin_EmailTemplate_PreviewTemplate_SendMail, MultiTenancySides = MultiTenancySides.Host | MultiTenancySides.Tenant, DisplayName = "TestSendEmail"},
                                     }
                             },
-                            new SystemPermission {Name = PermissionNames.Admin_SignServer, MultiTenancySides = MultiTenancySides.Host | MultiTenancySides.Tenant, DisplayName = "SignServer" }
+                            new SystemPermission {Name = PermissionNames.Admin_SignServer, MultiTenancySides = MultiTenancySides.Host | MultiTenancySides.Tenant, DisplayName = "SignServer" },
+
+                            new SystemPermission {Name = PermissionNames.Admin_ContractTemplate, MultiTenancySides = MultiTenancySides.Host | MultiTenancySides.Tenant, DisplayName = "Contract Template" }
+
                         }
                 },
 

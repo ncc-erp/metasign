@@ -40,6 +40,8 @@ export const PERMISSIONS_CONSTANT = {
 
     Admin_SignServer: "Admin.SignServer",
 
+    Admin_ContractTemplate: "Admin.ContractTemplate",
+
     //Contact
     Contact: "Contact",
     Contact_View: "Contact.View",
