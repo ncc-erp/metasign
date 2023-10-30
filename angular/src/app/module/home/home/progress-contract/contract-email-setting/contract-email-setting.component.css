@@ -64,14 +64,16 @@
 
 .btn_step {
   display: flex;
-  position: absolute;
-  bottom: 0px;
+  position: fixed;
+  background-color: #ffff;
+  bottom: 1px;
   left: 0px;
   right: 0px;
   height: 50px;
   align-items: center;
   justify-content: space-between;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 2px 0px inset;
+  /* box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 2px 0px inset; */
+
 }
 
 .signer_form--order {
@@ -187,4 +189,5 @@
   .email_text--input {
     margin: 10px 0 18px 0;
   }
+
 }

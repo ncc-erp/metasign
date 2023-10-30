@@ -1,0 +1,34 @@
+<div class="card-header" >
+    <h4>
+        {{title}}
+    </h4>
+</div>
+<div class="card-body" [busy]="isConverting">
+    <div class="form-group" *ngIf="!data">
+       <strong>File support:</strong> <span class="text-danger"> .pdf, .doc, .docx, .xls, .xlsx, .png, .jpg, .jpeg, .txt</span>
+    </div>
+
+    <div class="form-group row" *ngIf="!data">
+        <label for="" class="mt-2 col-3">File</label>
+        <div class="col-9">
+            <input title="" (change)="onFileSelected($event)" type="file"
+                accept=".pdf, .doc, .docx, .xls, .xlsx, .png, .jpg, .jpeg, .txt" id="fileID" #fileInput />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="" class="mt-2 col-3">Template name:</label>
+        <div class="col-9">
+            <mat-form-field appearance="outline">
+                <input type="text" name="name" matInput [(ngModel)]="newTemplate.name">
+            </mat-form-field>
+        </div>
+    </div>
+</div>
+<div class="card-footer text-right">
+    <button class="btn btn-default mr-2" mat-dialog-close="">
+        Cancel
+    </button>
+    <button class="btn btn-primary" (click)="save()" [disabled]="isConverting">
+        Save
+    </button>
+</div>

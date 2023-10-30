@@ -189,7 +189,8 @@
 
 .btn_step {
   display: flex;
-  position: absolute;
+  position: fixed;
+  background-color: #ffff;
   bottom: 1px;
   left: 0;
   right: 0;
@@ -232,7 +233,7 @@
   .contract_design--viewer,
   .contract_design--left,
   .contract_design--right {
-    height: 73vh;
+    height: 70vh;
   }
 
   .content {
@@ -243,7 +244,7 @@
   .btn_step {
     display: flex;
     position: absolute;
-    bottom: 24px;
+    bottom: 15px;
     left: 0;
     right: 0;
     height: 50px;
