@@ -232,7 +232,7 @@
   .contract_design--viewer,
   .contract_design--left,
   .contract_design--right {
-    height: 73vh;
+    height: 70vh;
   }
 
   .content {
@@ -243,7 +243,7 @@
   .btn_step {
     display: flex;
     position: absolute;
-    bottom: 24px;
+    bottom: 50px;
     left: 0;
     right: 0;
     height: 50px;
