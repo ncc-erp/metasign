@@ -20,6 +20,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static EC.Constants.Enum;
+using static iTextSharp.text.pdf.AcroFields;
 
 namespace EC.Manager.ContractTemplates
 {
@@ -126,16 +127,16 @@ namespace EC.Manager.ContractTemplates
                     sheet.Cells[startRow + 1, startCol + 1].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
                     startCol += 2;
                 }
-                foreach (var item in data.ContractTemplate.ListField)
+                for (var index = 0; index < data.ContractTemplate.ListField.Count; index++)
                 {
                     sheet.Cells[startRow, startCol, startRow + 1, startCol].Merge = true;
                     sheet.Cells[startRow, startCol, startRow + 1, startCol].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
-                    sheet.Cells[startRow, startCol].Value = item;
-                    if (data.ContractTemplate.ListField.IndexOf(item) == 0)
+                    sheet.Cells[startRow, startCol].Value = data.ContractTemplate.ListField[index];
+                    if (index == 0)
                     {
                         sheet.Names.Add("StartListField", sheet.Cells[startRow, startCol]);
                     }
-                    if (data.ContractTemplate.ListField.IndexOf(item) == data.ContractTemplate.ListField.Count() - 1)
+                    if (index == data.ContractTemplate.ListField.Count() - 1)
                     {
                         sheet.Names.Add("EndListField", sheet.Cells[startRow, startCol]);
                     }
@@ -384,120 +385,126 @@ namespace EC.Manager.ContractTemplates
 
         public async Task<ValidImportMassContractTemplateDto> ValidImportMassTemplate(UploadMassTemplateFileDto input)
         {
-            var templateData = await Get(input.TemplateId);
-            using (var fileStream = new MemoryStream())
+            try
             {
-                input.File.CopyTo(fileStream);
-                using (var package = new ExcelPackage(fileStream))
+                var templateData = await Get(input.TemplateId);
+                using (var fileStream = new MemoryStream())
                 {
-                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                    var sheet = package.Workbook.Worksheets[0];
-                    var rowCount = sheet.Dimension.End.Row;
-                    var colCount = sheet.Dimension.End.Column;
-                    if (rowCount <= 2)
+                    input.File.CopyTo(fileStream);
+                    using (var package = new ExcelPackage(fileStream))
                     {
-                        throw new UserFriendlyException("Data column is missed");
-                    }
-                    var result = new ValidImportMassContractTemplateDto()
-                    {
-                        FailList = new List<ResponseFailDto>(),
-                        SuccessList = new List<RowMassTemplateExportDto>()
-                    };
-                    for (int row = 3; row <= rowCount; row++)
-                    {
-                        var contractName = sheet.Cells[row, 2].GetCellValue<string>();
-                        if (contractName == null)
-                        { result.FailList.Add(new ResponseFailDto { Address = sheet.Cells[row, 2].Address, ReasonFail = "ContractNameIsEmpty" }); }
-                        var contractCode = sheet.Cells[row, 3].GetCellValue<string>();
-                        DateTime? expireTime = null;
-                        if (string.IsNullOrEmpty(sheet.Cells[row, 4].GetCellValue<string>()))
+                        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                        var sheet = package.Workbook.Worksheets[0];
+                        var rowCount = sheet.Dimension.End.Row;
+                        var colCount = sheet.Dimension.End.Column;
+                        if (rowCount <= 2)
                         {
+                            throw new UserFriendlyException("Data column is missed");
                         }
-                        if (!string.IsNullOrEmpty(sheet.Cells[row, 4].GetCellValue<string>()))
+                        var result = new ValidImportMassContractTemplateDto()
                         {
-                            expireTime = DateTime.TryParse(sheet.Cells[row, 4].GetCellValue<string>(), out var dt) ? dt : (DateTime?)null;
-                        }
-                        result.SuccessList.Add(new RowMassTemplateExportDto { Contract = new CreatECDto { Name = contractName, Code = contractCode, ExpriedTime = expireTime, } });
-                    }
-                    var startColSigner = sheet.Names["StartSigner"].EntireColumn.StartColumn;
-                    var endColSigner = sheet.Names["EndSigner"].EntireColumn.StartColumn;
-                    if ((endColSigner - startColSigner) / 2 + 1 != templateData.SignerSettings.Count)
-                    {
-                        throw new UserFriendlyException("Wrong Template!");
-                    }
-                    var checkMultiple = new List<CheckMultiple>();
-                    for (int col = 0; col <= endColSigner - startColSigner; col += 2)
-                    {
-                        var colCheck = new CheckMultiple() { NameEmails = new List<NameEmail>() };
+                            FailList = new List<ResponseFailDto>(),
+                            SuccessList = new List<RowMassTemplateExportDto>()
+                        };
                         for (int row = 3; row <= rowCount; row++)
                         {
-                            var name = sheet.Cells[row, col + startColSigner].GetCellValue<string>();
-                            var email = sheet.Cells[row, col + startColSigner + 1].GetCellValue<string>();
-                            colCheck.NameEmails.Add(new NameEmail
+                            var contractName = sheet.Cells[row, 2].GetCellValue<string>();
+                            if (contractName == null)
+                            { result.FailList.Add(new ResponseFailDto { Address = sheet.Cells[row, 2].Address, ReasonFail = "ContractNameIsEmpty" }); }
+                            var contractCode = sheet.Cells[row, 3].GetCellValue<string>();
+                            DateTime? expireTime = null;
+                            if (string.IsNullOrEmpty(sheet.Cells[row, 4].GetCellValue<string>()))
                             {
-                                Name = string.IsNullOrEmpty(name) ? "" : name.Trim(),
-                                Email = string.IsNullOrEmpty(email) ? "" : email.Trim(),
-                            });
+                            }
+                            if (!string.IsNullOrEmpty(sheet.Cells[row, 4].GetCellValue<string>()))
+                            {
+                                expireTime = DateTime.TryParse(sheet.Cells[row, 4].GetCellValue<string>(), out var dt) ? dt : (DateTime?)null;
+                            }
+                            result.SuccessList.Add(new RowMassTemplateExportDto { Contract = new CreatECDto { Name = contractName, Code = contractCode, ExpriedTime = expireTime, } });
                         }
-                        colCheck.MassGuid = colCheck.NameEmails.GroupBy(x => new { x.Name, x.Email }).Count() == 1 ? Guid.NewGuid() : null;
-                        checkMultiple.Add(colCheck);
-                    }
-                    for (int row = 3; row <= rowCount; row++)
-                    {
-                        var startSigner = startColSigner;
-                        var signers = new List<SignerMassDto>();
-                        result.SuccessList[row - 3].Signers = new List<SignerMassDto>();
-                        while (startSigner <= endColSigner)
+                        var startColSigner = sheet.Names["StartSigner"].EntireColumn.StartColumn;
+                        var endColSigner = sheet.Names["EndSigner"].EntireColumn.StartColumn;
+                        if ((endColSigner - startColSigner) / 2 + 1 != templateData.SignerSettings.Count)
                         {
-                            var signerName = sheet.Cells[row, startSigner].GetCellValue<string>();
-                            if (string.IsNullOrEmpty(signerName))
-                            {
-                                result.FailList.Add(new ResponseFailDto { Address = sheet.Cells[row, startSigner].Address, ReasonFail = "NameIsEmpty" });
-                            }
-                            var signerEmail = sheet.Cells[row, startSigner + 1].GetCellValue<string>();
-                            if (!CommonUtils.IsValidEmail(signerEmail))
-                            {
-                                result.FailList.Add(new ResponseFailDto { Address = sheet.Cells[row, startSigner + 1].Address, ReasonFail = "EmailIsNotValid" });
-                            }
-                            signers.Add(new SignerMassDto
-                            {
-                                Name = signerName,
-                                Email = signerEmail,
-                                Color = templateData.SignerSettings[(startSigner - startColSigner) / 2].Color,
-                                ContractRole = templateData.SignerSettings[(startSigner - startColSigner) / 2].ContractRole,
-                                ProcesOrder = templateData.SignerSettings[(startSigner - startColSigner) / 2].ProcesOrder,
-                                SignatureSettings = templateData.SignatureSettings.Where(x => x.ContractTemplateSignerId == templateData.SignerSettings[(startSigner - startColSigner) / 2].Id).ToList(),
-                                MassGuid = checkMultiple[(startSigner - startColSigner) / 2].MassGuid
-                            });
-                            startSigner += 2;
+                            throw new UserFriendlyException("Wrong Template!");
                         }
-                        result.SuccessList[row - 3].Signers.AddRange(signers);
-                    }
-                    var startColListField = sheet.Names["StartListField"].EntireColumn.StartColumn;
-                    var endColListField = sheet.Names["EndListField"].EntireColumn.StartColumn;
-                    if ((endColListField - startColListField) + 1 != templateData.ContractTemplate.ListField.Count)
-                    {
-                        throw new UserFriendlyException("Wrong Template!");
-                    }
-                    for (int row = 3; row <= rowCount; row++)
-                    {
-                        var startListField = startColListField;
-                        result.SuccessList[row - 3].ListFieldDto = new List<string>();
-                        var listField = new List<string>();
-                        while (startListField <= endColListField)
+                        var checkMultiple = new List<CheckMultiple>();
+                        for (int col = 0; col <= endColSigner - startColSigner; col += 2)
                         {
-                            var fieldValue = sheet.Cells[row, startListField].GetCellValue<string>();
-                            if (string.IsNullOrEmpty(fieldValue))
+                            var colCheck = new CheckMultiple() { NameEmails = new List<NameEmail>() };
+                            for (int row = 3; row <= rowCount; row++)
                             {
-                                result.FailList.Add(new ResponseFailDto { Address = sheet.Cells[row, startListField].Address, ReasonFail = "AutoFillFieldValueIsEmpty" });
+                                var name = sheet.Cells[row, col + startColSigner].GetCellValue<string>();
+                                var email = sheet.Cells[row, col + startColSigner + 1].GetCellValue<string>();
+                                colCheck.NameEmails.Add(new NameEmail
+                                {
+                                    Name = string.IsNullOrEmpty(name) ? "" : name.Trim(),
+                                    Email = string.IsNullOrEmpty(email) ? "" : email.Trim(),
+                                });
                             }
-                            startListField++;
-                            listField.Add(fieldValue);
+                            colCheck.MassGuid = colCheck.NameEmails.GroupBy(x => new { x.Name, x.Email }).Count() == 1 ? Guid.NewGuid() : null;
+                            checkMultiple.Add(colCheck);
                         }
-                        result.SuccessList[row - 3].ListFieldDto.AddRange(listField);
+                        for (int row = 3; row <= rowCount; row++)
+                        {
+                            var startSigner = startColSigner;
+                            var signers = new List<SignerMassDto>();
+                            result.SuccessList[row - 3].Signers = new List<SignerMassDto>();
+                            while (startSigner <= endColSigner)
+                            {
+                                var signerName = sheet.Cells[row, startSigner].GetCellValue<string>();
+                                if (string.IsNullOrEmpty(signerName))
+                                {
+                                    result.FailList.Add(new ResponseFailDto { Address = sheet.Cells[row, startSigner].Address, ReasonFail = "NameIsEmpty" });
+                                }
+                                var signerEmail = sheet.Cells[row, startSigner + 1].GetCellValue<string>();
+                                if (!CommonUtils.IsValidEmail(signerEmail))
+                                {
+                                    result.FailList.Add(new ResponseFailDto { Address = sheet.Cells[row, startSigner + 1].Address, ReasonFail = "EmailIsNotValid" });
+                                }
+                                signers.Add(new SignerMassDto
+                                {
+                                    Name = signerName,
+                                    Email = signerEmail,
+                                    Color = templateData.SignerSettings[(startSigner - startColSigner) / 2].Color,
+                                    ContractRole = templateData.SignerSettings[(startSigner - startColSigner) / 2].ContractRole,
+                                    ProcesOrder = templateData.SignerSettings[(startSigner - startColSigner) / 2].ProcesOrder,
+                                    SignatureSettings = templateData.SignatureSettings.Where(x => x.ContractTemplateSignerId == templateData.SignerSettings[(startSigner - startColSigner) / 2].Id).ToList(),
+                                    MassGuid = checkMultiple[(startSigner - startColSigner) / 2].MassGuid
+                                });
+                                startSigner += 2;
+                            }
+                            result.SuccessList[row - 3].Signers.AddRange(signers);
+                        }
+                        var startColListField = sheet.Names["StartListField"].EntireColumn.StartColumn;
+                        var endColListField = sheet.Names["EndListField"].EntireColumn.StartColumn;
+                        if ((endColListField - startColListField) + 1 != templateData.ContractTemplate.ListField.Count)
+                        {
+                            throw new UserFriendlyException("Wrong Template!");
+                        }
+                        for (int row = 3; row <= rowCount; row++)
+                        {
+                            var startListField = startColListField;
+                            result.SuccessList[row - 3].ListFieldDto = new List<string>();
+                            var listField = new List<string>();
+                            while (startListField <= endColListField)
+                            {
+                                var fieldValue = sheet.Cells[row, startListField].GetCellValue<string>();
+                                if (string.IsNullOrEmpty(fieldValue))
+                                {
+                                    result.FailList.Add(new ResponseFailDto { Address = sheet.Cells[row, startListField].Address, ReasonFail = "AutoFillFieldValueIsEmpty" });
+                                }
+                                startListField++;
+                                listField.Add(fieldValue);
+                            }
+                            result.SuccessList[row - 3].ListFieldDto.AddRange(listField);
+                        }
+                        return result;
                     }
-                    return result;
                 }
+            } catch (Exception ex)
+            {
+                throw new UserFriendlyException(ex.Message);
             }
         }
 

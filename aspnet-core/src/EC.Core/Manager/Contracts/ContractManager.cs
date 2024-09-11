@@ -1733,7 +1733,7 @@ namespace EC.Manager.Contracts
             Process process = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
-                FileName = "soffice",
+                FileName = libreOfficePath,
                 Arguments = command,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
