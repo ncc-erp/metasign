@@ -20,7 +20,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static EC.Constants.Enum;
-using static iTextSharp.text.pdf.AcroFields;
 
 namespace EC.Manager.ContractTemplates
 {
