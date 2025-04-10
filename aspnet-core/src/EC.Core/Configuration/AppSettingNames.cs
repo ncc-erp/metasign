@@ -16,5 +16,10 @@
         public const string AWSRegion = "App.AWSRegion";
         public const string AWSBucketName = "App.AWSBucketName";
         public const string AWSPrefix = "App.AWSPrefix";
+
+        public const string EnableLoginMezon = "App.EnableLoginMezon";
+        public const string EnableLoginGoogle = "App.EnableLoginGoogle";
+        public const string EnableNormalLogin = "App.EnableNormalLogin";
+        public const string EnableLoginMicrosoft = "App.EnableLoginMicrosoft";
     }
 }

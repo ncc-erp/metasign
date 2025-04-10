@@ -4,19 +4,28 @@ using Abp.Runtime.Session;
 using EC.Configuration.Dto;
 using EC.GoogleClientId.Dto;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 
 namespace EC.Configuration
 {
-    [AbpAuthorize]
+    
     public class ConfigurationAppService : ECAppServiceBase, IConfigurationAppService
     {
+        private readonly IConfiguration _configuration;
+
+        public ConfigurationAppService(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+        [AbpAuthorize]
         public async Task ChangeUiTheme(ChangeUiThemeInput input)
         {
             await SettingManager.ChangeSettingForUserAsync(AbpSession.ToUserIdentifier(), AppSettingNames.UiTheme, input.Theme);
         }
 
         [HttpGet]
+        [AbpAuthorize]
         public async Task<EmailConfigDto> GetEmailSetting()
         {
             var tenantId = AbpSession.TenantId;
@@ -45,6 +54,7 @@ namespace EC.Configuration
         }
 
         [HttpPost]
+        [AbpAuthorize]
         public async Task SetEmailSetting(EmailConfigDto input)
         {
             var tenantId = AbpSession.TenantId;
@@ -73,6 +83,7 @@ namespace EC.Configuration
         }
 
         [HttpGet]
+        [AbpAuthorize]
         public async Task<GetConfigurationDto> GetNotiExprireTime()
         {
             var tenantId = AbpSession.TenantId;
@@ -86,6 +97,7 @@ namespace EC.Configuration
         }
 
         [HttpPost]
+        [AbpAuthorize]
         public async Task SetNotiExprireTime(GetConfigurationDto input)
         {
             var tenantId = AbpSession.TenantId;
@@ -96,6 +108,7 @@ namespace EC.Configuration
         }
 
         [HttpGet]
+        [AbpAuthorize]
         public async Task<GoogleClientIdDto> GetGoogleClientId()
         {
             var tenantId = AbpSession.TenantId;
@@ -109,6 +122,7 @@ namespace EC.Configuration
         }
 
         [HttpGet]
+        [AbpAuthorize]
         public async Task<CurrentPdfSignerDto> GetCurrentPdfSignerName()
         {
             var tenantId = AbpSession.TenantId;
@@ -120,8 +134,31 @@ namespace EC.Configuration
                 CurrentPdfSigner = await SettingManager.GetSettingValueForTenantAsync(AppSettingNames.DefaultPDFSignerName, tenantId.Value)
             };
         }
+        [HttpGet]
+        public async Task<LoginSettingDto> GetLoginSetting()
+        {
+            return new LoginSettingDto
+            {
+                EnableNormalLogin = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.EnableNormalLogin)),
+                MezonClientId = _configuration.GetValue<string>("Oauth2Mezon:Client_Id"),
+                EnableLoginGoogle = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.EnableLoginGoogle)),
+                EnableLoginMezon = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.EnableLoginMezon)),
+                EnableLoginMicrosoft = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.EnableLoginMicrosoft))
 
+            };
+        }
+
+        [HttpPut]
+        [AbpAuthorize]
+        public async Task ChangeLoginSetting(LoginSettingDto loginSetting)
+        {
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.EnableNormalLogin, loginSetting.EnableNormalLogin.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.EnableLoginMezon, loginSetting.EnableLoginMezon.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.EnableLoginGoogle, loginSetting.EnableLoginGoogle.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.EnableLoginMicrosoft, loginSetting.EnableLoginMicrosoft.ToString());
+        }
         [HttpPost]
+        [AbpAuthorize]
         public async Task SetGoogleClientId(GoogleClientIdDto input)
         {
             var tenantId = AbpSession.TenantId;
@@ -136,6 +173,7 @@ namespace EC.Configuration
         }
 
         [HttpGet]
+        [AbpAuthorize]
         public async Task<IsEnableLoginByUsernameDto> GetIsEnableLoginByUsername()
         {
             var tenantId = AbpSession.TenantId;
@@ -149,6 +187,7 @@ namespace EC.Configuration
         }
 
         [HttpPost]
+        [AbpAuthorize]
         public async Task SetIsEnableLoginByUsername(IsEnableLoginByUsernameDto input)
         {
             var tenantId = AbpSession.TenantId;
@@ -161,6 +200,7 @@ namespace EC.Configuration
         }
 
         [HttpGet]
+        [AbpAuthorize]
         public async Task<AWSCredentialDto> GetAWSCredential()
         {
             var tenantId = AbpSession.TenantId;
@@ -182,6 +222,7 @@ namespace EC.Configuration
         }
 
         [HttpPost]
+        [AbpAuthorize]
         public async Task SetAWSCredential(AWSCredentialDto input)
         {
             var tenantId = AbpSession.TenantId;
@@ -204,6 +245,7 @@ namespace EC.Configuration
         }
 
         [HttpGet]
+        [AbpAuthorize]
         public async Task<MicrosoftClientIdDto> GetMicrosoftClientId()
         {
             var tenantId = AbpSession.TenantId;
@@ -217,6 +259,7 @@ namespace EC.Configuration
         }
 
         [HttpPost]
+        [AbpAuthorize]
         public async Task SetMicrosoftClientId(MicrosoftClientIdDto input)
         {
             var tenantId = AbpSession.TenantId;
@@ -231,6 +274,7 @@ namespace EC.Configuration
         }
 
         [HttpGet]
+        [AbpAuthorize]
         public async Task<SignServerUrlDto> GetSignServerUrlDto()
         {
             var tenantId = AbpSession.TenantId;
@@ -246,6 +290,7 @@ namespace EC.Configuration
         }
 
         [HttpPost]
+        [AbpAuthorize]
         public async Task SetSignServerUrlDto(SignServerUrlDto input)
         {
             var tenantId = AbpSession.TenantId;

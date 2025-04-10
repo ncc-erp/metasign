@@ -1,4 +1,70 @@
 <div class="page-wrapper pb-4">
+  <!-- Edit Type Login -->
+  <div class="wrapper not-full-width">
+    <header class="header position-relative">
+      <div class="label-header">Login Setting</div>
+      <button
+        mat-raised-button
+        (click)="handleClickEdit('LoginSetting')"
+        class="button button-edit"
+        *ngIf="isCheckedLoginSetting && isGrandEdit()"
+      >
+        <i class="fa-sharp fa-solid fa-pen-to-square"></i>
+        {{ "Edit" | ecTranslate }}
+      </button>
+    </header>
+    <div class="content card">
+      <form
+        id="formLoginSetting"
+        class="card-body"
+        [formGroup]="formLoginSetting"
+        (ngSubmit)="saveLoginSetting()"
+      >
+        <mat-checkbox
+          [checked]="isEnableNormalLogin"
+          (change)="checkEnableNormalLogin($event)"
+          formControlName="enableNormalLogin"
+          >Enable normal Login</mat-checkbox
+        ><br>
+        <mat-checkbox
+        [checked]="isEnableLoginMezon"
+        (change)="checkEnableLoginMezon($event)"
+        formControlName="enableLoginMezon"
+        >Login with Mezon</mat-checkbox
+      ><br>
+      <mat-checkbox
+      [checked]="isEnableLoginMicrosoft"
+      (change)="checkEnableLoginMicrosoft($event)"
+      formControlName="enableLoginMicrosoft"
+      >Login with Microsoft</mat-checkbox
+    ><br>
+      <mat-checkbox
+      [checked]="isEnableLoginGoogle"
+      (change)="checkEnableLoginGoogle($event)"
+      formControlName="enableLoginGoogle"
+      >Login with Google</mat-checkbox
+    >
+      </form>
+      <footer *ngIf="!isCheckedLoginSetting" class="footer">
+        <button
+        class="mr-2"
+          mat-raised-button
+          color="secondary"
+          (click)="cancelChange('Login Setting')"
+        >
+          {{ "Cancel" | ecTranslate }}
+        </button>
+        <button
+          form="formLoginSetting"
+          mat-raised-button
+          type="submit"
+          class="btn-primary button"
+        >
+          {{ "Save" | ecTranslate }}
+        </button>
+      </footer>
+    </div>
+  </div>
   <!-- Email Setting -->
   <div class="wrapper not-full-width">
     <header class="header position-relative">
@@ -89,13 +155,6 @@
             <input matInput formControlName="{{ formItem.formControlName }}" />
           </mat-form-field>
         </div>
-        <mat-checkbox
-          class="checkbox-enable-login-username pt-2"
-          formControlName="enableLoginByUsername"
-          [checked]="isEnableLoginByUsername"
-          (change)="checkEnableLoginByUsername($event)"
-          >{{ "IsAllowNormalLogin" | ecTranslate }}</mat-checkbox
-        >
       </form>
       <footer *ngIf="!isDisabledFormGoogleId" class="footer">
         <button

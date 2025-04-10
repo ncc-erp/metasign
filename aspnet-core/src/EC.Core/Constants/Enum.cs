@@ -102,7 +102,9 @@
         public enum LoginType
         {
             Google = 1,
-            Microsoft = 2
+            Microsoft = 2,
+            Mezon = 3,
+
         }
 
         public enum MassType
