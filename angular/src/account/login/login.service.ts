@@ -25,6 +25,13 @@ export class LoginService {
 
         error =>{ abp.message.error(error.error.error.message); console.log(error); });
 }
+authenticateMezon(mezonToken: string, finallyCallback?: () => void): void{
+  finallyCallback = finallyCallback || (() => {});
 
+  this._googleLoginService.mezonAuthenticate(mezonToken)
+      .subscribe((result: any) => {
+        this.authService.processAuthenticateResult(result.result)
+      });
+}
 
 }

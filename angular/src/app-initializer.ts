@@ -173,8 +173,18 @@ export class AppInitializer {
         );
 
         AppConsts.localeMappings = response.localeMappings;
-
+        this.getStartUpConfig(response.remoteServiceBaseUrl);
         callback();
       });
+  }
+  private getStartUpConfig(baseUrl: string) {
+    this._httpClient.get<any>(baseUrl + '/api/services/app/Configuration/GetLoginSetting').subscribe(rs => {
+
+      AppConsts.enableNormalLogin = rs.result.enableNormalLogin
+      AppConsts.mezonClientId = rs.result.mezonClientId
+      AppConsts.enableLoginMezon = rs.result.enableLoginMezon
+      AppConsts.enableLoginGoogle = rs.result.enableLoginGoogle
+      AppConsts.enableLoginMicrosoft = rs.result.enableLoginMicrosoft
+    })
   }
 }

@@ -2,6 +2,7 @@
 using EC.Configuration;
 using EC.WebService.DesktopApp;
 using EC.WebService.Goggle;
+using EC.WebService.Mezon;
 using EC.WebService.PDFConverter;
 using EC.WebService.SignServer;
 using Microsoft.Extensions.Configuration;
@@ -32,6 +33,7 @@ namespace EC.WebService
             {
                 option.BaseAddress = new Uri(_appConfiguration.GetValue<string>("PDFConverterWebService:BaseAddress"));
             });
+            services.AddHttpClient<MezonWebService>(option => { });
             return services;
         }
     }

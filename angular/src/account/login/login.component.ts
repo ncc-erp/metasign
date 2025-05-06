@@ -1,3 +1,4 @@
+import { ActivatedRoute, Router } from '@angular/router';
 import { Component, ElementRef, Injector } from '@angular/core';
 import { AbpSessionService } from 'abp-ng2-module';
 import { AppComponentBase } from '@shared/app-component-base';
@@ -10,7 +11,8 @@ import { BsModalService } from 'ngx-bootstrap/modal';
 import { GoogleLoginService } from './google-login.service';
 import { buttomType, loginApp } from '@shared/AppEnums';
 import { TenantChangeDialogComponent } from 'account/tenant/tenant-change-dialog/tenant-change-dialog.component';
-
+import { Oauth2Mezon } from './../../shared/AppConsts';
+import { AppConsts } from '@shared/AppConsts';
 @Component({
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
@@ -21,7 +23,10 @@ import { TenantChangeDialogComponent } from 'account/tenant/tenant-change-dialog
 })
 export class LoginComponent extends AppComponentBase {
   submitting = false;
-  isEnableLoginByUsername: boolean = false;
+  isEnableNormalLogin: boolean = AppConsts.enableNormalLogin;
+  isEnableLoginByGoogle: boolean = AppConsts.enableLoginGoogle;
+  isEnableLoginByMicrosoft: boolean = AppConsts.enableLoginMicrosoft;
+  isEnableLoginByMezon: boolean = AppConsts.enableLoginMezon;
   private buttonLoginGoogle;
   public tenancyName: string;
   istenancyName;
@@ -34,7 +39,7 @@ export class LoginComponent extends AppComponentBase {
     private _sessionService: AbpSessionService,
     private msalService: MsalService,
     private _modalService: BsModalService,
-    private el:ElementRef
+    private el:ElementRef,private route : ActivatedRoute
   ) {
     super(injector);
   }
@@ -47,7 +52,14 @@ export class LoginComponent extends AppComponentBase {
     }
     this.width = this.el.nativeElement.offsetWidth
     this.InitgoogleValidate()
-    this.appSession.isEnableLoginByUsername === 'false' ? this.isEnableLoginByUsername = false : this.isEnableLoginByUsername = true 
+ 
+
+    this.route.queryParams.subscribe(params => {
+      const authorizationCode = params['code'];
+      if(authorizationCode != null ){
+        this.loginService.authenticateMezon(authorizationCode);
+      }
+    })
   }
   handlelogout()
   {    
@@ -129,5 +141,17 @@ export class LoginComponent extends AppComponentBase {
   handleCredentialResponse(response: CredentialResponse) {
     localStorage.setItem("JWT", response.credential)
     this.loginService.authenticateGoogle(response.credential,loginApp.google)
+  }
+
+  signInWithMezon() {
+    const OAUTH2_AUTHORIZE_URL = Oauth2Mezon.OAUTH2_AUTHORIZE_URL;
+    const CLIENT_ID = AppConsts.mezonClientId;
+    const REDIRECT_URI = AppConsts.appBaseUrl+"/account/login";
+     const RESPONSE_TYPE = 'code';
+     const SCOPE = 'openid+offline';
+     const STATE = 'hkjadkjashdkjsah'; 
+
+    const authUrl = `${OAUTH2_AUTHORIZE_URL}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPE}&state=${STATE}`;
+		return (window.location.href = authUrl);
   }
 }

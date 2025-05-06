@@ -78,6 +78,11 @@ export class ConfigurationService extends BaseApiService {
   public setMicrosoftClientId(data): Observable<ApiResponseDto<any>> {
     return this.processPost('SetMicrosoftClientId', data)
   }
+public changeLoginSetting(data): Observable<ApiResponseDto<any>> {
+    return this.processPut('ChangeLoginSetting', data)
+  }
 
-
+  public getLoginSetting(): Observable<ApiResponseDto<any>> {
+    return this.processGet('GetLoginSetting')
+  }
 }
