@@ -150,3 +150,18 @@
     width: auto;
   }
 }
+.mezon-button {
+  height: 48px; 
+  max-width: 445px; 
+  margin: 10px;
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.logo {
+  width: 40px;
+  height: 40px;
+}
