@@ -10,6 +10,8 @@ import { AccountServiceProxy, IsTenantAvailableInput, IsTenantAvailableOutput, S
 import { AppComponentBase } from "@shared/app-component-base";
 import { concatMap } from "rxjs/operators";
 import { MsalService } from "@azure/msal-angular";
+import { Oauth2Mezon } from "@shared/AppConsts";
+import { AppConsts } from "@shared/AppConsts";
 
 @Component({
   selector: "app-email-valid",
@@ -266,4 +268,16 @@ export class EmailValidComponent extends AppComponentBase implements OnInit {
 
     return JSON.parse(jsonPayload);
   }
+
+    signInWithMezon() {
+      const OAUTH2_AUTHORIZE_URL = Oauth2Mezon.OAUTH2_AUTHORIZE_URL;
+      const CLIENT_ID = AppConsts.mezonClientId;
+      const REDIRECT_URI = "http://localhost:4200/account/login";
+       const RESPONSE_TYPE = 'code';
+       const SCOPE = 'openid+offline';
+       const STATE = 'hkjadkjashdkjsah'; 
+  
+      const authUrl = `${OAUTH2_AUTHORIZE_URL}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPE}&state=${STATE}`;
+      return (window.location.href = authUrl);
+    }
 }

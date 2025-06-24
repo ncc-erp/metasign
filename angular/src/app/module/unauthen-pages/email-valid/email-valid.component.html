@@ -78,6 +78,15 @@
         </ng-template>
 
         <div *ngIf="isdisplayLogin" class="btn_login--wapper">
+                          <button mat-flat-button
+                                  class="button w-100 button-login mezon-button"
+                                  type="button"
+                                  (click)="signInWithMezon()"
+                                  color="primary">
+          <img src="assets/img/mezon-logo.svg" alt="Mezon Logo" class="logo" />
+          Mezon
+       </button>
+
           <app-buttom-login [type]="buttomType.login" (click)="handleLoginGoogle()" text="Google">
             <svg
               width="20"
