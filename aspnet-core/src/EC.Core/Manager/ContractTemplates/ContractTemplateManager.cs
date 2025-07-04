@@ -126,16 +126,16 @@ namespace EC.Manager.ContractTemplates
                     sheet.Cells[startRow + 1, startCol + 1].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
                     startCol += 2;
                 }
-                foreach (var item in data.ContractTemplate.ListField)
+                for (var index = 0; index < data.ContractTemplate.ListField.Count; index++)
                 {
                     sheet.Cells[startRow, startCol, startRow + 1, startCol].Merge = true;
                     sheet.Cells[startRow, startCol, startRow + 1, startCol].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
-                    sheet.Cells[startRow, startCol].Value = item;
-                    if (data.ContractTemplate.ListField.IndexOf(item) == 0)
+                    sheet.Cells[startRow, startCol].Value = data.ContractTemplate.ListField[index];
+                    if (index == 0)
                     {
                         sheet.Names.Add("StartListField", sheet.Cells[startRow, startCol]);
                     }
-                    if (data.ContractTemplate.ListField.IndexOf(item) == data.ContractTemplate.ListField.Count() - 1)
+                    if (index == data.ContractTemplate.ListField.Count() - 1)
                     {
                         sheet.Names.Add("EndListField", sheet.Cells[startRow, startCol]);
                     }

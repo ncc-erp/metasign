@@ -19,6 +19,8 @@ using EC.Models.TokenAuth;
 using EC.MultiTenancy;
 using EC.Controllers.Dto;
 using static EC.Constants.Enum;
+using EC.WebService.Mezon;
+using EC.WebService.Mezon.Dto;
 
 namespace EC.Controllers
 {
@@ -32,6 +34,7 @@ namespace EC.Controllers
         private readonly IExternalAuthConfiguration _externalAuthConfiguration;
         private readonly IExternalAuthManager _externalAuthManager;
         private readonly UserRegistrationManager _userRegistrationManager;
+        private readonly MezonWebService _mezonWebService;
 
         public TokenAuthController(
             LogInManager logInManager,
@@ -40,6 +43,7 @@ namespace EC.Controllers
             TokenAuthConfiguration configuration,
             IExternalAuthConfiguration externalAuthConfiguration,
             IExternalAuthManager externalAuthManager,
+            MezonWebService mezonWebService,
             UserRegistrationManager userRegistrationManager)
         {
             _logInManager = logInManager;
@@ -49,6 +53,7 @@ namespace EC.Controllers
             _externalAuthConfiguration = externalAuthConfiguration;
             _externalAuthManager = externalAuthManager;
             _userRegistrationManager = userRegistrationManager;
+            _mezonWebService = mezonWebService;
         }
 
         [HttpPost]
@@ -70,6 +75,7 @@ namespace EC.Controllers
                 UserId = loginResult.User.Id
             };
         }
+
 
         [HttpGet]
         public List<ExternalLoginProviderInfoModel> GetExternalAuthenticationProviders()
@@ -260,6 +266,38 @@ namespace EC.Controllers
             };
         }
 
+        [HttpPost]
+        public async Task<AuthenticateResultModel> MezonAuthenticate(string codeOauth2Mezon)
+        {
+            var userInfo = await _mezonWebService.GetTokenForOauth2Mezon(codeOauth2Mezon);
+            var loginResult = await GetLoginResultMezonAsync(userInfo, GetTenancyNameOrNull());
+
+            Logger.Info("MezonAuthentication");
+
+            var accessToken = CreateAccessToken(CreateJwtClaims(loginResult.Identity));
+
+            return new AuthenticateResultModel
+            {
+                AccessToken = accessToken,
+                EncryptedAccessToken = GetEncryptedAccessToken(accessToken),
+                ExpireInSeconds = (int)_configuration.Expiration.TotalSeconds,
+                UserId = loginResult.User.Id
+            };
+        }
+
+        private async Task<AbpLoginResult<Tenant, User>> GetLoginResultMezonAsync(AuthOauth2Mezon input, string tenancyName)
+        {
+            Logger.Info("GetLoginResultMezonAsync");
+            var loginResult = await _logInManager.LoginAsyncNoPassWithMezon(input,tenancyName,false);
+            switch (loginResult.Result)
+            {
+                case AbpLoginResultType.Success:
+                    return loginResult;
+                default:
+                    throw _abpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(loginResult.Result, null, tenancyName);
+            }
+        }
+
         private async Task<AbpLoginResult<Tenant, User>> GetExternalLogin(string token, string tenancyName, string secretCode, LoginType type)
         {
             Logger.Info("GetLoginResultGoogleAsync");
@@ -273,5 +311,7 @@ namespace EC.Controllers
                     throw _abpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(loginResult.Result, null, tenancyName);
             }
         }
+
+
     }
 }

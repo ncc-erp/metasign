@@ -6,6 +6,7 @@ import { EFormConfiguration, EFormControlNameFormEmailSetting, EFormControlNameF
 import { ConfigurationService } from '../../../service/api/configuration.service'
 import { AppComponentBase } from 'shared/app-component-base';
 import { PERMISSIONS_CONSTANT } from '@app/permission/permission';
+import { AppConsts } from '@shared/AppConsts';
 
 @Component({
   selector: 'app-configuration',
@@ -14,6 +15,7 @@ import { PERMISSIONS_CONSTANT } from '@app/permission/permission';
 })
 export class ConfigurationComponent extends AppComponentBase implements OnInit {
   emailSetting = []
+  isCheckedLoginSetting: boolean = true
   isDisabledFormEmail: boolean = true
   isDisabledFormGoogleId: boolean = true
   isDisabledFormUserNormalLogin: boolean = true
@@ -23,7 +25,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   googleClientId: string = ''
   SignServerClientId
   isEnableLoginByUsername: boolean = false
-  isEnableNormalLogin: boolean = false
+  isEnableNormalLogin: boolean  ;
+  isEnableLoginGoogle: boolean ;
+  isEnableLoginMezon: boolean ;
+ isEnableLoginMicrosoft: boolean ;
   isDisabledRemiderExpriedTime: boolean = true
   isDisabledFormSignServer: boolean = true
   remiderExpriedTime: number
@@ -110,6 +115,12 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     },
   ]
 
+  formLoginSetting = this.fb.group({ 
+    enableNormalLogin: new FormControl({ value: false, disabled: true }, Validators.required),
+    enableLoginMezon: new FormControl({ value: false, disabled: true }, Validators.required),
+    enableLoginGoogle: new FormControl({ value: false, disabled: true }, Validators.required),
+    enableLoginMicrosoft: new FormControl({ value: false, disabled: true }, Validators.required),
+   })
   formEmailSetting = this.fb.group({
     enableSsl: new FormControl({ value: false, disabled: true }, Validators.required),
     host: new FormControl({ value: '', disabled: true }, Validators.required),
@@ -161,11 +172,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       this.googleClientId = res.result.googleClientId
       this.formGoogleClientIdSetting.patchValue({ googleClientId: this.googleClientId })
     })
-    this.configurationService.getNormalLogin().subscribe(res => {
-      this.isEnableNormalLogin = res.result.isEnableLoginByUsername.toLowerCase() === 'true' ? true : false
-      this.formUserEnableLoginSetting.patchValue({ enableNormalLogin: this.isEnableNormalLogin })
 
-    })
     this.configurationService.getSignServerUrlDto().subscribe(res => {
       this.SignServerClientId = res.result
       this.formSignServerClientIdSetting.patchValue({ AdminAPI: res.result.adminAPI, BaseAddress: res.result.baseAddress })
@@ -186,7 +193,13 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
 
       this.formAwsS3Credential.patchValue(value.result);
     })
-
+    
+    this.configurationService.getLoginSetting().subscribe(res => {
+     this.isEnableNormalLogin = res.result.enableNormalLogin;
+      this.isEnableLoginGoogle = res.result.enableLoginGoogle;
+      this.isEnableLoginMezon = res.result.enableLoginMezon;
+      this.isEnableLoginMicrosoft = res.result.enableLoginMicrosoft;
+    })
     this.configurationService.getMicrosoftClientId().subscribe(value => {
       this.microsoftClientId = value.result.microsoftClientId
       this.formMicrosoftClientIdSetting.patchValue({ microsoftClientId: this.microsoftClientId })
@@ -197,6 +210,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
 
   handleClickEdit(config) {
     switch (config) {
+      case EFormConfiguration.LoginSetting:
+        this.isCheckedLoginSetting = !this.isCheckedLoginSetting
+        this.isCheckedLoginSetting ? this.formLoginSetting.disable() : this.formLoginSetting.enable()
+        break;
       case EFormConfiguration.EmailSetting:
         this.isDisabledFormEmail = !this.isDisabledFormEmail
         this.isDisabledFormEmail ? this.formEmailSetting.disable() : this.formEmailSetting.enable()
@@ -249,6 +266,12 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.isCheckedEnableSsl = event.checked
   }
 
+  checkEnableLoginGoogle(event: MatCheckboxChange) {
+    this.isEnableLoginGoogle = event.checked
+  }
+  checkEnableLoginMezon(event: MatCheckboxChange) {
+    this.isEnableLoginMezon = event.checked
+  }
   checkUseDefaultCredentials(event: MatCheckboxChange) {
     this.isCheckedUseDefault = event.checked
   }
@@ -258,6 +281,23 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   }
   checkEnableNormalLogin(event: MatCheckboxChange) {
     this.isEnableNormalLogin = event.checked
+  }
+
+  checkEnableLoginMicrosoft(event: MatCheckboxChange) {
+    this.isEnableLoginMicrosoft = event.checked
+  }
+  saveLoginSetting() {
+    var input = {
+      enableNormalLogin: this.isEnableNormalLogin.toString(),
+      enableLoginGoogle: this.isEnableLoginGoogle.toString(),
+      enableLoginMezon: this.isEnableLoginMezon.toString(),
+      enableLoginMicrosoft: this.isEnableLoginMicrosoft.toString()
+        }
+        this.configurationService.changeLoginSetting(input).subscribe(res => {
+          abp.notify.success(this.ecTransform("Edit LoginSetting Successfully!"))
+        })
+    this.isCheckedLoginSetting = true
+    this.isCheckedLoginSetting ? this.formLoginSetting.disable() : this.formLoginSetting.enable();
   }
 
   saveChangeEmail(data: any) {
@@ -320,6 +360,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
 
   cancelChange(config) {
     switch (config) {
+      case EFormConfiguration.LoginSetting:
+        this.isCheckedLoginSetting = true
+        this.isCheckedLoginSetting ? this.formLoginSetting.disable() : this.formLoginSetting.enable()
+        break;
       case EFormConfiguration.EmailSetting:
         this.handleCheckbox(this.emailSetting)
         this.formEmailSetting.patchValue({ ...this.emailSetting, enableSsl: this.isCheckedEnableSsl, useDefaultCredentials: this.isCheckedUseDefault });
@@ -394,5 +438,15 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.success(`Generate thành công, api key của bạn là:<h5>${rs.result}</h5>`, "Success", { isHTML: true })
       this.getApiKey()
     })
+  }
+
+  getLoginSetting() {
+    this.configurationService.getLoginSetting().subscribe(res => {    
+      this.isEnableNormalLogin = res.result.enableNormalLogin.toLowerCase() === 'true' ? true : false
+      this.isEnableLoginGoogle = res.result.enableLoginGoogle.toLowerCase() === 'true' ? true : false
+      this.isEnableLoginMezon = res.result.enableLoginMezon.toLowerCase() === 'true' ? true : false
+      this.isEnableLoginMicrosoft = res.result.enableLoginMicrosoft.toLowerCase() === 'true' ? true : false
+    } )
+
   }
 }

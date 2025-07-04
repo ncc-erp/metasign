@@ -64,7 +64,7 @@
         </svg>
       </app-buttom-login>
 
-      <div *ngIf="isEnableLoginByUsername" class="d-flex flex-column w-100 mt-3">
+      <div *ngIf="isEnableNormalLogin" class="d-flex flex-column w-100 mt-3">
         <table style="width: 100%" class="position-relative">
           <tr class="text-center">
             <td style=""></td>
@@ -119,9 +119,18 @@
       <p *ngIf="!tenancyName" class="login_btn--text">
         {{ "orLoginInformation" | ecTranslate }}
       </p>
+      <button mat-flat-button
+      class="button w-100 button-login mezon-button"
+      type="button"
+      (click)="signInWithMezon()"
+      color="primary">
+          <img src="assets/img/mezon-logo.svg" alt="Mezon Logo" class="logo" />
+          Mezon
+       </button>
+
 
       <div class="login_btn--app">
-        <app-buttom-login class="btn_login" (click)="handleLoginGoogle()" [type]="buttomType.login" text="Google">
+        <app-buttom-login *ngIf="isEnableLoginByGoogle" class="btn_login" (click)="handleLoginGoogle()" [type]="buttomType.login" text="Google">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g clip-path="url(#clip0_1382_408)">
               <path
@@ -145,7 +154,7 @@
           </svg>
         </app-buttom-login>
 
-        <app-buttom-login class="btn_login" (click)="handleLoginMicrosoft()" [type]="buttomType.login" text="Microsoft">
+        <app-buttom-login *ngIf="isEnableLoginByMicrosoft" class="btn_login" (click)="handleLoginMicrosoft()" [type]="buttomType.login" text="Microsoft">
           <svg width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="11.4091" y="10.9091" width="9.09091" height="9.09091" fill="#FEBA08" />
             <rect x="0.5" y="10.9091" width="9.09091" height="9.09091" fill="#05A6F0" />

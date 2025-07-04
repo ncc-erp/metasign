@@ -6,10 +6,13 @@ export class AppConsts {
   static appBaseHref: string; // returns angular's base-href parameter value if used during the publish
   static DEFAULT_SIGNATURE_WIDTH = 100;
   static DEFAULT_SIGNATURE_HEIGHT = 100;
-
+  static mezonClientId: string;
   static DEFAULT_SIGNATURE_WIDTH_DIGITAL = 220;
   static DEFAULT_SIGNATURE_HEIGHT_DIGITAL = 155;
-
+  static enableLoginMezon: boolean;
+  static enableLoginGoogle: boolean
+  static enableNormalLogin: boolean;
+  static enableLoginMicrosoft: boolean;
   static DEFAULT_INPUT_WIDTH = 210;
   static DEFAULT_INPUT_HEIGHT = 36;
 
@@ -107,4 +110,8 @@ export class AppConsts {
       label: "Date",
     },
   ];
+}
+export const Oauth2Mezon = {
+    OAUTH2_AUTHORIZE_URL:"https://oauth2.mezon.ai/oauth2/auth",
+    REDIRECT_URI:AppConsts.appBaseUrl+"/account/login",
 }

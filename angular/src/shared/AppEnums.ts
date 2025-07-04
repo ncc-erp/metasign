@@ -161,6 +161,7 @@ export enum ELabelFormSignServerClientIdSetting {
 }
 
 export enum EFormConfiguration {
+  LoginSetting = 'LoginSetting',
   EmailSetting = 'EmailSetting',
   GoogleClientId = "GoogleClientId",
   RemiderContractTerm = 'RemiderContractTerm',
@@ -169,7 +170,6 @@ export enum EFormConfiguration {
   MicrosoftClientId = "MicrosoftClientId",
   UserNormalLogin='UserNormalLogin'
 }
-
 export enum EFormControlNameFormEmailSetting {
   EnableSsl = "enableSsl",
   Host = "host",

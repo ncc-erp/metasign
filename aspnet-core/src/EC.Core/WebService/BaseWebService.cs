@@ -29,6 +29,56 @@ namespace EC.WebService
             _logger = NullLogger.Instance;
         }
 
+        public void SetAuthorizationToken(string token)
+        {
+            if (!string.IsNullOrEmpty(token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
+        }
+
+        protected virtual async Task<T> PostFormUrlEncodedAsync<T>(string url, Dictionary<string, string> formData)
+        {
+            var content = new FormUrlEncodedContent(formData);
+            try
+            {
+                var response = await _httpClient.PostAsync(url, content);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<T>(responseContent);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"{url} error: {ex.Message}");
+            }
+            return default;
+        }
+
+        protected virtual async Task<T> PostAsync<T>(string url, object input)
+        {
+            var strInput = JsonConvert.SerializeObject(input);
+            var logInfo = $"Post: BaseAddress [{_httpClient.BaseAddress}], url: {url}, input: {strInput}";
+            var contentString = new StringContent(strInput, Encoding.UTF8, "application/json");
+
+            try
+            {
+                _logger.Info(logInfo);
+                var response = await _httpClient.PostAsync(url, contentString);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    _logger.Info($"{logInfo} response: {responseContent}");
+                    return JsonConvert.DeserializeObject<T>(responseContent);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"{logInfo} error: {ex.Message}");
+            }
+            return default;
+        }
         protected virtual async Task<T> GetAsync<T>(string url)
         {
             var fullUrl = $"{_httpClient.BaseAddress}{url}";
