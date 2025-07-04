@@ -2,6 +2,10 @@
   
 
 # Metasign
+
+## Support community
+https://mezon.ai/invite/1840698395413450752
+
 ## Overview
 Metasign is an e-contract solution to bring businesses and individuals a superior experience when engaging in contracts, and optimizing operation and management systems. 
 
