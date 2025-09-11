@@ -107,7 +107,7 @@ export class EditMailDialogComponent
     }
     this.dialogRef.close({
       ...this.mailInfo,
-      selectedEmailTemplateId: this.templateId,
+      selectedEmailTemplate: this.templateId,
     });
   }
 

@@ -6,7 +6,7 @@
       <mat-form-field appearance="outline" class="pr-3">
         <mat-label class="mt-0">{{ "EmailTemplate" | ecTranslate }}</mat-label>
         <mat-select
-          [(value)]="selectedEmailTemplateId"
+          [(value)]="selectedEmailTemplate"
           (selectionChange)="onSelectEmailTemplate($event)"
         >
           <mat-option

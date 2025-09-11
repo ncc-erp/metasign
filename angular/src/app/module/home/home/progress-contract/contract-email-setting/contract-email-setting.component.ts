@@ -39,7 +39,7 @@ export class ContractEmailSettingComponent
   private step: number = 0;
   public fileBase64: any;
   public contractInfo;
-  public selectedEmailTemplateId: number;
+  public selectedEmailTemplate: number;
   emailTemplateList: IEmailTemplate[] = [];
   nameFile: string;
   signers: ContractEmailDto[];
@@ -88,7 +88,7 @@ export class ContractEmailSettingComponent
       if (res && res.success === true) {
         this.emailTemplateList = res.result;
 
-        this.selectedEmailTemplateId = this.emailTemplateList[0]?.id;
+        this.selectedEmailTemplate = this.emailTemplateList[0]?.id;
         this.getMailContent();
       }
     });
@@ -104,7 +104,7 @@ export class ContractEmailSettingComponent
   }
 
   onSelectEmailTemplate(event: MatSelectChange) {
-    this.selectedEmailTemplateId = event.value;
+    this.selectedEmailTemplate = event.value;
     this.getMailContent();
   }
 
@@ -230,7 +230,7 @@ export class ContractEmailSettingComponent
 
   getMailContent() {
     this.contractService
-      .GetContractMailContent(this.contractId, this.selectedEmailTemplateId)
+      .GetContractMailContent(this.contractId, this.selectedEmailTemplate)
       .subscribe((rs) => {
         this.contractMailContent = rs.result;
         this.displayMailContent = this.sanitizer.bypassSecurityTrustHtml(
@@ -267,7 +267,6 @@ export class ContractEmailSettingComponent
           rs.bodyMessage
         );
         this.contractMailContent = rs;
-        this.selectedEmailTemplateId = rs.selectedEmailTemplateId;
       }
     });
   }

@@ -34,6 +34,7 @@ namespace EC.Manager.Contracts.Dto
     {
         public long Id { get; set; }
         public List<RowMassTemplateExportDto> RowData { get; set; }
+
         public long MailTemplateId { get; set; }
     }
 }
