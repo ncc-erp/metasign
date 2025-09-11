@@ -1,3 +1,5 @@
+import { IEmailTemplate } from "@app/module/home/home/progress-contract/contract-email-setting/interfaces/email-template-interface";
+
 export interface MailPreviewInfoDto {
     templateId: number,
     name: string
@@ -18,7 +20,8 @@ export interface EmailDto {
     cCs: string,
     ArrCCs: string[],
     description: string,
-    templateType: string
+    templateType: string,
+    language: string
 }
 export interface MailDialogData {
     mailInfo?: MailPreviewInfo,
@@ -45,12 +48,14 @@ export class MailPreviewInfo {
     tenantId?: number;
 }
 export interface EditEmailDialogData {
-    templateId?: number,
-    mailInfo?: MailPreviewInfo,
-    title?: string,
-    showDialogHeader?: boolean,
-    temporarySave?: boolean,
-    isEditTemplate?: boolean
+    templateId?: number;
+    mailInfo?: MailPreviewInfo;
+    title?: string;
+    showDialogHeader?: boolean;
+    temporarySave?: boolean;
+    isEditTemplate?: boolean;
+    emailTemplateList?: IEmailTemplate[];
+    contractId?: number;
 }
 export interface UpdateEmailTemplate {
     id: number;

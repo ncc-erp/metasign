@@ -4,19 +4,28 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { DomSanitizer } from "@angular/platform-browser";
 import { ContractService } from "@app/service/api/contract.service";
 import { contractStep } from "@shared/AppEnums";
-import { EditEmailDialogData, MailPreviewInfo, MailPreviewInfoDto } from "@app/service/model/admin/emailTemplate.dto";
+import {
+  EditEmailDialogData,
+  MailPreviewInfo,
+  MailPreviewInfoDto,
+} from "@app/service/model/admin/emailTemplate.dto";
 import { SetLocalStorageContract } from "@shared/helpers/FunctionsHelper";
 import { AppComponentBase } from "@shared/app-component-base";
 import { PERMISSIONS_CONSTANT } from "@app/permission/permission";
 import { MatDialog } from "@angular/material/dialog";
 import { EditMailDialogComponent } from "@app/module/admin/email-template/edit-mail-dialog/edit-mail-dialog.component";
 import { concatMap } from "rxjs/operators";
+import { IEmailTemplate } from "@app/module/home/home/progress-contract/contract-email-setting/interfaces/email-template-interface";
+import { filter as _filter } from "lodash-es";
+import { MatSelectChange } from "@node_modules/@angular/material/select";
+import { EmailTemplateService } from "@app/service/api/email-template.service";
 
 enum ContractRole {
   Signer = 1,
   reviewer = 2,
   Viewer = 3,
 }
+
 @Component({
   selector: "app-contract-email-setting",
   templateUrl: "./contract-email-setting.component.html",
@@ -24,16 +33,19 @@ enum ContractRole {
 })
 export class ContractEmailSettingComponent
   extends AppComponentBase
-  implements OnInit {
+  implements OnInit
+{
   private contractId: number = 0;
   private step: number = 0;
   public fileBase64: any;
   public contractInfo;
+  public selectedEmailTemplate: number;
+  emailTemplateList: IEmailTemplate[] = [];
   nameFile: string;
   signers: ContractEmailDto[];
   viewers: ContractEmailDto[];
   contractsLocalStorage!: [{ contractId: number; step: number }];
-  isOrderSign: boolean
+  isOrderSign: boolean;
   public mailInfo: MailPreviewInfo = {} as MailPreviewInfo;
   public contractMailContent = {} as MailPreviewInfoDto;
   public displayMailContent;
@@ -46,10 +58,11 @@ export class ContractEmailSettingComponent
   constructor(
     injector: Injector,
     private contractService: ContractService,
+    private emailTemplateService: EmailTemplateService,
     private sanitizer: DomSanitizer,
     private route: ActivatedRoute,
     private router: Router,
-    private dialog: MatDialog,
+    private dialog: MatDialog
   ) {
     super(injector);
     this.contractId = JSON.parse(
@@ -63,11 +76,22 @@ export class ContractEmailSettingComponent
   }
 
   ngOnInit(): void {
+    this.getAllEmailTemplate();
     this.getContractbyId();
-    this.getMailContent();
     this.arrangeSign = JSON.parse(
       localStorage.getItem("statusArrangeSignerContract")
     );
+  }
+
+  getAllEmailTemplate() {
+    this.emailTemplateService.getAllEmailTemplate().subscribe((res) => {
+      if (res && res.success === true) {
+        this.emailTemplateList = res.result;
+
+        this.selectedEmailTemplate = this.emailTemplateList[0]?.id;
+        this.getMailContent();
+      }
+    });
   }
 
   getContractbyId() {
@@ -77,6 +101,11 @@ export class ContractEmailSettingComponent
       );
       this.getContractMailInfo();
     });
+  }
+
+  onSelectEmailTemplate(event: MatSelectChange) {
+    this.selectedEmailTemplate = event.value;
+    this.getMailContent();
   }
 
   convertBase64ToImage(base64Data: string): string {
@@ -100,7 +129,9 @@ export class ContractEmailSettingComponent
           value.contractRole === ContractRole.reviewer
         );
       });
-      this.isOrderSign = !!this.signers.find(signer => signer.procesOrder !== 1)
+      this.isOrderSign = !!this.signers.find(
+        (signer) => signer.procesOrder !== 1
+      );
       if (this.isOrderSign) {
         this.signers.sort((a, b) => a.procesOrder - b.procesOrder);
       }
@@ -144,59 +175,70 @@ export class ContractEmailSettingComponent
   }
 
   onSendMail() {
-    this.contractService._currentQuickFilter.next(-1)
-    this.contractService._currentStatus.next(-1)
+    this.contractService._currentQuickFilter.next(-1);
+    this.contractService._currentStatus.next(-1);
     this.dbclick = true;
     if (this.dbclick) {
       let dto = {
         contractId: this.contractId,
         mailContent: this.contractMailContent,
       };
-      this.contractService.setNotiExpiredContract(this.contractId).pipe(
-        concatMap(() => {
-          return this.contractService.SendMailToViewer(dto)
-        }),
-        concatMap(() => {
-          return this.contractService.SendMail(dto)
-        })
-      ).subscribe((rs) => {
-        this.dbclick = false
-        SetLocalStorageContract(this.contractId, this.step, true);
-        if ((rs.result.isAssigned && rs.result.isOrder && rs.result.isfirstSigner) || (rs.result.isAssigned && !rs.result.isOrder)) {
-          this.clearStore();
-          const contract = {
-            settingId: rs.result.settingId,
-            contractId: rs.result.contractId,
-          };
-          const encode = encodeURIComponent(JSON.stringify(contract));
-          this.router.navigate(["app/send-mail-result"], {
-            queryParams: {
-              settingId: encode,
-              contractId: encode,
-            },
-          });
-        } else {
-          this.clearStore();
-          abp.message.success(this.ecTransform('SendEmailSuccessfully'));
-          this.router.navigate(["app/contracts"]);
-        }
-      }, () => {
-        this.dbclick = false;
-      });
+      this.contractService
+        .setNotiExpiredContract(this.contractId)
+        .pipe(
+          concatMap(() => {
+            return this.contractService.SendMailToViewer(dto);
+          }),
+          concatMap(() => {
+            return this.contractService.SendMail(dto);
+          })
+        )
+        .subscribe(
+          (rs) => {
+            this.dbclick = false;
+            SetLocalStorageContract(this.contractId, this.step, true);
+            if (
+              (rs.result.isAssigned &&
+                rs.result.isOrder &&
+                rs.result.isfirstSigner) ||
+              (rs.result.isAssigned && !rs.result.isOrder)
+            ) {
+              this.clearStore();
+              const contract = {
+                settingId: rs.result.settingId,
+                contractId: rs.result.contractId,
+              };
+              const encode = encodeURIComponent(JSON.stringify(contract));
+              this.router.navigate(["app/send-mail-result"], {
+                queryParams: {
+                  settingId: encode,
+                  contractId: encode,
+                },
+              });
+            } else {
+              this.clearStore();
+              abp.message.success(this.ecTransform("SendEmailSuccessfully"));
+              this.router.navigate(["app/contracts"]);
+            }
+          },
+          () => {
+            this.dbclick = false;
+          }
+        );
     }
   }
 
   getMailContent() {
     this.contractService
-      .GetContractMailContent(this.contractId)
+      .GetContractMailContent(this.contractId, this.selectedEmailTemplate)
       .subscribe((rs) => {
-
         this.contractMailContent = rs.result;
         this.displayMailContent = this.sanitizer.bypassSecurityTrustHtml(
           this.contractMailContent.bodyMessage
         );
       });
   }
+
   public isShowSendMailBtn() {
     return this.isGranted(PERMISSIONS_CONSTANT.ProcessStep_StepSendMail_Send);
   }
@@ -207,21 +249,25 @@ export class ContractEmailSettingComponent
       mailInfo: { ...this.contractMailContent },
       showDialogHeader: false,
       temporarySave: true,
-      isEditTemplate: false
-    }
+      isEditTemplate: false,
+      emailTemplateList: this.emailTemplateList,
+      contractId: this.contractId,
+    };
 
     const editDialog = this.dialog.open(EditMailDialogComponent, {
       data: dialogData,
-      width: '1600px',
-      height: '90%',
-      panelClass: 'email-dialog'
-    })
+      width: "1600px",
+      height: "90%",
+      panelClass: "email-dialog",
+    });
 
-    editDialog.afterClosed().subscribe(rs => {
+    editDialog.afterClosed().subscribe((rs) => {
       if (rs) {
-        this.displayMailContent = this.sanitizer.bypassSecurityTrustHtml(rs.bodyMessage);
-        this.contractMailContent = rs
+        this.displayMailContent = this.sanitizer.bypassSecurityTrustHtml(
+          rs.bodyMessage
+        );
+        this.contractMailContent = rs;
       }
-    })
+    });
   }
 }

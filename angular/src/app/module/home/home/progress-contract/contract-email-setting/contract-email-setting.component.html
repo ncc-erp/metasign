@@ -1,9 +1,25 @@
 <div class="setting_email px-5 mt-4">
   <div class="col-7">
-    <div class="row">
-      <h4 class="email_text--input pr-3">{{'MailContent' | ecTranslate}}</h4>
+    <div class="row align-items-center">
+      <h4 class="email_text--input pr-3">{{ "MailContent" | ecTranslate }}</h4>
+
+      <mat-form-field appearance="outline" class="pr-3">
+        <mat-label class="mt-0">{{ "EmailTemplate" | ecTranslate }}</mat-label>
+        <mat-select
+          [(value)]="selectedEmailTemplate"
+          (selectionChange)="onSelectEmailTemplate($event)"
+        >
+          <mat-option
+            *ngFor="let template of emailTemplateList"
+            [value]="template.id"
+            >{{ template.name }}</mat-option
+          >
+        </mat-select>
+      </mat-form-field>
+
       <button class="btn-edit-mail button" (click)="editMailTemplate()">
-        {{'EditV2' | ecTranslate}}<i class="pl-2 fa-regular fa-pen-to-square"></i>
+        {{ "EditV2" | ecTranslate
+        }}<i class="pl-2 fa-regular fa-pen-to-square"></i>
       </button>
     </div>
     <div
@@ -20,7 +36,7 @@
   </div>
   <div class="col-5 px-3">
     <div class="email_contract--file">
-      <h4 class="email_contract--title mb-3">{{'Contract' | ecTranslate}}</h4>
+      <h4 class="email_contract--title mb-3">{{ "Contract" | ecTranslate }}</h4>
       <p>
         <i class="fa-light fa-files"></i><i class="fa-regular fa-file"></i>
         <strong style="font-size: 18px">
@@ -29,9 +45,9 @@
       </p>
     </div>
     <div class="email_contract--Send">
-      <h4 class="contract_Send--title">{{'To' | ecTranslate}}</h4>
+      <h4 class="contract_Send--title">{{ "To" | ecTranslate }}</h4>
       <div class="email_contract--signer">
-        <h5 class="contract_signer--title">{{'Signers' | ecTranslate}}</h5>
+        <h5 class="contract_signer--title">{{ "Signers" | ecTranslate }}</h5>
         <div
           *ngFor="let signer of signers; let i = index"
           class="contract_signer--box"
@@ -77,7 +93,9 @@
       </div>
 
       <div class="email_contract--view" *ngIf="viewers?.length > 0">
-        <h5 class="contract_view--title">{{'CopyRecipients' | ecTranslate}}</h5>
+        <h5 class="contract_view--title">
+          {{ "CopyRecipients" | ecTranslate }}
+        </h5>
         <div *ngFor="let viewer of viewers" class="contract_view--box mt-2 p-3">
           <b class="contract_name">{{ viewer.name }}</b>
           <div class="contract_email">{{ viewer.email }}</div>
@@ -93,7 +111,7 @@
       color="secondary"
       mat-button
     >
-      {{'Back' | ecTranslate}}
+      {{ "Back" | ecTranslate }}
     </button>
     <button
       *ngIf="isShowSendMailBtn()"
@@ -102,7 +120,7 @@
       class="button"
       (click)="onSendMail()"
     >
-      {{'Send' | ecTranslate}}
+      {{ "Send" | ecTranslate }}
     </button>
   </div>
 </div>

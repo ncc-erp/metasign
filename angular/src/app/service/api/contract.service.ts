@@ -35,7 +35,6 @@ export class ContractService extends BaseApiService {
     return this.processPost("GetContractByFilterPaging", data);
   }
 
-
   public createContractFromTemplate(payload): Observable<ApiResponseDto<any>> {
     return this.processPost(`CreateContractFromTemplate`, payload);
   }
@@ -68,14 +67,22 @@ export class ContractService extends BaseApiService {
     return this.processPost(`SendMailToViewer`, data);
   }
 
-  public GetSignUrl(settingId: number, contractId: number): Observable<ApiResponseDto<any>> {
-    return this.processGet(`GetSignUrl?settingId=${settingId}&contractId=${contractId}`);
+  public GetSignUrl(
+    settingId: number,
+    contractId: number
+  ): Observable<ApiResponseDto<any>> {
+    return this.processGet(
+      `GetSignUrl?settingId=${settingId}&contractId=${contractId}`
+    );
   }
 
   public GetContractMailContent(
-    id: number
+    id: number,
+    mailTemplateId: number
   ): Observable<ApiResponseDto<MailPreviewInfoDto>> {
-    return this.processGet(`GetContractMailContent?contractId=${id}`);
+    return this.processGet(
+      `GetContractMailContent?contractId=${id}&mailTemplateId=${mailTemplateId}`
+    );
   }
 
   public GetContractStatistic(): Observable<
@@ -88,18 +95,15 @@ export class ContractService extends BaseApiService {
     return this.processPut(`SaveDraft?contractId=${contractId}`, {});
   }
 
-
   public ResendMailOne(data): Observable<ApiResponseDto<any>> {
-    return this.processPost('ResendMailOne', data);
+    return this.processPost("ResendMailOne", data);
   }
 
   public ResendMailAll(contractId: number): Observable<ApiResponseDto<number>> {
     return this.processPost(`ResendMailAll?contractId=${contractId}`, {});
   }
 
-  public CancelContract(
-    input: any
-  ): Observable<ApiResponseDto<number>> {
+  public CancelContract(input: any): Observable<ApiResponseDto<number>> {
     return this.processPost(`CancelContract`, input);
   }
 
@@ -107,41 +111,44 @@ export class ContractService extends BaseApiService {
     return this.processGet(`GetAllSigners`);
   }
   public ConvertFile(input): Observable<ApiResponseDto<any>> {
-    const formData = new FormData()
-    formData.append("File", input)
-    return this.processPost(`ConvertFile`, formData)
+    const formData = new FormData();
+    formData.append("File", input);
+    return this.processPost(`ConvertFile`, formData);
   }
 
   public downloadContact(id, input): Observable<ApiResponseDto<any>> {
-    return this.processGet(`DownloadContractAndCertificate?ContractId=${id}&DownloadType=${input}`)
+    return this.processGet(
+      `DownloadContractAndCertificate?ContractId=${id}&DownloadType=${input}`
+    );
   }
   public checkSignerDownload(id: number): Observable<ApiResponseDto<any>> {
-    return this.processGet(`CheckContractHasSigned?contractId=${id}`)
+    return this.processGet(`CheckContractHasSigned?contractId=${id}`);
   }
 
   public updateProcessOrder(id: number): Observable<ApiResponseDto<any>> {
-    return this.processPut(`UpdateProcessOrder?contractId=${id}`, {})
+    return this.processPut(`UpdateProcessOrder?contractId=${id}`, {});
   }
   public checkHasInput(id: number): Observable<ApiResponseDto<any>> {
-    return this.processGet(`CheckHasInput?contractId=${id}`)
+    return this.processGet(`CheckHasInput?contractId=${id}`);
   }
   public removeAllSignature(id: number): Observable<ApiResponseDto<any>> {
     return this.processDelete(`RemoveAllSignature?contractId=${id}`);
   }
-  public setNotiExpiredContract(id): Observable<ApiResponseDto<any>>{
-    return this.processPost(`SetNotiExpiredContract?contractId=${id}`,{})
+  public setNotiExpiredContract(id): Observable<ApiResponseDto<any>> {
+    return this.processPost(`SetNotiExpiredContract?contractId=${id}`, {});
   }
 
   public downLoadMassTemplate(templateId): Observable<ApiResponseDto<any>> {
-    return this.processPost(`DownLoadMassTemplate?templateId=${templateId}`)
+    return this.processPost(`DownLoadMassTemplate?templateId=${templateId}`);
   }
 
-  public validImportMassTemplate(Contracttemplate): Observable<ApiResponseDto<any>> {
-    return this.processPost(`ValidImportMassTemplate`,Contracttemplate)
+  public validImportMassTemplate(
+    Contracttemplate
+  ): Observable<ApiResponseDto<any>> {
+    return this.processPost(`ValidImportMassTemplate`, Contracttemplate);
   }
 
   public createMassContract(input): Observable<ApiResponseDto<any>> {
-    return this.processPost(`CreateMassContract`,input)
+    return this.processPost(`CreateMassContract`, input);
   }
-
 }

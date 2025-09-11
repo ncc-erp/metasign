@@ -33,17 +33,19 @@ namespace EC.Manager.Notifications.Email
         public IQueryable<EmailDto> IQGetEmailTemplate()
         {
             return WorkScope.GetAll<EmailTemplate>()
-                    .Select(s => new EmailDto
-                    {
-                        Id = s.Id,
-                        Name = s.Name,
-                        Description = s.Description,
-                        BodyMessage = s.BodyMessage.Replace("\"", "'"),
-                        Type = s.Type,
-                        CCs = s.CCs,
-                        SendToEmail = s.SendToEmail
-                    });
+                 .Select(s => new EmailDto
+                 {
+                     Id = s.Id,
+                     Name = s.Name,
+                     Description = s.Description,
+                     BodyMessage = s.BodyMessage.Replace("\"", "'"),
+                     Type = s.Type,
+                     CCs = s.CCs,
+                     SendToEmail = s.SendToEmail,
+                 });
         }
+
+
 
         public void SendMail(MailPreviewInfoDto input)
         {
@@ -94,8 +96,8 @@ namespace EC.Manager.Notifications.Email
             var bodyMessage = typeOfEntity.GetProperty("BodyMessage").GetValue(mailEntity) as string;
             var subject = typeOfDto.GetProperty("Subject").GetValue(data) != null ? typeOfDto.GetProperty("Subject").GetValue(data) as string : "";
 
-            var properties = typeOfDto.GetProperties().Where(s => s.Name != "SendToEmail" 
-            && s.Name != "SignUrl" 
+            var properties = typeOfDto.GetProperties().Where(s => s.Name != "SendToEmail"
+            && s.Name != "SignUrl"
             && s.Name != "AuthorEmail"
             && s.Name != "ContractCode").Select(s => s.Name).ToArray();
             foreach (var property in properties)
@@ -209,9 +211,9 @@ namespace EC.Manager.Notifications.Email
             return input;
         }
 
-        public MailPreviewInfoDto GetEmailContentById(MailFuncEnum mailType, long id)
+        public MailPreviewInfoDto GetEmailContentById(MailFuncEnum mailType, long id, long mailTemplateId)
         {
-            var template = WorkScope.GetAll<EmailTemplate>().Where(x => x.Type == mailType).FirstOrDefault();
+            var template = WorkScope.GetAll<EmailTemplate>().Where(x => x.Id == mailTemplateId).FirstOrDefault();
 
             var data = EmailDispatchData(mailType, id);
 
