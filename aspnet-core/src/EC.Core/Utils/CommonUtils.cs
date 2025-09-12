@@ -121,10 +121,6 @@ namespace EC.Utils
         {
             var expireTimeTag = content.ExpireTime.HasValue ? content.ExpireTime.Value.ToString("dd/MM/yyyy") : "";
 
-            //var lookupContractTag = content.Language.ToLower() == "en"
-            //    ? "<h3>Click <a href=\"{content.LookupUrl}\">here</a> to lookup contract.</h3>"
-            //    : "<h3>Nhấn vào <a href=\"{content.LookupUrl}\">đây</a> để tra cứu hợp đồng.</h3>";
-
             var newString = body.Replace("{{SendToEmail}}", $" {content.SendToName} ({content.SendToEmail}) ")
                 .Replace("{{SignUrl}}", content.SignUrl)
                 .Replace("{{AuthorEmail}}", $" {content.AuthorName} ({content.AuthorEmail}) ")

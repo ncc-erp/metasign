@@ -1444,7 +1444,6 @@ namespace EC.Manager.Contracts
               .Select(x =>
               {
                   var mailTemplate = SetContractMailTemplate(x, baseUrl);
-                  //mailTemplate.Language = template.Language.ToString(); // Set the language here
                   return new ResultTemplateEmail<ContractMailTemplateDto> { Result = mailTemplate };
               })
               .ToList();
@@ -1560,7 +1559,6 @@ namespace EC.Manager.Contracts
                 List<ResultTemplateEmail<ContractMailTemplateDto>> maiContents = viewers.Select(x =>
                 {
                     var mailTemplate = SetContractMailTemplate(x, baseUrl);
-                    //mailTemplate.Language = template.Language;
                     return new ResultTemplateEmail<ContractMailTemplateDto> { Result = mailTemplate };
                 }).ToList();
 

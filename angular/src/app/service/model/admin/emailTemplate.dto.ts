@@ -21,7 +21,6 @@ export interface EmailDto {
     ArrCCs: string[],
     description: string,
     templateType: string,
-    language: string
 }
 export interface MailDialogData {
     mailInfo?: MailPreviewInfo,
