@@ -125,7 +125,7 @@ namespace EC.Utils
                 .Replace("{{SignUrl}}", content.SignUrl)
                 .Replace("{{AuthorEmail}}", $" {content.AuthorName} ({content.AuthorEmail}) ")
                 .Replace("{{ContractCode}}</h3>", $"{content.ContractCode}</h3>")
-                .Replace("{{LookUpContractUrl}}", content.LookupUrl)
+                .Replace("{{LookUpContactUrl}}", content.LookupUrl)
                 .Replace("{{ExpireTimeTag}}", $"{expireTimeTag}<h3>ID: {content.ContractGuid}</h3>");
 
             return newString;
