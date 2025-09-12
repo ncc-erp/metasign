@@ -24,7 +24,7 @@ namespace EC.Configuration
                 new SettingDefinition(AppSettingNames.SignServerAdminAPI, "", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.EnableLoginGoogle, "false", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.EnableLoginMezon, "true", scopes:SettingScopes.Application| SettingScopes.Tenant),
-                new SettingDefinition(AppSettingNames.EnableNormalLogin, "true", scopes:SettingScopes.Application| SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.EnableNormalLogin, "false", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.EnableLoginMicrosoft, "false", scopes:SettingScopes.Application| SettingScopes.Tenant)
             };
         }
