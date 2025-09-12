@@ -234,12 +234,27 @@ namespace EC.Manager.Notifications.Email
                if (!mails.Contains(e))
                {
                    var isSeedMailExist = DictionaryHelper.SeedMailDic.ContainsKey(e);
+
+                   //Vietnamese template
                    mailTemplates.Add(
                        new EmailTemplate
                        {
                            Subject = isSeedMailExist ? DictionaryHelper.SeedMailDic[e].Subject : string.Empty,
                            Name = isSeedMailExist ? DictionaryHelper.SeedMailDic[e].Name : string.Empty,
                            BodyMessage = TemplateHelper.ContentEmailTemplate(e),
+                           Description = isSeedMailExist ? DictionaryHelper.SeedMailDic[e].Description : string.Empty,
+                           Type = e,
+                           TenantId = tenantId
+                       }
+                   );
+
+                   //English template   
+                   mailTemplates.Add(
+                       new EmailTemplate
+                       {
+                           Subject = isSeedMailExist ? DictionaryHelper.SeedMailDic[e].Subject : string.Empty,
+                           Name = isSeedMailExist ? DictionaryHelper.SeedMailDic[e].Name + " - EN" : string.Empty,
+                           BodyMessage = TemplateHelper.ContentEmailEnglishTemplate(e),
                            Description = isSeedMailExist ? DictionaryHelper.SeedMailDic[e].Description : string.Empty,
                            Type = e,
                            TenantId = tenantId
