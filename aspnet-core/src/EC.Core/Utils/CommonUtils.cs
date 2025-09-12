@@ -119,7 +119,7 @@ namespace EC.Utils
 
         public static string ReplaceBodyMessage(string body, ContractMailTemplateDto content)
         {
-            var expireTimeTag = content.ExpireTime.HasValue ? $"<h3>Thời hạn ký: {content.ExpireTime.Value.ToString("dd/MM/yyyy")}</h3>" : "";
+            var expireTimeTag = content.ExpireTime.HasValue ? content.ExpireTime.Value.ToString("dd/MM/yyyy") : "";
 
             //var lookupContractTag = content.Language.ToLower() == "en"
             //    ? "<h3>Click <a href=\"{content.LookupUrl}\">here</a> to lookup contract.</h3>"
@@ -128,8 +128,10 @@ namespace EC.Utils
             var newString = body.Replace("{{SendToEmail}}", $" {content.SendToName} ({content.SendToEmail}) ")
                 .Replace("{{SignUrl}}", content.SignUrl)
                 .Replace("{{AuthorEmail}}", $" {content.AuthorName} ({content.AuthorEmail}) ")
-                .Replace("{{ContractCode}}</h3>", $"{content.ContractCode}</h3>{expireTimeTag}<h3>ID: {content.ContractGuid}</h3>")
-                .Replace("{{LookUpContactUrl}}", content.LookupUrl);
+                .Replace("{{ContractCode}}</h3>", $"{content.ContractCode}</h3>")
+                .Replace("{{LookUpContactUrl}}", content.LookupUrl)
+                .Replace("{{ExpireTimeTag}}", $"{expireTimeTag}<h3>ID: {content.ContractGuid}</h3>");
+
             return newString;
         }
     }
