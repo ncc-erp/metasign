@@ -66,6 +66,7 @@ export interface SignatureSettings {
   signatureTypeName?: string;
   heightPage: number;
   loading?: boolean;
+  isShowSignDate?: boolean;
 }
 
 export interface FillInputDto {

@@ -18,7 +18,7 @@ export interface SignDto {
     width?:number,
     x?:number,
     y?:number
-
+    isShowSignDate?:boolean
 }
 
 

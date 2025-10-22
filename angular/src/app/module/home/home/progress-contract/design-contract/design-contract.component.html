@@ -343,6 +343,19 @@
             </div>
           </div>
         </div>
+
+        <!-- Checkbox show/hide sign date for usbToken (signatureType = 2 = digital) -->
+        <div
+          *ngIf="currentSigner.signatureType === signatureType.Digital"
+          class="mt-3 flex d-flex align-items-center justify-content-between"
+        >
+          <p class="flex-1 mb-0 mr-3">{{ "showSignDate" | ecTranslate }}</p>
+          <mat-slide-toggle
+            [checked]="currentSigner?.isShowSignDate"
+            (change)="onShowSignDateChange($event.checked)"
+            
+          ></mat-slide-toggle>
+        </div>
       </div>
     </div>
   </div>

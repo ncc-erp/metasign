@@ -25,6 +25,7 @@ namespace EC.Manager.ContractTemplateSettings.Dto
         public string FontFamily { get; set; }
         public string FontColor { get; set; }
         public string ValueInput { get; set; }
+        public bool IsShowSignDate { get; set; }
     }
 
     public class UpdateContractTemplateSettingDto
@@ -42,7 +43,7 @@ namespace EC.Manager.ContractTemplateSettings.Dto
         public string FontFamily { get; set; }
         public string FontColor { get; set; }
         public string ValueInput { get; set; }
-
+        public bool IsShowSignDate { get; set; }
     }
 
     public class GetContractTemplateSettingDto
@@ -63,7 +64,7 @@ namespace EC.Manager.ContractTemplateSettings.Dto
         public string SignerEmail { get; set; }
         public string Color { get; set; }
         public string ValueInput { get; set; }
-
+        public bool IsShowSignDate { get; set; }
     }
 
     public class GetAllSignerLocationDto

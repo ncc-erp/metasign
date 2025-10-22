@@ -59,6 +59,7 @@ namespace EC.Manager.ContractTemplateSettings
             item.Page = input.Page;
             item.SignatureType = input.SignatureType;
             item.ValueInput = input.ValueInput;
+            item.IsShowSignDate = input.IsShowSignDate;
             bool isInput = input.SignatureType != SignatureTypeSetting.Electronic
                 && input.SignatureType != SignatureTypeSetting.Digital
                 && input.SignatureType != SignatureTypeSetting.Acronym
@@ -228,6 +229,7 @@ namespace EC.Manager.ContractTemplateSettings
                     Page = x.Page,
                     SignatureType = x.SignatureType,
                     ValueInput = x.ValueInput,
+                    IsShowSignDate = x.IsShowSignDate
                 }).FirstOrDefaultAsync();
         }
 
@@ -269,6 +271,7 @@ namespace EC.Manager.ContractTemplateSettings
                         SignatureType = x.SignatureType,
                         SignerName = x.ContractTemplateSigner.SignerName,
                         SignerEmail = x.ContractTemplateSigner.SignerEmail
+
                     }
                 }).GroupBy(x => x.Signer).AsEnumerable()
                 .Select(x => new GetAllSignerLocationDto

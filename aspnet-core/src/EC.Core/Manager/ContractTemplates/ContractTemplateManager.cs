@@ -217,7 +217,9 @@ namespace EC.Manager.ContractTemplates
                         SignerEmail = x.ContractTemplateSigner.SignerEmail,
                         SignerName = x.ContractTemplateSigner.SignerName,
                         Color = x.ContractTemplateSigner.Color,
-                        ValueInput = x.ValueInput
+                        ValueInput = x.ValueInput,
+                        IsShowSignDate = x.IsShowSignDate
+
                     }).ToList();
                 var signers = WorkScope.GetAll<ContractTemplateSigner>()
                     .Where(x => x.ContractTemplateId == id)
