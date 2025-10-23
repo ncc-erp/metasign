@@ -33,5 +33,6 @@ namespace EC.Manager.Contracts.Dto
         public string StatusName => Enum.GetName(typeof(ContractStatus), Status);
         public long? ContractTemplateId { get; set; }
         public Guid? ContractGuid { get; set; }
+        public long? EmailTemplateId { get; set; }
     }
 }

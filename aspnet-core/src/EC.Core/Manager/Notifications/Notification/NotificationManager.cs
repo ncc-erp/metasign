@@ -8,6 +8,7 @@ using EC.Manager.Notifications.Email.Dto;
 using EC.MultiTenancy;
 using EC.Utils;
 using HRMv2.NccCore;
+using iTextSharp.text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -42,9 +43,14 @@ namespace EC.Manager.Notifications.Notification
             {
                 tenantName = _tenantManager.GetById(AbpSession.TenantId.Value).TenancyName;
             }
-            var emailTemplate = _emailManager.GetEmailTemplateDto(MailFuncEnum.Signing);
+
+            var emailTemplate = await GetEmailTemplateByContractId(contractId);
 
             var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
+
+            var emailMessageText = emailTemplate.Name.ToLower().Contains("en")
+                ? $"Cancel contract at: {DateAt.ToString("HH:mm dd/MM/yyyy")} by {author}"
+                : $"Huỷ tài liệu lúc: {DateAt.ToString("HH:mm dd/MM/yyyy")} bởi {author}";
 
             var contractSetting = await WorkScope.GetAll<ContractSetting>()
                 .Where(x => x.ContractId == contractId && x.IsSendMail)
@@ -54,12 +60,12 @@ namespace EC.Manager.Notifications.Notification
                     ExpireTime = x.Contract.ExpriredTime,
                     ContractName = x.Contract.Name,
                     SendToEmail = x.SignerEmail,
-                    Subject = $"[Huỷ tài liệu] {x.Contract.Name}",
+                    Subject = emailTemplate.Name.ToLower(),
                     ContractCode = x.Contract.Code,
                     AuthorEmail = x.Contract.User.EmailAddress,
                     SendToName = x.SignerName,
                     AuthorName = x.Contract.User.FullName,
-                    Message = $"Huỷ tài liệu lúc: {DateAt.ToString("HH:mm dd/MM/yyyy")} bởi {author}",
+                    Message = emailMessageText,
                     SignUrl = $"{baseUrl}app/signging/email-valid?settingId={x.Id}&contractId={x.ContractId}&tenantName={tenantName}",
                     LookupUrl = $"{baseUrl}app/email-login"
                 }).ToListAsync();
@@ -82,8 +88,19 @@ namespace EC.Manager.Notifications.Notification
             {
                 tenantName = _tenantManager.GetById(AbpSession.TenantId.Value).TenancyName;
             }
-            var emailTemplate = _emailManager.GetEmailTemplateDto(MailFuncEnum.Signing);
+
+            var emailTemplate = await GetEmailTemplateByContractId(contractId);
+
             var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
+
+            var emailSubJectText = emailTemplate.Name.ToLower().Contains("en")
+               ? $"[Completed] {emailTemplate.Name.Split(" - ")[0]}"
+               : $"[Hoàn thành] {emailTemplate.Name.Split(" - ")[0]}";
+
+            var emailMessageText = emailTemplate.Name.ToLower().Contains("en")
+               ? $"Contract completed: {emailTemplate.Name.Split(" - ")[0]}"
+               : $"Hoàn thành tài liệu: {emailTemplate.Name.Split(" - ")[0]}"; 
+
             var contractSetting = await WorkScope.GetAll<ContractSetting>()
                 .Where(x => x.ContractId == contractId)
                 .Select(x => new ContractMailTemplateDto
@@ -92,8 +109,8 @@ namespace EC.Manager.Notifications.Notification
                     ExpireTime = x.Contract.ExpriredTime,
                     ContractName = x.Contract.Name,
                     SendToEmail = x.SignerEmail,
-                    Subject = $"[Hoàn thành] {x.Contract.Name}",
-                    Message = $"Hoàn thành tài liệu {x.Contract.Name}",
+                    Subject = emailSubJectText,
+                    Message = emailMessageText,
                     ContractCode = x.Contract.Code,
                     AuthorEmail = x.Contract.User.EmailAddress,
                     SendToName = x.SignerName,
@@ -120,9 +137,18 @@ namespace EC.Manager.Notifications.Notification
             {
                 tenantName = _tenantManager.GetById(AbpSession.TenantId.Value).TenancyName;
             }
-            var emailTemplate = _emailManager.GetEmailTemplateDto(MailFuncEnum.Signing);
+
+            var emailTemplate = await GetEmailTemplateByContractId(settings.ContractId);
 
             var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
+
+            var emailSubJectText = emailTemplate.Name.ToLower().Contains("en")
+               ? $"[Canceled Contract] {emailTemplate.Name.Split(" - ")[0]}"
+               : $"[Huỷ tài liệu] {emailTemplate.Name.Split(" - ")[0]}";
+
+            var emailMessageText = emailTemplate.Name.ToLower().Contains("en")
+               ? $"Contract cancelled at: {history.TimeAt.ToString("HH:mm dd/MM/yyyy")} by {history.AuthorEmail}"
+               : $"Huỷ tài liệu lúc: {history.TimeAt.ToString("HH:mm dd/MM/yyyy")} bởi {history.AuthorEmail}";
 
             var contractSetting = allSignerHasSentMail
                 .Select(x => new ContractMailTemplateDto
@@ -131,12 +157,12 @@ namespace EC.Manager.Notifications.Notification
                     ExpireTime = x.Contract.ExpriredTime,
                     ContractName = x.Contract.Name,
                     SendToEmail = x.SignerEmail,
-                    Subject = $"[Huỷ tài liệu] {x.Contract.Name}",
+                    Subject = emailSubJectText,
                     ContractCode = x.Contract.Code,
                     AuthorEmail = history.AuthorEmail,
                     SendToName = x.SignerName,
                     AuthorName = x.Contract.User.FullName,
-                    Message = $"Huỷ tài liệu lúc: {history.TimeAt.ToString("HH:mm dd/MM/yyyy")} bởi {history.AuthorEmail}",
+                    Message = emailMessageText,
                     SignUrl = $"{baseUrl}app/signging/email-valid?settingId={x.Id}&contractId={x.ContractId}&tenantName={tenantName}",
                     LookupUrl = $"{baseUrl}app/email-login"
                 }).ToList();
@@ -183,6 +209,17 @@ namespace EC.Manager.Notifications.Notification
             MailPreviewInfoDto mailInput = _emailManager.GenerateEmailContent(ownerMailInfo, emailTemplate);
             mailInput.BodyMessage = CommonUtils.ReplaceBodyMessage(mailInput.BodyMessage, ownerMailInfo);
             _backgroundJobManager.Enqueue<SendMail, MailPreviewInfoDto>(mailInput, BackgroundJobPriority.High, TimeSpan.FromSeconds(ECConsts.DELAY_SEND_MAIL_SECOND));
+        }
+
+        private async Task<EmailTemplateDto> GetEmailTemplateByContractId(long contractId)
+        {
+            var emailTemplateId = await WorkScope.GetAll<Contract>()
+                .Where(c => c.Id == contractId)
+                .Select(c => c.EmailTemplateId)
+                .FirstOrDefaultAsync();
+
+
+            return _emailManager.GetEmailTemplateDto(MailFuncEnum.Signing, (long)emailTemplateId);
         }
 
         public async Task RemoveOldJob(long contractId)
