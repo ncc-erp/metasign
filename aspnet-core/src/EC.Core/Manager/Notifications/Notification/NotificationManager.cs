@@ -48,6 +48,10 @@ namespace EC.Manager.Notifications.Notification
 
             var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
 
+            var emailSubjectText = emailTemplate.Name.ToLower().Contains("en")
+                ? "[Canceled Contract]"
+                : "[Huỷ tài liệu]";
+
             var emailMessageText = emailTemplate.Name.ToLower().Contains("en")
                 ? $"Cancel contract at: {DateAt.ToString("HH:mm dd/MM/yyyy")} by {author}"
                 : $"Huỷ tài liệu lúc: {DateAt.ToString("HH:mm dd/MM/yyyy")} bởi {author}";
@@ -60,7 +64,7 @@ namespace EC.Manager.Notifications.Notification
                     ExpireTime = x.Contract.ExpriredTime,
                     ContractName = x.Contract.Name,
                     SendToEmail = x.SignerEmail,
-                    Subject = emailTemplate.Name.ToLower(),
+                    Subject = $"{emailSubjectText} {x.Contract.Name}",
                     ContractCode = x.Contract.Code,
                     AuthorEmail = x.Contract.User.EmailAddress,
                     SendToName = x.SignerName,
@@ -94,12 +98,12 @@ namespace EC.Manager.Notifications.Notification
             var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
 
             var emailSubJectText = emailTemplate.Name.ToLower().Contains("en")
-               ? $"[Completed] {emailTemplate.Name.Split(" - ")[0]}"
-               : $"[Hoàn thành] {emailTemplate.Name.Split(" - ")[0]}";
+                   ? $"[Completed]"
+                   : $"[Hoàn thành]";
 
             var emailMessageText = emailTemplate.Name.ToLower().Contains("en")
-               ? $"Contract completed: {emailTemplate.Name.Split(" - ")[0]}"
-               : $"Hoàn thành tài liệu: {emailTemplate.Name.Split(" - ")[0]}"; 
+               ? $"Contract completed"
+               : $"Hoàn thành tài liệu"; 
 
             var contractSetting = await WorkScope.GetAll<ContractSetting>()
                 .Where(x => x.ContractId == contractId)
@@ -109,8 +113,8 @@ namespace EC.Manager.Notifications.Notification
                     ExpireTime = x.Contract.ExpriredTime,
                     ContractName = x.Contract.Name,
                     SendToEmail = x.SignerEmail,
-                    Subject = emailSubJectText,
-                    Message = emailMessageText,
+                    Subject = $"{emailSubJectText} {x.Contract.Name}",
+                    Message = $"{emailMessageText} {x.Contract.Name}",
                     ContractCode = x.Contract.Code,
                     AuthorEmail = x.Contract.User.EmailAddress,
                     SendToName = x.SignerName,
@@ -143,8 +147,8 @@ namespace EC.Manager.Notifications.Notification
             var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
 
             var emailSubJectText = emailTemplate.Name.ToLower().Contains("en")
-               ? $"[Canceled Contract] {emailTemplate.Name.Split(" - ")[0]}"
-               : $"[Huỷ tài liệu] {emailTemplate.Name.Split(" - ")[0]}";
+               ? $"[Canceled Contract]"
+               : $"[Huỷ tài liệu]";
 
             var emailMessageText = emailTemplate.Name.ToLower().Contains("en")
                ? $"Contract cancelled at: {history.TimeAt.ToString("HH:mm dd/MM/yyyy")} by {history.AuthorEmail}"
@@ -157,7 +161,7 @@ namespace EC.Manager.Notifications.Notification
                     ExpireTime = x.Contract.ExpriredTime,
                     ContractName = x.Contract.Name,
                     SendToEmail = x.SignerEmail,
-                    Subject = emailSubJectText,
+                    Subject = $"{emailSubJectText} {x.Contract.Name}",
                     ContractCode = x.Contract.Code,
                     AuthorEmail = history.AuthorEmail,
                     SendToName = x.SignerName,
