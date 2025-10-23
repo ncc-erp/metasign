@@ -1,10 +1,4 @@
-﻿using Abp;
-using EC.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using static EC.Constants.Enum;
 
 namespace EC.Manager.Notifications.Email.Dto
@@ -23,7 +17,7 @@ namespace EC.Manager.Notifications.Email.Dto
         public string AuthorName { get; set; }
         public long? ContractSettingId { get; set; }
         public ContractRole ContractRole { get; set; }
-        public Guid? ContractGuid{ get; set;}
+        public Guid? ContractGuid { get; set; }
         public DateTime? ExpireTime { get; set; }
     }
 }

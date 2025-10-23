@@ -5,8 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static EC.Constants.Enum;
 
 namespace EC.EntityFrameworkCore.Seed.Host
@@ -48,6 +46,17 @@ namespace EC.EntityFrameworkCore.Seed.Host
                                 Type = e,
                             }
                         );
+
+                        mailTemplates.Add(
+                           new EmailTemplate
+                           {
+                               Subject = isSeedMailExist ? DictionaryHelper.SeedMailDic[e].Subject : string.Empty,
+                               Name = isSeedMailExist ? DictionaryHelper.SeedMailDic[e].Name + " - EN" : string.Empty,
+                               BodyMessage = TemplateHelper.ContentEmailEnglishTemplate(e),
+                               Description = isSeedMailExist ? DictionaryHelper.SeedMailDic[e].Description : string.Empty,
+                               Type = e,
+                           }
+                       );
                     }
                 });
 

@@ -11,6 +11,29 @@
 
 <div class="p-3 background-card">
   <div class="card mb-0">
+    <div *ngIf="!isEditTemplate" class="w-full row mb-3 px-4 py-2">
+      <div class="col-2 d-flex align-items-center">
+        <label class="col-form-label mb-0">
+          {{ "EmailTemplate" | ecTranslate }}:
+        </label>
+      </div>
+      <div class="col-10 d-flex align-items-center">
+        <mat-form-field appearance="outline" class="w-50 mb-0 px-2">
+          <mat-select
+            [(value)]="templateId"
+            (selectionChange)="onSelectEmailTemplate($event)"
+          >
+            <mat-option
+              *ngFor="let template of emailTemplateList"
+              [value]="template.id"
+            >
+              {{ template.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
     <div class="table table-responsive w-100 mb-0">
       <table class="w-100">
         <thead>
@@ -18,7 +41,7 @@
             <th *ngIf="isEditTemplate">
               <span *ngIf="isShowHeaderSendMail()">Mail</span>
             </th>
-            <th></th>
+            <th *ngIf="isEditTemplate"></th>
             <th *ngIf="mailInfo?.propertiesSupport?.length">
               {{ "PropertiesSupport" | ecTranslate }}
             </th>
@@ -31,11 +54,9 @@
                 class="d-flex px-3 align-items-center py-1"
                 *ngIf="isShowHeaderSendMail()"
               >
-                <div class="col-6">
-                  <div class="form-group row mb-1">
-                    <label
-                      class="col-2 col-form-label d-flex align-items-center"
-                    >
+                <div class="col-12">
+                  <div class="form-group row mb-3 align-items-center">
+                    <label class="col-2 col-form-label mb-0">
                       {{ "To" | ecTranslate }}:
                     </label>
                     <div class="col-10">
@@ -49,13 +70,13 @@
                       />
                     </div>
                   </div>
-                  <div class="form-group row align-items-center mb-1">
-                    <label class="col-2 p-0 col-form-label">
+                  <div class="form-group row mb-3 align-items-center">
+                    <label class="col-2 col-form-label mb-0">
                       {{ "Subject" | ecTranslate }}:
                     </label>
                     <div class="col-10">
                       <input
-                        class="form-control my-1"
+                        class="form-control"
                         required
                         [(ngModel)]="mailInfo.subject"
                         placeholder="Subject"
@@ -90,7 +111,7 @@
             </td>
             <td
               style="max-width: 200px"
-              *ngIf="mailInfo?.propertiesSupport?.length"
+              *ngIf="isEditTemplate && mailInfo?.propertiesSupport?.length"
             >
               <div class="property-support">
                 <ul>

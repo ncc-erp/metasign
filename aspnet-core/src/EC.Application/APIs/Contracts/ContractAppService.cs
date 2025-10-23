@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using NccCore.Paging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using static EC.Manager.Contracts.ContractManager;
 
 namespace EC.APIs.Contracts
 {
@@ -134,9 +133,9 @@ namespace EC.APIs.Contracts
         }
 
         [HttpGet]
-        public MailPreviewInfoDto GetContractMailContent(long contractId)
+        public MailPreviewInfoDto GetContractMailContent(long contractId, long mailTemplateId)
         {
-            return _contractManager.GetContractMailContent(contractId);
+            return _contractManager.GetContractMailContent(contractId, mailTemplateId);
         }
 
         [HttpGet]

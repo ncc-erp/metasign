@@ -423,7 +423,7 @@ namespace EC.Manager.Contracts
                 var sendMailDto = new SendMailDto
                 {
                     ContractId = entity.Id,
-                    MailContent = GetContractMailContent(entity.Id)
+                    MailContent = GetContractMailContent(entity.Id, input.MailTemplateId)
                 };
                 await SendMailToViewer(sendMailDto);
                 await SendMail(sendMailDto);
@@ -472,7 +472,8 @@ namespace EC.Manager.Contracts
             if (input.DownloadType == DownloadContractType.Contract)
             {
                 return base64Contract;
-            };
+            }
+            ;
 
             var signatures = new List<SignartureDto>();
 
@@ -536,7 +537,8 @@ namespace EC.Manager.Contracts
             if (input.DownloadType == DownloadContractType.Certificate)
             {
                 return base64Certificate;
-            };
+            }
+            ;
 
             List<FileDto> listFile = new List<FileDto>();
 
@@ -978,9 +980,9 @@ namespace EC.Manager.Contracts
                 .ToListAsync();
         }
 
-        public MailPreviewInfoDto GetContractMailContent(long contractId)
+        public MailPreviewInfoDto GetContractMailContent(long contractId, long mailTemplateId)
         {
-            return _emailManager.GetEmailContentById(MailFuncEnum.Signing, contractId);
+            return _emailManager.GetEmailContentById(MailFuncEnum.Signing, contractId, mailTemplateId);
         }
 
         public async Task<GetContractStatisticDto> GetContractStatistic()
@@ -1360,7 +1362,8 @@ namespace EC.Manager.Contracts
                 clonedMailContent.MailHistory = CreateContractHistory(contractCreator, contractId, content.Result.SendToEmail, content.Result.ContractRole, IsReSent);
 
                 _backgroundJobManager.Enqueue<SendMail, MailPreviewInfoDto>(clonedMailContent, BackgroundJobPriority.High, TimeSpan.FromSeconds(0));
-            };
+            }
+            ;
         }
 
         public async Task ResendMailOne(ReSendMailDto input)
@@ -1422,6 +1425,8 @@ namespace EC.Manager.Contracts
                 .Include(x => x.User)
                 .Where(x => x.Id == input.ContractId).FirstOrDefault();
 
+            var template = WorkScope.GetAll<EmailTemplate>().Where(x => x.Id == input.MailContent.TemplateId).FirstOrDefault();
+
             string contractCreator = contract.User.EmailAddress;
 
             var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
@@ -1434,11 +1439,14 @@ namespace EC.Manager.Contracts
                 .ToListAsync();
 
             var isOrder = signers.Any(x => x.ProcesOrder != 1);
-            List<ResultTemplateEmail<ContractMailTemplateDto>> maiContents = signers.Where(x => !x.IsComplete)
-            .Select(x => new ResultTemplateEmail<ContractMailTemplateDto>
-            {
-                Result = SetContractMailTemplate(x, baseUrl)
-            }).ToList();
+            List<ResultTemplateEmail<ContractMailTemplateDto>> maiContents = signers
+              .Where(x => !x.IsComplete)
+              .Select(x =>
+              {
+                  var mailTemplate = SetContractMailTemplate(x, baseUrl);
+                  return new ResultTemplateEmail<ContractMailTemplateDto> { Result = mailTemplate };
+              })
+              .ToList();
 
             var lastcontent = new ResultTemplateEmail<ContractMailTemplateDto>();
             if (maiContents.Count == 0 && isOrder /*&& !isSendAll*/)
@@ -1498,7 +1506,8 @@ namespace EC.Manager.Contracts
                     {
                         break;
                     }
-                };
+                }
+                ;
             }
 
             var contractSettingId = signers.Where(x => x.SignerEmail == contractCreator)
@@ -1531,6 +1540,10 @@ namespace EC.Manager.Contracts
             var contract = WorkScope.GetAll<Contract>()
                 .Include(x => x.User)
                 .Where(x => x.Id == input.ContractId).FirstOrDefault();
+
+            var template = WorkScope.GetAll<EmailTemplate>().Where(x => x.Id == input.MailContent.TemplateId).FirstOrDefault();
+
+
             string contractCreator = contract.User.EmailAddress;
             var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
 
@@ -1543,9 +1556,10 @@ namespace EC.Manager.Contracts
             if (viewers.Count > 0)
             {
                 string notiReceivers = viewers.Select(x => x.SignerEmail).JoinAsString(", ");
-                List<ResultTemplateEmail<ContractMailTemplateDto>> maiContents = viewers.Select(x => new ResultTemplateEmail<ContractMailTemplateDto>
+                List<ResultTemplateEmail<ContractMailTemplateDto>> maiContents = viewers.Select(x =>
                 {
-                    Result = SetContractMailTemplate(x, baseUrl)
+                    var mailTemplate = SetContractMailTemplate(x, baseUrl);
+                    return new ResultTemplateEmail<ContractMailTemplateDto> { Result = mailTemplate };
                 }).ToList();
 
                 var delaySendMail = 0;
@@ -1564,7 +1578,8 @@ namespace EC.Manager.Contracts
                     var item = await WorkScope.GetAsync<ContractSetting>(mailInput.ContractSettingId.Value);
                     item.IsComplete = true;
                     CurrentUnitOfWork.SaveChanges();
-                };
+                }
+                ;
                 contract.Status = ContractStatus.Inprogress;
                 await WorkScope.UpdateAsync(contract);
             }
@@ -1756,7 +1771,8 @@ namespace EC.Manager.Contracts
             if (IsReSent)
             {
                 sentedTranslate = "reSent";
-            };
+            }
+            ;
             return new CreaContractHistoryDto
             {
                 Action = HistoryAction.SendMail,

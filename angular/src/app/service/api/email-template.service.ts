@@ -1,37 +1,51 @@
-
-import { Injectable, Injector } from '@angular/core';
-import { Observable } from 'rxjs';
-import { MailPreviewInfo, MailPreviewInfoDto, UpdateEmailTemplate } from '../model/admin/emailTemplate.dto';
-import { ApiResponseDto } from '../model/common.dto';
+import { Injectable, Injector } from "@angular/core";
+import { Observable } from "rxjs";
+import {
+  MailPreviewInfo,
+  MailPreviewInfoDto,
+  UpdateEmailTemplate,
+} from "../model/admin/emailTemplate.dto";
+import { ApiResponseDto } from "../model/common.dto";
 import { BaseApiService } from "./base-api.service";
+import { IEmailTemplate } from "@app/module/home/home/progress-contract/contract-email-setting/interfaces/email-template-interface";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class EmailTemplateService extends BaseApiService {
-
   changeUrl() {
-    return "EmailTemplate"
+    return "EmailTemplate";
   }
 
   constructor(injector: Injector) {
     super(injector);
   }
 
-  public previewTemplate(templateId: number): Observable<ApiResponseDto<MailPreviewInfo>> {
+  public getAllEmailTemplate(): Observable<ApiResponseDto<IEmailTemplate[]>> {
+    return this.processGet(`GetAll`);
+  }
+
+  public previewTemplate(
+    templateId: number
+  ): Observable<ApiResponseDto<MailPreviewInfo>> {
     return this.processGet(`PreviewTemplate?id=${templateId}`);
   }
 
-  public getTemplateById(id: number): Observable<ApiResponseDto<MailPreviewInfo>> {
+  public getTemplateById(
+    id: number
+  ): Observable<ApiResponseDto<MailPreviewInfo>> {
     return this.processGet(`GetTemplateById?id=${id}`);
   }
 
-  public updateTemplate(input: UpdateEmailTemplate): Observable<ApiResponseDto<MailPreviewInfoDto>> {
+  public updateTemplate(
+    input: UpdateEmailTemplate
+  ): Observable<ApiResponseDto<MailPreviewInfoDto>> {
     return this.processPut(`UpdateTemplate`, input);
   }
 
-  public sendMail(input: MailPreviewInfoDto): Observable<ApiResponseDto<MailPreviewInfoDto>> {
+  public sendMail(
+    input: MailPreviewInfoDto
+  ): Observable<ApiResponseDto<MailPreviewInfoDto>> {
     return this.processPost(`SendMail`, input);
   }
-
 }
