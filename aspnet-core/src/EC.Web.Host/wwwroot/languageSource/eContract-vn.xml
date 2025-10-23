@@ -672,5 +672,6 @@
 		<text name="FileError" value="File có lỗi vui lòng kiểm tra lại!" />
 		<text name="NoData" value="Không có dữ liệu!" />
 		<text name="SignerNotBeenSet" value="Tồn tại người ký chưa được thiết lập vị trí ký!" />
+		<text name="showSignDate" value="Hiển thị ngày ký"/>
 	</texts>
 </localizationDictionary>

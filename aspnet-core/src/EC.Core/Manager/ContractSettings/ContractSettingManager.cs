@@ -99,6 +99,7 @@ namespace EC.Manager.ContractSettings
                                 Width = x.Width,
                                 SignatureType = x.SignatureType,
                                 ValueInput = x.ValueInput,
+                                IsShowSignDate = x.IsShowSignDate,
                             };
                             listEntity.Add(item);
                         });

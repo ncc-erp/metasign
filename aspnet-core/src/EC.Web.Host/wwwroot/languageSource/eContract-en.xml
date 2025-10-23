@@ -618,5 +618,6 @@
 		<text name="FileError" value="File has errors please check again!" />
 		<text name="NoData" value="No data!" />
 		<text name="SignerNotBeenSet" value="There exists a signer whose signing position has not been set!" />
+		<text name="showSignDate" value="Show signing date"/>
 	</texts>
 </localizationDictionary>

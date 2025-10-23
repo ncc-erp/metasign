@@ -25,5 +25,6 @@ namespace EC.Manager.SignerSignatureSettings.Dto
         public string FontFamily { get; set; }
         public string FontColor { get; set; }
         public string ValueInput { get; set; }
+        public bool IsShowSignDate { get; set; }
     }
 }

@@ -251,7 +251,7 @@ namespace EC.Manager.SignerSignatureSettings
                   signerEmail = x.SignerEmail,
                   iscomplete = x.IsComplete,
                   Color = x.Color,
-                  MassGuid = x.SignerMassGuid
+                  MassGuid = x.SignerMassGuid,
               })
               .FirstOrDefaultAsync();
             var isCreator = WorkScope.GetAll<Contract>()
@@ -302,6 +302,7 @@ namespace EC.Manager.SignerSignatureSettings
                     FontFamily = x.FontFamily,
                     FontColor = x.FontColor,
                     ValueInput = x.ValueInput,
+                    IsShowSignDate = x.IsShowSignDate,
                 })
                 .ToListAsync();
 
@@ -334,6 +335,7 @@ namespace EC.Manager.SignerSignatureSettings
                 SignatureDefault = defaultSignature != default ? defaultSignature : null,
                 IsCreator = isCreator,
                 MassGuid = contract.MassGuid
+               
             };
         }
 
@@ -373,7 +375,7 @@ namespace EC.Manager.SignerSignatureSettings
                     FontSize = x.FontSize,
                     FontFamily = x.FontFamily,
                     FontColor = x.FontColor,
-                    ValueInput = x.ValueInput
+                    IsShowSignDate = x.IsShowSignDate,
                 })
                 .ToListAsync();
 
@@ -418,6 +420,7 @@ namespace EC.Manager.SignerSignatureSettings
                     SignerName = x.ContractSetting.SignerName,
                     Color = dicSettingColor.ContainsKey(x.ContractSettingId) ? dicSettingColor[x.ContractSettingId] : null,
                     ValueInput = x.ValueInput,
+                    IsShowSignDate = x.IsShowSignDate,
                 }).ToList();
 
             return new GetContractSignerSignatureSettingDto
@@ -445,6 +448,7 @@ namespace EC.Manager.SignerSignatureSettings
                     PositionY = x.PositionY,
                     Width = x.Width,
                     Page = x.Page
+                    
                 });
         }
 
