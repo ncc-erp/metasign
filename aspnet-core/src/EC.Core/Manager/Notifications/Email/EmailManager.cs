@@ -3,6 +3,7 @@ using Abp.Timing;
 using Abp.UI;
 using EC.Constants.Dictionary;
 using EC.Entities;
+using EC.Manager.Contracts;
 using EC.Manager.Notifications.Email.Dto;
 using EC.Manager.Notifications.Templates;
 using HRMv2.NccCore;
@@ -217,6 +218,13 @@ namespace EC.Manager.Notifications.Email
 
             var data = EmailDispatchData(mailType, id);
 
+            var contract = WorkScope.GetAll<Contract>().Where(x => x.Id == id).FirstOrDefault();
+
+            if (contract != null)
+            {
+               contract.EmailTemplateId = mailTemplateId;
+            }
+
             return GenerateEmailContent(data.Result, template);
         }
 
@@ -301,22 +309,21 @@ namespace EC.Manager.Notifications.Email
             };
         }
 
-        public EmailTemplateDto GetEmailTemplateDto(MailFuncEnum type)
+        public EmailTemplateDto GetEmailTemplateDto(MailFuncEnum type, long? emailTemplateId)
         {
-            var emailTemplateDto = WorkScope.GetAll<EmailTemplate>()
-                .Where(s => s.Type == type)
-                .Select(s => new EmailTemplateDto
-                {
-                    Id = s.Id,
-                    Type = s.Type,
-                    BodyMessage = s.BodyMessage,
-                    CCs = s.CCs,
-                    Name = s.Name,
-                    Subject = s.Subject,
-                    SendToEmail = s.SendToEmail
-                }).FirstOrDefault();
-
-            return emailTemplateDto;
+            return WorkScope.GetAll<EmailTemplate>()
+             .Where(s => emailTemplateId.HasValue ? s.Id == emailTemplateId.Value : s.Type == type)
+             .Select(s => new EmailTemplateDto
+             {
+                 Id = s.Id,
+                 Type = s.Type,
+                 BodyMessage = s.BodyMessage,
+                 CCs = s.CCs,
+                 Name = s.Name,
+                 Subject = s.Subject,
+                 SendToEmail = s.SendToEmail
+             })
+             .FirstOrDefault();
         }
 
         public void SetSendStatus(long id)

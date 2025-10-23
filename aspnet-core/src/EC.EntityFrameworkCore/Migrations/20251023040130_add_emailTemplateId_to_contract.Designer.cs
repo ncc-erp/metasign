@@ -3,6 +3,7 @@ using System;
 using EC.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EC.Migrations
 {
     [DbContext(typeof(ECDbContext))]
-    partial class ECDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251023040130_add_emailTemplateId_to_contract")]
+    partial class add_emailTemplateId_to_contract
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2121,9 +2123,6 @@ namespace EC.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsShowSignDate")
-                        .HasColumnType("boolean");
-
                     b.Property<bool>("IsSigned")
                         .HasColumnType("boolean");
 
@@ -2442,9 +2441,6 @@ namespace EC.Migrations
                         .HasColumnType("real");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsShowSignDate")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("IsSigned")
