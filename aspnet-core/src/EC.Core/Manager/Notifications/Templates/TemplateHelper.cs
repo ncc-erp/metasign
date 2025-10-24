@@ -5,7 +5,6 @@ namespace EC.Manager.Notifications.Templates
 {
     public static class TemplateHelper
     {
-        //Vietnamese email template
         public static string ContentEmailTemplate(MailFuncEnum type) =>
         type switch
         {
