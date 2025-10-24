@@ -424,7 +424,6 @@ namespace EC.Manager.Contracts
                 {
                     ContractId = entity.Id,
                     MailContent = GetContractMailContent(entity.Id, input.MailTemplateId)
-                    MailContent = GetContractMailContent(entity.Id, input.MailTemplateId)
                 };
                 await SendMailToViewer(sendMailDto);
                 await SendMail(sendMailDto);
