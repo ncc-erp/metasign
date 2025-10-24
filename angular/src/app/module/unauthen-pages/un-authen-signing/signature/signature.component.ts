@@ -24,63 +24,72 @@ import { SignatureDialogStampComponent } from "../signature-dialog-stamp/signatu
   styleUrls: ["./signature.component.css"],
 })
 export class SignatureComponent extends AppComponentBase implements OnInit {
-  @ViewChild('myTextarea') myTextarea: ElementRef;
+  @ViewChild("myTextarea") myTextarea: ElementRef;
 
   @Input() signature: SignatureSettings;
   @Input() signatureSetting;
   @Input() imageSignatureDigital: string;
-  @Input() statusEmitSignatureDigital: boolean
+  @Input() statusEmitSignatureDigital: boolean;
   @Output() signatureValue = new EventEmitter<any>();
   @Output() contractValue = new EventEmitter<any>();
   totalLineTextarea: string[];
   ContractSettingType = ContractSettingType;
   valueContractText: string;
-  height: number
+  height: number;
   @Input() signatureDefaultElectronic: any;
   @Input() signatureDefaultStamp: any;
+
+  @Output() signatureFocus = new EventEmitter<void>();
 
   constructor(
     private injector: Injector,
     public dialog: MatDialog,
-    public sanitizer: DomSanitizer,
+    public sanitizer: DomSanitizer
   ) {
     super(injector);
   }
 
   ngOnInit(): void {
-    this.height = this.signature.height
-    this.valueContractText = this.signature.valueInput
+    this.height = this.signature.height;
+    this.valueContractText = this.signature.valueInput;
   }
 
   ngAfterViewInit() {
     if (this.signature.isAllowSigning) {
-      this.handleValue()
+      this.handleValue();
     }
     if (this.signature.signatureType === ContractSettingType.DatePicker) {
-      this.onDate()
+      this.onDate();
     }
   }
 
+  onFocus() {
+    this.signatureFocus.emit();
+  }
+
+
   handleValue() {
-    this.signature.valueInput = this.valueContractText
-    this.totalLineTextarea = this.handleLineTextarea(this.signature)
-    this.signature.valueInput = this.totalLineTextarea.join('\n')
+    this.signature.valueInput = this.valueContractText;
+    this.totalLineTextarea = this.handleLineTextarea(this.signature);
+    this.signature.valueInput = this.totalLineTextarea.join("\n");
     this.contractValue.emit(this.signature);
-    this.height = this.signature.height
-    let heightOneLine = 25 * (this.signature.fontSize / (AppConsts.fontSize[AppConsts.defaultFontSize]))
+    this.height = this.signature.height;
+    let heightOneLine =
+      25 *
+      (this.signature.fontSize / AppConsts.fontSize[AppConsts.defaultFontSize]);
     if (this.signature.height / heightOneLine < this.totalLineTextarea.length) {
-      this.height = this.totalLineTextarea.length * heightOneLine
+      this.height = this.totalLineTextarea.length * heightOneLine;
     }
   }
 
   handleLineTextarea(signature) {
-    let totalLines = []
+    let totalLines = [];
     if (
       signature?.signatureType === ContractSettingType.Text &&
       signature.valueInput !== undefined
     ) {
-      const inputCanvas = document.createElement('canvas');
-      const inputCtx = inputCanvas.getContext('2d');
+      const inputCanvas = document.createElement("canvas");
+      const inputCtx = inputCanvas.getContext("2d");
       inputCtx.font = `${signature.fontSize}px ${signature?.fontFamily}`;
       let totalWords = signature.valueInput?.split("\n");
       let widthTextarea = signature.width;
@@ -107,12 +116,14 @@ export class SignatureComponent extends AppComponentBase implements OnInit {
   }
 
   onDate() {
-    this.signature.valueInput = moment(this.valueContractText).format("DD/MM/YYYY").toString()
+    this.signature.valueInput = moment(this.valueContractText)
+      .format("DD/MM/YYYY")
+      .toString();
     this.contractValue.emit(this.signature);
   }
 
   openDialog(): void {
-    let dialogRef
+    let dialogRef;
     if (this.signature.signatureType === ContractSettingType.Stamp) {
       dialogRef = this.dialog.open(SignatureDialogStampComponent, {
         data: {
@@ -121,14 +132,13 @@ export class SignatureComponent extends AppComponentBase implements OnInit {
           signatureSetting: this.signatureSetting,
           width: this.signature.width,
           height: this.signature.height,
-          signatureType: this.signature.signatureType
+          signatureType: this.signature.signatureType,
         },
         height: "85%",
         width: "45%",
-        panelClass: 'signature-dialog',
+        panelClass: "signature-dialog",
       });
-    }
-    else {
+    } else {
       dialogRef = this.dialog.open(SignatureDialogComponent, {
         data: {
           signature: this.signature,
@@ -136,14 +146,13 @@ export class SignatureComponent extends AppComponentBase implements OnInit {
           signatureSetting: this.signatureSetting,
           width: this.signature.width,
           height: this.signature.height,
-          signatureType: this.signature.signatureType
+          signatureType: this.signature.signatureType,
         },
         height: "85%",
         width: "45%",
-        panelClass: 'signature-dialog',
+        panelClass: "signature-dialog",
       });
     }
-
 
     dialogRef
       .afterClosed()
@@ -157,7 +166,7 @@ export class SignatureComponent extends AppComponentBase implements OnInit {
               setDefault: value.setDefault,
               signatureUserId: null,
               signatureType: this.signature.signatureType,
-              pageHeight: this.signature.heightPage
+              pageHeight: this.signature.heightPage,
             };
           } else {
             return null;
@@ -167,20 +176,16 @@ export class SignatureComponent extends AppComponentBase implements OnInit {
       .subscribe((value) => {
         if (value) {
           if (value.signatureType === ContractSettingType.Stamp) {
-            this.signatureDefaultStamp =
-            {
+            this.signatureDefaultStamp = {
               contractBase64: value.signartureBase64,
-              signatureType: value.signatureType
-            }
-
-          }
-          else {
+              signatureType: value.signatureType,
+            };
+          } else {
             if (this.signatureDefaultElectronic) {
-              this.signatureDefaultElectronic =
-              {
+              this.signatureDefaultElectronic = {
                 contractBase64: value.signartureBase64,
-                signatureType: value.signatureType
-              }
+                signatureType: value.signatureType,
+              };
             }
           }
           this.signatureValue.emit(value);
@@ -197,8 +202,8 @@ export class SignatureComponent extends AppComponentBase implements OnInit {
       y: Math.round(this.signature.positionY),
       width: this.signature.width,
       height: this.signature.height,
-      pageHeight: this.signature.heightPage
-    }
+      pageHeight: this.signature.heightPage,
+    };
     if (this.statusEmitSignatureDigital) {
       this.signatureValue.emit(signature);
     }
@@ -211,8 +216,8 @@ export class SignatureComponent extends AppComponentBase implements OnInit {
         signartureBase64: this.signatureDefaultElectronic?.contractBase64,
         isNewSignature: false,
         signatureType: this.signature.signatureType,
-        pageHeight: this.signature.heightPage
-      }
+        pageHeight: this.signature.heightPage,
+      };
       this.signatureValue.emit(signature);
     } else {
       this.openDialog();
@@ -220,15 +225,14 @@ export class SignatureComponent extends AppComponentBase implements OnInit {
   }
 
   handleClickSignatureStamp() {
-
     if (this.signatureDefaultStamp?.contractBase64) {
       let signature = {
         signerSignatureSettingid: this.signature.id,
         signartureBase64: this.signatureDefaultStamp.contractBase64,
         isNewSignature: false,
         signatureType: this.signature.signatureType,
-        pageHeight: this.signature.heightPage
-      }
+        pageHeight: this.signature.heightPage,
+      };
 
       this.signatureValue.emit(signature);
     } else {
