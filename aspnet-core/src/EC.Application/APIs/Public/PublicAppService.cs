@@ -58,7 +58,7 @@ namespace EC.APIs.Public
         [HttpGet]
         public dynamic DownloadApp()
         {
-            string filePath = Path.Combine(_hostingEnvironment.WebRootPath, "exe/metasign.exe");
+            string filePath = Path.Combine(_hostingEnvironment.WebRootPath, "exe/Metasign.msi");
 
             if (!System.IO.File.Exists(filePath))
             {
