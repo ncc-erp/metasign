@@ -50,7 +50,7 @@
     <Folder Include="wwwroot\tempConvert\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="wwwroot\exe\Metasign.msi">
+    <Content Update="wwwroot\exe\Metasign.msi">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </Content>
