@@ -56,17 +56,19 @@ namespace EC.APIs.Public
         }
 
         [HttpGet]
-        public dynamic DownloadApp()
+        public IActionResult DownloadApp()
         {
-            string filePath = Path.Combine(_hostingEnvironment.WebRootPath, "exe/Metasign.msi");
+            var filePath = Path.Combine(_hostingEnvironment.WebRootPath, "exe", "Metasign.msi");
 
             if (!System.IO.File.Exists(filePath))
             {
                 throw new UserFriendlyException("Setup file not found!");
             }
 
-            byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
-            return fileBytes;
+            return new PhysicalFileResult(filePath, "application/x-msi")
+            {
+                FileDownloadName = "Metasign.msi"
+            };
         }
 
         [HttpGet]
