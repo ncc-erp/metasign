@@ -40,9 +40,7 @@ export class CertDetailDialogComponent implements OnInit {
   handleDownloadFileExe()
   {
     this.dialogRef.close();
-    this.contractPublicService.downloadApp().subscribe((rs)=>{
-        this.downloadFileExe(rs.result,'metasign.exe');
-    })
+    window.open('https://profile.mezon.ai/app-metasign/Metasign.msi', '_blank');
   }
 
   getCertificate(){
