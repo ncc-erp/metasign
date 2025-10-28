@@ -49,4 +49,10 @@
     <Folder Include="wwwroot\digitalSignatureImg\" />
     <Folder Include="wwwroot\tempConvert\" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="wwwroot\exe\Metasign.msi">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
 </Project>
