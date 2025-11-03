@@ -214,7 +214,21 @@ namespace EC.Manager.Notifications.Email
 
         public MailPreviewInfoDto GetEmailContentById(MailFuncEnum mailType, long id, long mailTemplateId)
         {
-            var template = WorkScope.GetAll<EmailTemplate>().Where(x => x.Id == mailTemplateId).FirstOrDefault();
+            var template = WorkScope.GetAll<EmailTemplate>()
+                .Where(x => x.Id == mailTemplateId)
+                .FirstOrDefault();
+
+            if (template == null)
+            {
+                template = WorkScope.GetAll<EmailTemplate>()
+                    .OrderBy(x => x.Id)
+                    .FirstOrDefault();
+            }
+
+            if (template == null)
+            {
+                throw new UserFriendlyException("No email template found");
+            }
 
             var data = EmailDispatchData(mailType, id);
 
@@ -222,7 +236,7 @@ namespace EC.Manager.Notifications.Email
 
             if (contract != null)
             {
-               contract.EmailTemplateId = mailTemplateId;
+               contract.EmailTemplateId = template.Id;
             }
 
             return GenerateEmailContent(data.Result, template);
