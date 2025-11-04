@@ -312,12 +312,12 @@ namespace EC.Manager.Contracts
         public async Task CreateMassContract(CreateMassContractDto input)
         {
             var loginUserId = AbpSession.UserId.Value;
-            var template = WorkScope.GetAll<ContractTemplate>().Where(x => x.Id == input.Id).FirstOrDefault();
+            var template = await WorkScope.GetAll<ContractTemplate>().Where(x => x.Id == input.Id).FirstOrDefaultAsync();
 
-            var loginUserEmail = WorkScope.GetAll<User>()
+            var loginUserEmail = await WorkScope.GetAll<User>()
                 .Where(x => x.Id == loginUserId)
                 .Select(x => x.EmailAddress)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
             var massGuid = Guid.NewGuid();
             var numOfContracts = input.RowData.Count;
             for (int i = 0; i < numOfContracts; i++)
@@ -398,7 +398,7 @@ namespace EC.Manager.Contracts
                         Color = item1.Color,
                         SignerMassGuid = item1.MassGuid
                     };
-                    signer.Id = WorkScope.InsertAndGetId(signer);
+                    signer.Id = await WorkScope.InsertAndGetIdAsync(signer);
                     var signatureSetting = item1.SignatureSettings.Select(x => new SignerSignatureSetting
                     {
                         ContractSettingId = signer.Id,
@@ -413,7 +413,7 @@ namespace EC.Manager.Contracts
                         FontColor = x.FontColor,
                         ValueInput = x.ValueInput,
                     }).ToList();
-                    WorkScope.InsertRange(signatureSetting);
+                    await WorkScope.InsertRangeAsync(signatureSetting);
                 }
 
                 #endregion Create Signer and SignatureSetting
