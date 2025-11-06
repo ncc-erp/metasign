@@ -285,6 +285,27 @@ namespace EC.Controllers
             };
         }
 
+        [HttpPost]
+        public async Task<MezonSigningAuthenticateResult> SigningMezonAuthenticate(string codeOauth2Mezon, string redirectUri)
+        {
+            var userInfo = await _mezonWebService.GetTokenForViewContractMezon(codeOauth2Mezon, redirectUri);
+
+            var loginResult = await GetLoginResultMezonAsync(userInfo, GetTenancyNameOrNull());
+
+            Logger.Info("MezonAuthentication");
+
+            var accessToken = CreateAccessToken(CreateJwtClaims(loginResult.Identity));
+
+            return new MezonSigningAuthenticateResult
+            {
+                Email = userInfo.sub,
+                AccessToken = accessToken,
+                EncryptedAccessToken = GetEncryptedAccessToken(accessToken),
+                ExpireInSeconds = (int)_configuration.Expiration.TotalSeconds,
+                UserId = loginResult.User.Id
+            };
+        }
+
         private async Task<AbpLoginResult<Tenant, User>> GetLoginResultMezonAsync(AuthOauth2Mezon input, string tenancyName)
         {
             Logger.Info("GetLoginResultMezonAsync");
