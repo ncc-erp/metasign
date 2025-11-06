@@ -988,14 +988,19 @@ export class UnAuthenSigningComponent
           status: 1,
         },
       });
+      return; // Important: stop execution if no JWT
     }
+    
     localStorage.setItem("notSignNow", "1");
     let currentLogin = this.parseJwt(jwt);
     let type = localStorage.getItem("typeLoginSigning");
     let email;
     if (+type === loginApp.microsoft) {
       email = currentLogin.preferred_username;
+    } else if (+type === loginApp.mezon) {
+      email = currentLogin.email;
     } else {
+      // Google or default
       email = currentLogin.email;
     }
 

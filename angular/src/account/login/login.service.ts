@@ -34,4 +34,13 @@ authenticateMezon(mezonToken: string, finallyCallback?: () => void): void{
       });
 }
 
+signingWithMezon(mezonToken: string, redirectUri: string, finallyCallback?: () => void): void{
+  finallyCallback = finallyCallback || (() => {});
+
+  this._googleLoginService.signingMezonAuthenticate(mezonToken, redirectUri)
+      .subscribe((result: any) => {
+        return result.result;
+      });
+}
+
 }

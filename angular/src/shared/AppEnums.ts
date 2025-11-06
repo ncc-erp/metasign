@@ -14,7 +14,8 @@ export enum ContractInvalidate {
 
 export enum loginApp {
   google = 1,
-  microsoft = 2
+  microsoft = 2,
+  mezon = 3
 }
 
 export enum contractStep {
