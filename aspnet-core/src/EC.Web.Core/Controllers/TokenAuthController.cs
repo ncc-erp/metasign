@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -298,7 +298,7 @@ namespace EC.Controllers
 
             return new MezonSigningAuthenticateResult
             {
-                Email = userInfo.sub,
+                Email = userInfo.email,
                 AccessToken = accessToken,
                 EncryptedAccessToken = GetEncryptedAccessToken(accessToken),
                 ExpireInSeconds = (int)_configuration.Expiration.TotalSeconds,
