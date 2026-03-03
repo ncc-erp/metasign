@@ -355,6 +355,7 @@ export class EmailValidComponent extends AppComponentBase implements OnInit {
       } else {
         this.ngZone.run(() => {
           this.messages = this.EcTranslatePipe.transform("EmailDoesNotHavePermissionToViewTheDocumentPleaseCheckAgain");
+          abp.message.error(this.messages);
         });
       }
     });

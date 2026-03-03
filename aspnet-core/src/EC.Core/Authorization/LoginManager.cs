@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Abp.Authorization;
 using Abp.Authorization.Users;
 using Abp.Configuration;
@@ -106,7 +106,7 @@ namespace EC.Authorization
           
             try
             {
-                var emailAddress = input.sub;
+                var emailAddress = input.email;
                 var clientAppId = _configuration.GetValue<string>("Oauth2Mezon:CLient_Id");
                 var corectAudience = input.aud.Any(s => s== clientAppId);
                 var correctIssuer = input.iss == "https://oauth2.mezon.ai";
