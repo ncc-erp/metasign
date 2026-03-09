@@ -34,10 +34,10 @@ authenticateMezon(mezonToken: string, finallyCallback?: () => void): void{
       });
 }
 
-signingWithMezon(mezonToken: string, redirectUri: string, finallyCallback?: () => void): void{
+signingWithMezon(mezonToken: string, redirectUri: string, contractId?: number, finallyCallback?: () => void): void{
   finallyCallback = finallyCallback || (() => {});
 
-  this._googleLoginService.signingMezonAuthenticate(mezonToken, redirectUri)
+  this._googleLoginService.signingMezonAuthenticate(mezonToken, redirectUri, contractId)
       .subscribe((result: any) => {
         return result.result;
       });

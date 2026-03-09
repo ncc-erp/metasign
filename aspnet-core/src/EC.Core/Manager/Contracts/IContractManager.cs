@@ -1,4 +1,4 @@
-﻿using Abp.Dependency;
+using Abp.Dependency;
 using EC.Manager.Contracts.Dto;
 using System;
 using System.Collections.Generic;
@@ -15,6 +15,6 @@ namespace EC.Manager.Contracts
         Task<GetContractDto> Get(long id);
         Task<UpdatECDto> Update(UpdatECDto input);
         Task<GetContractMailSettingDto> GetSendMailInfo(long contractId);
-
+        Task<List<GetContractDto>> GetByContractIdAndEmailAddress(long contractId, string emailAddress);
     }
 }

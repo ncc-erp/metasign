@@ -286,23 +286,19 @@ namespace EC.Controllers
         }
 
         [HttpPost]
-        public async Task<MezonSigningAuthenticateResult> SigningMezonAuthenticate(string codeOauth2Mezon, string redirectUri)
+        public async Task<MezonSigningAuthenticateResult> SigningMezonAuthenticate(string codeOauth2Mezon, Int64 contractId, string redirectUri)
         {
-            var userInfo = await _mezonWebService.GetTokenForViewContractMezon(codeOauth2Mezon, redirectUri);
-
-            var loginResult = await GetLoginResultMezonAsync(userInfo, GetTenancyNameOrNull());
+            var userInfo = await _mezonWebService.GetInfoForViewContractMezon(codeOauth2Mezon, redirectUri);
+            var loginResult = await GetLoginResultMezonForSignContractsAsync(userInfo, contractId, GetTenancyNameOrNull());
 
             Logger.Info("MezonAuthentication");
-
-            var accessToken = CreateAccessToken(CreateJwtClaims(loginResult.Identity));
 
             return new MezonSigningAuthenticateResult
             {
                 Email = userInfo.email,
-                AccessToken = accessToken,
-                EncryptedAccessToken = GetEncryptedAccessToken(accessToken),
+                AccessToken = userInfo.accessToken,
+                EncryptedAccessToken = GetEncryptedAccessToken(userInfo.accessToken),
                 ExpireInSeconds = (int)_configuration.Expiration.TotalSeconds,
-                UserId = loginResult.User.Id
             };
         }
 
@@ -316,6 +312,19 @@ namespace EC.Controllers
                     return loginResult;
                 default:
                     throw _abpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(loginResult.Result, null, tenancyName);
+            }
+        }
+        private async Task<Boolean> GetLoginResultMezonForSignContractsAsync(AuthOauth2Mezon input, Int64 contractId, string tenancyName)
+        {
+            Logger.Info("GetLoginResultMezonAsyncForSignContract");
+            var loginResult = await _logInManager.LoginAsyncWithMezonForSignContract(input, contractId, tenancyName, false);
+            if (loginResult)
+            {
+                return loginResult;
+            }
+            else
+            {
+                throw new UserFriendlyException(string.Format("You don't have permission to view this contract"));
             }
         }
 

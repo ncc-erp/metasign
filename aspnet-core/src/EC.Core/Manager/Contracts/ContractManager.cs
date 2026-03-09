@@ -1,4 +1,4 @@
-﻿using Abp.BackgroundJobs;
+using Abp.BackgroundJobs;
 using Abp.Collections.Extensions;
 using Abp.Json;
 using Abp.Logging;
@@ -635,6 +635,34 @@ namespace EC.Manager.Contracts
                 }).ToList();
             query = query.Where(x => x.Email != userEmail).ToList();
             return query;
+        }
+        
+        public async Task<List<GetContractDto>> GetByContractIdAndEmailAddress(Int64 contractId, String emailAddress)
+        {
+            var tenantId = AbpSession.TenantId;
+            var contractSettings = WorkScope.GetAll<ContractSetting>();
+
+            return await WorkScope.GetAll<Contract>()
+                .Where(x => x.TenantId == tenantId && x.Id == contractId
+                    && contractSettings.Any(cs => cs.ContractId == x.Id && cs.SignerEmail == emailAddress))
+                .Select(x => new GetContractDto
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Code = x.Code,
+                    File = x.File,
+                    Status = x.Status,
+                    CreationTime = x.CreationTime,
+                    UserId = x.UserId,
+                    ExpriedTime = x.ExpriredTime,
+                    UpdatedUser = x.LastModifierUser.FullName,
+                    UpdatedTime = x.LastModificationTime,
+                    ContractGuid = x.ContractGuid,
+                    ContractBase64 = x.FileBase64,
+                    NumberOfSetting = contractSettings.Count(cs => cs.ContractId == x.Id && cs.ContractRole == ContractRole.Signer),
+                    CountCompleted = contractSettings.Count(cs => cs.ContractId == x.Id && cs.ContractRole == ContractRole.Signer && cs.IsComplete),
+                })
+                .ToListAsync();
         }
 
         public async Task<GridResult<GetContractDto>> GetContractByFilterPaging(GetContractByFilterDto input)

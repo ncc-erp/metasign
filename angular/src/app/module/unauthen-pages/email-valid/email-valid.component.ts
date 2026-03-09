@@ -117,7 +117,7 @@ export class EmailValidComponent extends AppComponentBase implements OnInit {
         console.log('Calling signingMezonAuthenticate with redirectUri:', redirectUri);
         
         // Get email from Mezon and call validEmail
-        this.googleLoginService.signingMezonAuthenticate(authorizationCode, redirectUri)
+        this.googleLoginService.signingMezonAuthenticate(authorizationCode, redirectUri, this.contracId)
           .subscribe((result: any) => {
             console.log('signingMezonAuthenticate result:', result);
             if (result && result.result) {
@@ -160,6 +160,12 @@ export class EmailValidComponent extends AppComponentBase implements OnInit {
             } else {
               console.error('Invalid result structure');
             }
+          }, (error: any) => {
+            this.ngZone.run(() => {
+              const errorMessage = error?.error?.error?.message || 'Login Mezon failed';
+              this.messages = errorMessage;
+              abp.message.error(errorMessage);
+            });
           });
         return;
       }

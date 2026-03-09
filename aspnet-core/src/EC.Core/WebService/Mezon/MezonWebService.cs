@@ -43,7 +43,7 @@ namespace EC.WebService.Mezon
             return infoAuth;
         }
 
-        public async Task<AuthOauth2Mezon> GetTokenForViewContractMezon(string code, string redirect_uri)
+        public async Task<AuthOauth2Mezon> GetInfoForViewContractMezon(string code, string redirect_uri)
         {
             var url = _configuration.GetValue<string>("Oauth2Mezon:Url_Oauth2Mezon");
             var urlInfo = _configuration.GetValue<string>("Oauth2Mezon:Url_UserInfo");
@@ -62,13 +62,11 @@ namespace EC.WebService.Mezon
 
             var response = await PostFormUrlEncodedAsync<TokenResponse>(url, formData);
             SetAuthorizationToken(response.AccessToken);
-
+            
             var infoAuth = await PostAsync<AuthOauth2Mezon>(urlInfo, null);
-
+            infoAuth.accessToken = response.IdToken;
             return infoAuth;
         }
-
-
     }
 }
 
