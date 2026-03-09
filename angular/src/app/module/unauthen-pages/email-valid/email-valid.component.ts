@@ -117,7 +117,7 @@ export class EmailValidComponent extends AppComponentBase implements OnInit {
         console.log('Calling signingMezonAuthenticate with redirectUri:', redirectUri);
         
         // Get email from Mezon and call validEmail
-        this.googleLoginService.signingMezonAuthenticate(authorizationCode, redirectUri)
+        this.googleLoginService.signingMezonAuthenticate(authorizationCode, redirectUri, this.contracId)
           .subscribe((result: any) => {
             console.log('signingMezonAuthenticate result:', result);
             if (result && result.result) {

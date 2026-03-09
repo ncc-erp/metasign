@@ -32,11 +32,13 @@ export class GoogleLoginService extends BaseApiService {
     )
   }
 
-  signingMezonAuthenticate(mezonToken: string, redirectUri: string):Observable<any>{  
+  signingMezonAuthenticate(mezonToken: string, redirectUri: string, contractId?: number):Observable<any>{  
     const encodedMezonToken = encodeURIComponent(mezonToken);
     const encodedRedirectUri = encodeURIComponent(redirectUri);
-    return this.httpClient.post(AppConsts.remoteServiceBaseUrl+
-      `/api/TokenAuth/SigningMezonAuthenticate?codeOauth2Mezon=${encodedMezonToken}&redirectUri=${encodedRedirectUri}`,{}
-    )
+    let url = `${AppConsts.remoteServiceBaseUrl}/api/TokenAuth/SigningMezonAuthenticate?codeOauth2Mezon=${encodedMezonToken}&redirectUri=${encodedRedirectUri}`;
+    if (contractId) {
+      url += `&contractId=${contractId}`;
+    }
+    return this.httpClient.post(url, {});
   }
 }

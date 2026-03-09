@@ -13,6 +13,7 @@ namespace EC.WebService.Mezon.Dto
         public long rat { get; set; }
         public string sub { get; set; }
         public string email { get; set; }
+        public string accessToken { get; set; }
 
     }
 }
