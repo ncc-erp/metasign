@@ -160,6 +160,12 @@ export class EmailValidComponent extends AppComponentBase implements OnInit {
             } else {
               console.error('Invalid result structure');
             }
+          }, (error: any) => {
+            this.ngZone.run(() => {
+              const errorMessage = error?.error?.error?.message || 'Login Mezon failed';
+              this.messages = errorMessage;
+              abp.message.error(errorMessage);
+            });
           });
         return;
       }

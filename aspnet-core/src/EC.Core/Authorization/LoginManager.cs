@@ -278,7 +278,7 @@ namespace EC.Authorization
 
                 if (contracts.Count == 0)
                 {
-                    throw new UserFriendlyException(string.Format("You don't have any contracts"));
+                    throw new UserFriendlyException(string.Format("You don't have permission to view this contract"));
                 }
 
                 return true;

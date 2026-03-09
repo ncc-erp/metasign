@@ -324,7 +324,7 @@ namespace EC.Controllers
             }
             else
             {
-                throw new UserFriendlyException(string.Format("You don't have any contracts"));
+                throw new UserFriendlyException(string.Format("You don't have permission to view this contract"));
             }
         }
 
