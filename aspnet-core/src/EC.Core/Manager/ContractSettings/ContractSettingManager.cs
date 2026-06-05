@@ -1,4 +1,4 @@
-﻿using Abp.BackgroundJobs;
+using Abp.BackgroundJobs;
 using Abp.Domain.Uow;
 using Abp.UI;
 using EC.Authorization.Users;
@@ -108,6 +108,9 @@ namespace EC.Manager.ContractSettings
                     }
                 }
             }
+
+            // Tự động tìm và cập nhật tọa độ Anchor Tag cho hợp đồng tạo từ template
+            await _contractManager.ProcessAnchorTags(input.ContractId);
 
             await _contractManager.SaveDraft(input.ContractId);
 

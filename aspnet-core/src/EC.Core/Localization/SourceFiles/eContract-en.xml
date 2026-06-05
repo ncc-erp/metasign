@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <localizationDictionary culture="en">
   <texts>
 	<text name="Home" value="Home" />
@@ -315,6 +315,7 @@
 	  <text name="YouHadDocumentNeedSign" value="You had document need sign" />
 	  <text name="CoordinatesX" value="Coordinates X" />
 	  <text name="CoordinatesY" value="Coordinates Y" />
+	  <text name="AnchorTag" value="Anchor Tag" />
 	  <text name="YouHaveReceivedACopyOfTheDocument" value="You have received a copy of the document" />
 	  <text name="Viewer" value="Viewer" />
 	  <text name="ApprovedBy" value="Approved by" />

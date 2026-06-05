@@ -21,6 +21,7 @@ using EC.Manager.SignerSignatureSettings.Dto;
 using EC.Manager.SignServerWorkers;
 using EC.MultiTenancy;
 using EC.Utils;
+using EC.Utils.Dto;
 using EC.WebService.PDFConverter;
 using HRMv2.NccCore;
 using iTextSharp.text;
@@ -429,6 +430,8 @@ namespace EC.Manager.Contracts
                 await SendMail(sendMailDto);
 
                 #endregion Send Mail
+
+                await ProcessAnchorTags(entity.Id);
             }
         }
 
@@ -1444,6 +1447,8 @@ namespace EC.Manager.Contracts
 
             await WorkScope.UpdateAsync(contract);
 
+            await ProcessAnchorTags(contractId);
+
             return contractId;
         }
 
@@ -1853,6 +1858,111 @@ namespace EC.Manager.Contracts
                 ContractSettingIdHaveBoth = contractSettingIdHaveBoth,
                 NormalSignerId = normalSignerId,
             };
+        }
+
+        public async Task ProcessAnchorTags(long contractId)
+        {
+            var signatureSettings = await WorkScope.GetAll<SignerSignatureSetting>()
+                .Where(x => x.ContractSetting.ContractId == contractId)
+                .ToListAsync();
+
+            if (!signatureSettings.Any(x => !string.IsNullOrEmpty(x.ValueInput) && x.ValueInput.StartsWith("[") && x.ValueInput.EndsWith("]")))
+            {
+                return;
+            }
+
+            var pdfBase64 = await _fileStoringManager.DownloadUnsignedContractBase64(contractId);
+            if (string.IsNullOrEmpty(pdfBase64))
+            {
+                return;
+            }
+
+            byte[] pdfBytes = Convert.FromBase64String(pdfBase64.Split(",")[1]);
+            var foundPositions = new List<TextPosition>();
+
+            foreach (var setting in signatureSettings)
+            {
+                if (!string.IsNullOrEmpty(setting.ValueInput) && setting.ValueInput.StartsWith("[") && setting.ValueInput.EndsWith("]"))
+                {
+                    var position = PdfTextFinder.FindAnchorPosition(pdfBytes, setting.ValueInput);
+                    if (position != null)
+                    {
+                        if (!foundPositions.Any(p => p.Page == position.Page && p.X == position.X && p.Y == position.Y))
+                        {
+                            foundPositions.Add(position);
+                        }
+
+                        setting.Page = position.Page;
+
+                        float boxWidth = setting.Width ?? 0;
+                        float boxHeight = setting.Height ?? 0;
+
+                        if (boxWidth <= 0 || boxHeight <= 0)
+                        {
+                            switch (setting.SignatureType)
+                            {
+                                case SignatureTypeSetting.Electronic:
+                                    boxWidth = 180;
+                                    boxHeight = 110;
+                                    break;
+                                case SignatureTypeSetting.Digital:
+                                case SignatureTypeSetting.Stamp:
+                                    boxWidth = 220;
+                                    boxHeight = 155;
+                                    break;
+                                case SignatureTypeSetting.Text:
+                                case SignatureTypeSetting.DatePicker:
+                                    boxWidth = 210;
+                                    boxHeight = 36;
+                                    break;
+                                default:
+                                    boxWidth = 180;
+                                    boxHeight = 110;
+                                    break;
+                            }
+                        }
+
+                        // Center in PDF coordinates:
+                        float pdfCenterX = position.X + position.Width / 2f;
+                        float pdfCenterY = position.Y + position.Height / 2f;
+
+                        // Convert PDF center to frontend coordinates (scale * 2, Y-axis inverted)
+                        float frontCenterX = pdfCenterX * 2;
+                        float frontCenterY = (position.PageHeight - pdfCenterY) * 2;
+
+                        // Set top-left corner of the box
+                        setting.PositionX = frontCenterX - (boxWidth / 2f);
+                        setting.PositionY = frontCenterY - (boxHeight / 2f);
+
+                        if (setting.SignatureType == SignatureTypeSetting.Text || setting.SignatureType == SignatureTypeSetting.DatePicker)
+                        {
+                            setting.ValueInput = string.Empty;
+                        }
+
+                        await WorkScope.UpdateAsync(setting);
+                    }
+                }
+            }
+
+            if (foundPositions.Any())
+            {
+                byte[] maskedPdfBytes = SignUtils.MaskPdfAnchorTags(pdfBytes, foundPositions);
+                var contract = await WorkScope.GetAll<Contract>().FirstOrDefaultAsync(x => x.Id == contractId);
+                if (contract != null)
+                {
+                    using (var stream = new MemoryStream(maskedPdfBytes))
+                    {
+                        IFormFile file = new FormFile(stream, 0, stream.Length, Path.GetFileNameWithoutExtension(contract.File), contract.File)
+                        {
+                            Headers = new HeaderDictionary(),
+                            ContentType = "application/pdf"
+                        };
+                        await _fileStoringManager.UploadUnsignedContract(contractId, file);
+                    }
+                }
+            }
+
+            await CurrentUnitOfWork.SaveChangesAsync();
         }
 
         private ContractMailTemplateDto SetContractMailTemplate(ContractSetting contractSetting, string baseUrl)

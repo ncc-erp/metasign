@@ -7,6 +7,9 @@ import {
   EventEmitter,
   Injector,
   HostListener,
+  SimpleChanges,
+  OnChanges,
+  OnInit
 } from "@angular/core";
 import { CdkDragEnd } from "@angular/cdk/drag-drop";
 import { Component } from "@angular/core";
@@ -21,7 +24,7 @@ import { AppConsts } from "@shared/AppConsts";
   templateUrl: "./signature-type.component.html",
   styleUrls: ["./signature-type.component.css"],
 })
-export class SignatureTypeComponent extends AppComponentBase {
+export class SignatureTypeComponent extends AppComponentBase implements OnInit, OnChanges {
   private isResizing = false;
   private px = 0;
   private py = 0;
@@ -59,17 +62,39 @@ export class SignatureTypeComponent extends AppComponentBase {
     this.height = this.signatureValue.height
   }
 
-  ngAfterViewInit(): void {
-    this.signatureType!.nativeElement.style.left = `${this.signatureValue.positionX
-      }px`;
-    this.signatureType.nativeElement.style.top = `${this.signatureValue.positionY
-      }px`;
-    if (this.signatureValue.signatureType !== (this.ContractSettingType.DatePicker || ContractSettingType.Text)) {
-      this.signatureType.nativeElement.style.width = `${this.signatureValue.width}px`;
-      this.signatureType.nativeElement.style.height = `${this.signatureValue.height}px`;
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes["signatureValue"] && !changes["signatureValue"].firstChange) {
+      this.updateElementPosition();
     }
-    if ((!this.signatureValue.valueInput && !this.isTextareaFocused) || this.isTextareaFocused) {
-      this.signatureType.nativeElement.style.backgroundColor = `${this.signatureValue.color}`;
+  }
+
+  ngAfterViewInit(): void {
+    this.updateElementPosition();
+  }
+
+  updateElementPosition(): void {
+    if (this.signatureType && this.signatureType.nativeElement) {
+      this.signatureType.nativeElement.style.left = `${this.signatureValue.positionX}px`;
+      this.signatureType.nativeElement.style.top = `${this.signatureValue.positionY}px`;
+      
+      if (this.signatureValue.signatureType !== this.ContractSettingType.DatePicker && 
+          this.signatureValue.signatureType !== this.ContractSettingType.Text) {
+        this.signatureType.nativeElement.style.width = `${this.signatureValue.width}px`;
+        this.signatureType.nativeElement.style.height = `${this.signatureValue.height}px`;
+      }
+      
+      // Clear any transform left by drag end to allow style-based positioning to take effect
+      this.signatureType.nativeElement.style.transform = "";
+
+      const isInput = this.signatureValue.signatureType === this.ContractSettingType.Text ||
+                      this.signatureValue.signatureType === this.ContractSettingType.DatePicker ||
+                      this.signatureValue.signatureType === this.ContractSettingType.Dropdown;
+
+      if (!isInput || (!this.signatureValue.valueInput && !this.isTextareaFocused) || this.isTextareaFocused) {
+        this.signatureType.nativeElement.style.backgroundColor = `${this.signatureValue.color}`;
+      } else {
+        this.signatureType.nativeElement.style.backgroundColor = "transparent";
+      }
     }
   }
 
@@ -85,8 +110,13 @@ export class SignatureTypeComponent extends AppComponentBase {
     }
     this.focusSignatureId = -1
     this.isTextareaFocused = false;
-    if ((!this.signatureValue.valueInput && !this.isTextareaFocused) || this.isTextareaFocused) {
+    const isInput = this.signatureValue.signatureType === this.ContractSettingType.Text ||
+                    this.signatureValue.signatureType === this.ContractSettingType.DatePicker ||
+                    this.signatureValue.signatureType === this.ContractSettingType.Dropdown;
+    if (!isInput || (!this.signatureValue.valueInput && !this.isTextareaFocused) || this.isTextareaFocused) {
       this.signatureType.nativeElement.style.backgroundColor = `${this.signatureValue.color}`;
+    } else {
+      this.signatureType.nativeElement.style.backgroundColor = "transparent";
     }
   }
 
@@ -122,6 +152,15 @@ export class SignatureTypeComponent extends AppComponentBase {
       dx: initialPosition.x + offset.x,
       dy: initialPosition.y + offset.y,
     };
+
+    const isInput = this.signatureValue.signatureType === this.ContractSettingType.Text ||
+                    this.signatureValue.signatureType === this.ContractSettingType.DatePicker ||
+                    this.signatureValue.signatureType === this.ContractSettingType.Dropdown;
+
+    if (!isInput && this.signatureValue.valueInput && this.signatureValue.valueInput.startsWith('[') && this.signatureValue.valueInput.endsWith(']')) {
+      signaturePosition.valueInput = '';
+    }
+
     this.updatePositionSignature.emit(signaturePosition);
   }
 

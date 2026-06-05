@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <localizationDictionary culture="en">
 	<texts>
 		<text name="Home" value="Home" />
@@ -382,6 +382,7 @@
 		<text name="USBToken" value="USB Token" />
 		<text name="Recipient" value="Recipient" />
 		<text name="Location" value="Location" />
+		<text name="AnchorTag" value="Anchor Tag" />
 		<text name="Formatting" value="Formatting" />
 		<text name="PreviewContractResults" value="Preview contract results " />
 		<text name="MissingSignatureLocationForRecipients" value="Missing signature location for recipients" />

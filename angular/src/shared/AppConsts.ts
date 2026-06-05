@@ -4,8 +4,8 @@ export class AppConsts {
   static remoteServiceBaseUrl: string;
   static appBaseUrl: string;
   static appBaseHref: string; // returns angular's base-href parameter value if used during the publish
-  static DEFAULT_SIGNATURE_WIDTH = 100;
-  static DEFAULT_SIGNATURE_HEIGHT = 100;
+  static DEFAULT_SIGNATURE_WIDTH = 180;
+  static DEFAULT_SIGNATURE_HEIGHT = 110;
   static mezonClientId: string;
   static DEFAULT_SIGNATURE_WIDTH_DIGITAL = 220;
   static DEFAULT_SIGNATURE_HEIGHT_DIGITAL = 155;

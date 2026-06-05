@@ -1,4 +1,4 @@
-﻿using Abp.UI;
+using Abp.UI;
 using EC.Authorization.Users;
 using EC.Entities;
 using EC.Manager.Contracts;
@@ -376,6 +376,7 @@ namespace EC.Manager.SignerSignatureSettings
                     FontFamily = x.FontFamily,
                     FontColor = x.FontColor,
                     IsShowSignDate = x.IsShowSignDate,
+                    ValueInput = x.ValueInput,
                 })
                 .ToListAsync();
 
