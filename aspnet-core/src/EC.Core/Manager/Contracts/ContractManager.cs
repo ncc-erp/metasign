@@ -1866,7 +1866,7 @@ namespace EC.Manager.Contracts
                 .Where(x => x.ContractSetting.ContractId == contractId)
                 .ToListAsync();
 
-            if (!signatureSettings.Any(x => !string.IsNullOrEmpty(x.ValueInput) && x.ValueInput.StartsWith("[") && x.ValueInput.EndsWith("]")))
+            if (!signatureSettings.Any(x => x.SignatureType != SignatureTypeSetting.Text && x.SignatureType != SignatureTypeSetting.DatePicker && !string.IsNullOrEmpty(x.ValueInput) && x.ValueInput.StartsWith("[") && x.ValueInput.EndsWith("]")))
             {
                 return;
             }
@@ -1882,7 +1882,7 @@ namespace EC.Manager.Contracts
 
             foreach (var setting in signatureSettings)
             {
-                if (!string.IsNullOrEmpty(setting.ValueInput) && setting.ValueInput.StartsWith("[") && setting.ValueInput.EndsWith("]"))
+                if (setting.SignatureType != SignatureTypeSetting.Text && setting.SignatureType != SignatureTypeSetting.DatePicker && !string.IsNullOrEmpty(setting.ValueInput) && setting.ValueInput.StartsWith("[") && setting.ValueInput.EndsWith("]"))
                 {
                     var position = PdfTextFinder.FindAnchorPosition(pdfBytes, setting.ValueInput);
                     if (position != null)

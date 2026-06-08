@@ -91,6 +91,22 @@
   height: 100%;
   left: 0;
   padding: 20px;
+  box-sizing: border-box;
+}
+
+.contract_design--right.has-select .contract_design--page {
+  height: 30vh;
+}
+
+.contract_design--right.has-select .content {
+  height: calc(30vh - 80px);
+}
+
+.contract_design--right.has-select .contract_design--select {
+  top: 30vh;
+  height: calc(100% - 30vh);
+  overflow-y: auto;
+  border-top: 1px solid rgb(220, 220, 220);
 }
 
 .design_right--position {
