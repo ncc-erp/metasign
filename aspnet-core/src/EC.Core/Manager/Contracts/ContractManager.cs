@@ -19,6 +19,7 @@ using EC.Manager.Notifications.Email.Dto;
 using EC.Manager.Notifications.Notification;
 using EC.Manager.SignerSignatureSettings.Dto;
 using EC.Manager.SignServerWorkers;
+using EC.Manager.ContractTemplateSettings.Dto;
 using EC.MultiTenancy;
 using EC.Utils;
 using EC.Utils.Dto;
@@ -315,6 +316,17 @@ namespace EC.Manager.Contracts
             var loginUserId = AbpSession.UserId.Value;
             var template = await WorkScope.GetAll<ContractTemplate>().Where(x => x.Id == input.Id).FirstOrDefaultAsync();
 
+            var signatureSettings = await WorkScope.GetAll<ContractTemplateSetting>()
+                .Where(x => x.ContractTemplateSigner.ContractTemplateId == template.Id)
+                .ToListAsync();
+
+            var anchorTags = signatureSettings
+                .Where(x => x.SignatureType != SignatureTypeSetting.Text && x.SignatureType != SignatureTypeSetting.DatePicker)
+                .Where(x => !string.IsNullOrEmpty(x.ValueInput) && x.ValueInput.StartsWith("[") && x.ValueInput.EndsWith("]"))
+                .Select(x => x.ValueInput)
+                .Distinct()
+                .ToList();
+
             var loginUserEmail = await WorkScope.GetAll<User>()
                 .Where(x => x.Id == loginUserId)
                 .Select(x => x.EmailAddress)
@@ -357,7 +369,7 @@ namespace EC.Manager.Contracts
                 var base64 = "";
                 if (!string.IsNullOrEmpty(template.MassWordContent))
                 {
-                    var base64Convert = await FillAndRepaceContent(template.MassWordContent, template.MassField, input.RowData[i].ListFieldDto);
+                    var base64Convert = await FillAndRepaceContent(template.MassWordContent, template.MassField, input.RowData[i].ListFieldDto, input.RowData[i].Signers, anchorTags);
                     base64 = await SignUtils.FillPdfWithText(fillInput, location, base64Convert, _webHostEnvironment.WebRootPath);
                 }
                 else
@@ -1817,12 +1829,13 @@ namespace EC.Manager.Contracts
             };
         }
 
-        private async Task<string> FillAndRepaceContent(string massWordContent, string massField, List<string> listFieldDto)
+        private async Task<string> FillAndRepaceContent(string massWordContent, string massField, List<string> listFieldDto, List<SignerMassDto> signers, List<string> anchorTags)
         {
             var filePath = Path.Combine(_webHostEnvironment.WebRootPath, "tempReplace", Guid.NewGuid().ToString() + ".docx");
             var bytes = Convert.FromBase64String(massWordContent.Split(',')[1].Trim());
             var fieldName = JsonConvert.DeserializeObject<List<string>>(massField);
             File.WriteAllBytes(filePath, bytes);
+            
             using (Document doc = new Document())
             {
                 doc.LoadFromFile(filePath);
@@ -1832,11 +1845,168 @@ namespace EC.Manager.Contracts
                 }
                 doc.SaveToFile(filePath, FileFormat.Auto);
             }
-            await ConvertToPdf(filePath, Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder));
-            var outputFile = Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder, Path.GetFileNameWithoutExtension(filePath) + ".pdf");
-            var result = Convert.ToBase64String(File.ReadAllBytes(outputFile));
-            File.Delete(filePath);
-            File.Delete(outputFile);
+            
+            string tempPdfFolder = Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder);
+            await ConvertToPdf(filePath, tempPdfFolder);
+            var tempPdfFile = Path.Combine(tempPdfFolder, Path.GetFileNameWithoutExtension(filePath) + ".pdf");
+            byte[] pdfBytes = File.ReadAllBytes(tempPdfFile);
+            
+            if (signers != null)
+            {
+                foreach (var signer in signers)
+                {
+                    if (signer.SignatureSettings != null)
+                    {
+                        foreach (var setting in signer.SignatureSettings)
+                        {
+                            if (setting.SignatureType != SignatureTypeSetting.Text && 
+                                setting.SignatureType != SignatureTypeSetting.DatePicker && 
+                                !string.IsNullOrEmpty(setting.ValueInput) && 
+                                setting.ValueInput.StartsWith("[") && 
+                                setting.ValueInput.EndsWith("]"))
+                            {
+                                var position = PdfTextFinder.FindAnchorPosition(pdfBytes, setting.ValueInput);
+                                if (position != null)
+                                {
+                                    setting.Page = position.Page;
+                                    
+                                    float boxWidth = setting.Width ?? 0;
+                                    float boxHeight = setting.Height ?? 0;
+                                    
+                                    if (boxWidth <= 0 || boxHeight <= 0)
+                                    {
+                                        switch (setting.SignatureType)
+                                        {
+                                            case SignatureTypeSetting.Electronic:
+                                                boxWidth = 180;
+                                                boxHeight = 110;
+                                                break;
+                                            case SignatureTypeSetting.Digital:
+                                            case SignatureTypeSetting.Stamp:
+                                                boxWidth = 220;
+                                                boxHeight = 155;
+                                                break;
+                                            case SignatureTypeSetting.Text:
+                                            case SignatureTypeSetting.DatePicker:
+                                                boxWidth = 210;
+                                                boxHeight = 36;
+                                                break;
+                                            default:
+                                                boxWidth = 180;
+                                                boxHeight = 110;
+                                                break;
+                                        }
+                                    }
+                                    
+                                    float pdfCenterX = position.X + position.Width / 2f;
+                                    float pdfCenterY = position.Y + position.Height / 2f;
+                                    
+                                    float frontCenterX = pdfCenterX * 2;
+                                    float frontCenterY = (position.PageHeight - pdfCenterY) * 2;
+                                    
+                                    setting.PositionX = frontCenterX - (boxWidth / 2f);
+                                    setting.PositionY = frontCenterY - (boxHeight / 2f);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (File.Exists(tempPdfFile))
+            {
+                File.Delete(tempPdfFile);
+            }
+            
+            using (Document doc = new Document())
+            {
+                doc.LoadFromFile(filePath);
+                
+                var anchorTagsToReplace = new List<string>();
+                if (signers != null)
+                {
+                    foreach (var signer in signers)
+                    {
+                        if (signer.SignatureSettings != null)
+                        {
+                            foreach (var setting in signer.SignatureSettings)
+                            {
+                                if (setting.SignatureType != SignatureTypeSetting.Text && 
+                                    setting.SignatureType != SignatureTypeSetting.DatePicker && 
+                                    !string.IsNullOrEmpty(setting.ValueInput) && 
+                                    setting.ValueInput.StartsWith("[") && 
+                                    setting.ValueInput.EndsWith("]"))
+                                {
+                                    anchorTagsToReplace.Add(setting.ValueInput);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if (anchorTags != null)
+                {
+                    anchorTagsToReplace.AddRange(anchorTags);
+                }
+                
+                var autoDetectedTags = new List<string>();
+                try
+                {
+                    var anchorRegex = new System.Text.RegularExpressions.Regex(
+                        @"\[[^\]]*(?:metasign|chuky|chu\s*ky|signature|sign|stamp|electronic|digital)[^\]]*\]", 
+                        System.Text.RegularExpressions.RegexOptions.IgnoreCase
+                    );
+                    
+                    var selections = doc.FindAllPattern(anchorRegex);
+                    if (selections != null)
+                    {
+                        foreach (var selection in selections)
+                        {
+                            string matchedText = selection.SelectedText;
+                            if (!string.IsNullOrEmpty(matchedText) && !autoDetectedTags.Contains(matchedText))
+                            {
+                                autoDetectedTags.Add(matchedText);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Warn($"[FillAndRepaceContent] Error auto-detecting anchor tags: {ex.Message}");
+                }
+                
+                var allTagsToReplace = anchorTagsToReplace
+                    .Concat(autoDetectedTags)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+                
+                Logger.Warn($"[FillAndRepaceContent] anchorTags to replace: {string.Join(", ", allTagsToReplace)}");
+                
+                foreach (var tag in allTagsToReplace)
+                {
+                    string spaces = new string(' ', tag.Length);
+                    var regex = new System.Text.RegularExpressions.Regex(System.Text.RegularExpressions.Regex.Escape(tag));
+                    int replacedCount = doc.Replace(regex, spaces);
+                    Logger.Warn($"[FillAndRepaceContent] Replaced tag '{tag}' with spaces. Replaced count: {replacedCount}");
+                }
+                
+                doc.SaveToFile(filePath, FileFormat.Auto);
+            }
+            
+            await ConvertToPdf(filePath, tempPdfFolder);
+            var finalPdfFile = Path.Combine(tempPdfFolder, Path.GetFileNameWithoutExtension(filePath) + ".pdf");
+            var resultBytes = File.ReadAllBytes(finalPdfFile);
+            var result = Convert.ToBase64String(resultBytes);
+            
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+            if (File.Exists(finalPdfFile))
+            {
+                File.Delete(finalPdfFile);
+            }
+            
             return "data:application/pdf;base64," + result;
         }
 
@@ -1943,25 +2113,6 @@ namespace EC.Manager.Contracts
                     }
                 }
             }
-
-            if (foundPositions.Any())
-            {
-                byte[] maskedPdfBytes = SignUtils.MaskPdfAnchorTags(pdfBytes, foundPositions);
-                var contract = await WorkScope.GetAll<Contract>().FirstOrDefaultAsync(x => x.Id == contractId);
-                if (contract != null)
-                {
-                    using (var stream = new MemoryStream(maskedPdfBytes))
-                    {
-                        IFormFile file = new FormFile(stream, 0, stream.Length, Path.GetFileNameWithoutExtension(contract.File), contract.File)
-                        {
-                            Headers = new HeaderDictionary(),
-                            ContentType = "application/pdf"
-                        };
-                        await _fileStoringManager.UploadUnsignedContract(contractId, file);
-                    }
-                }
-            }
-
             await CurrentUnitOfWork.SaveChangesAsync();
         }
 

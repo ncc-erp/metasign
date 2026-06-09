@@ -364,11 +364,9 @@ namespace EC.Manager.ContractTemplateSettings
                         float pdfCenterX = position.X + position.Width / 2f;
                         float pdfCenterY = position.Y + position.Height / 2f;
 
-                        // Convert PDF center to frontend coordinates (scale * 2, Y-axis inverted)
                         float frontCenterX = pdfCenterX * 2;
                         float frontCenterY = (position.PageHeight - pdfCenterY) * 2;
 
-                        // Set top-left corner of the box
                         setting.PositionX = frontCenterX - (boxWidth / 2f);
                         setting.PositionY = frontCenterY - (boxHeight / 2f);
 
@@ -376,15 +374,6 @@ namespace EC.Manager.ContractTemplateSettings
                     }
                 }
             }
-
-            if (foundPositions.Any())
-            {
-                byte[] maskedPdfBytes = EC.Utils.SignUtils.MaskPdfAnchorTags(pdfBytes, foundPositions);
-                string base64Prefix = template.Content.Contains(",") ? template.Content.Split(",")[0] + "," : "data:application/pdf;base64,";
-                template.Content = base64Prefix + Convert.ToBase64String(maskedPdfBytes);
-                await WorkScope.UpdateAsync(template);
-            }
-
             await CurrentUnitOfWork.SaveChangesAsync();
         }
     }

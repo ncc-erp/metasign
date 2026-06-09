@@ -74,13 +74,10 @@ namespace EC.Utils
                 return;
             }
 
-            // Normalize target tag
             string target = _anchorTag.ToLowerInvariant().Replace(" ", "");
 
-            // Sort fragments by Y descending (top-to-bottom)
             var sorted = _fragments.OrderByDescending(f => f.Y).ToList();
 
-            // Group fragments into lines by Y coordinate with a small threshold (e.g., 3.0 points)
             var lines = new List<List<TextFragment>>();
             foreach (var fragment in sorted)
             {
@@ -93,10 +90,8 @@ namespace EC.Utils
                 line.Add(fragment);
             }
 
-            // Search each line
             foreach (var line in lines)
             {
-                // Sort fragments left-to-right
                 var orderedLine = line.OrderBy(f => f.MinX).ToList();
 
                 var normalizedLineText = "";
@@ -135,7 +130,7 @@ namespace EC.Utils
                         PageHeight = 0 
                     };
 
-                    return; // Match found, exit
+                    return;
                 }
             }
         }

@@ -275,44 +275,5 @@ namespace EC.Utils
                 return "data:application/pdf;base64," + outputBase64;
             }
         }
-
-        public static byte[] MaskPdfAnchorTags(byte[] pdfBytes, List<EC.Utils.Dto.TextPosition> positions)
-        {
-            if (positions == null || !positions.Any())
-            {
-                return pdfBytes;
-            }
-
-            try
-            {
-                using (var reader = new PdfReader(pdfBytes))
-                using (var ms = new MemoryStream())
-                {
-                    using (var stamper = new PdfStamper(reader, ms))
-                    {
-                        foreach (var pos in positions)
-                        {
-                            var overContent = stamper.GetOverContent(pos.Page);
-                            overContent.SetColorFill(BaseColor.WHITE);
-                            
-                            // Add a small padding to ensure the brackets and characters are fully masked
-                            float padding = 3f;
-                            float rectX = pos.X - padding;
-                            float rectY = pos.Y - padding;
-                            float rectWidth = pos.Width + padding * 2f;
-                            float rectHeight = pos.Height + padding * 2f;
-                            
-                            overContent.Rectangle(rectX, rectY, rectWidth, rectHeight);
-                            overContent.Fill();
-                        }
-                    }
-                    return ms.ToArray();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new UserFriendlyException("Error hiding anchor tags on PDF document: " + ex.Message);
-            }
-        }
     }
 }
