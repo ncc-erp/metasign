@@ -134,6 +134,15 @@ export class DesignContractComponent
   signatureTypeList = AppConsts.signatureTypeList;
   otherTypeList = AppConsts.otherTypeList;
   batchContract: boolean;
+  anchorTags: string[] = [];
+  anchorTagSearch: string = '';
+
+  get filteredAnchorTags(): string[] {
+    if (!this.anchorTagSearch || !this.anchorTagSearch.trim()) return this.anchorTags;
+    const keyword = this.anchorTagSearch.toLowerCase().trim();
+    return this.anchorTags.filter(tag => tag.toLowerCase().includes(keyword));
+  }
+
   @ViewChild("dropZone", { read: ElementRef }) dropZone: ElementRef;
   @ViewChildren("page") elements: any;
 
@@ -227,6 +236,7 @@ export class DesignContractComponent
           });
 
           this.getContractSignatureSetting(rs.result);
+          this.anchorTags = rs.result.anchorTags || [];
           this.contractLoadding = false;
           this.isCheckType(rs.result.signatureSettings);
         });
@@ -267,6 +277,7 @@ export class DesignContractComponent
           });
 
           this.getContractSignatureSetting(rs.result);
+          this.anchorTags = rs.result.anchorTags || [];
           this.contractLoadding = false;
         });
     }
@@ -382,6 +393,8 @@ export class DesignContractComponent
       this.fontFamily = $event.fontFamily;
       this.fontSize = $event.fontSize;
     }
+    // Reset ô search khi chọn ô chữ ký mới
+    this.anchorTagSearch = '';
     this.focusSignatureId = $event.id;
     this.valueSignerContractEdit = this.contractId
       ? $event.contractSettingId

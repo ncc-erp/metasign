@@ -268,14 +268,46 @@
         >
           {{ "AnchorTag" | ecTranslate }}
           <mat-form-field appearance="outline">
-            <input
-              [readonly]="!isAllowEditSignature()"
-              type="text"
+            <mat-select
               formControlName="valueInput"
-              class="position_signer--input"
-              matInput
-              placeholder="e.g. [Sign1]"
-            />
+              [disabled]="!isAllowEditSignature()"
+              placeholder="Chọn mã neo"
+              (openedChange)="anchorTagSearch = ''"
+            >
+              <!-- Ô tìm kiếm trong dropdown -->
+              <mat-option disabled class="anchor-search-option">
+                <input
+                  class="anchor-search-input"
+                  [(ngModel)]="anchorTagSearch"
+                  [ngModelOptions]="{ standalone: true }"
+                  [placeholder]="'SearchAnchorTag' | ecTranslate"
+                  (click)="$event.stopPropagation()"
+                  (keydown)="$event.stopPropagation()"
+                  autocomplete="off"
+                />
+              </mat-option>
+
+              <mat-option [value]="null">{{ 'None' | ecTranslate }}</mat-option>
+
+              <!-- Giá trị đã lưu không có trong danh sách -->
+              <mat-option
+                *ngIf="signerActionForm.get('valueInput')?.value && !anchorTags.includes(signerActionForm.get('valueInput')?.value)"
+                [value]="signerActionForm.get('valueInput')?.value"
+              >
+                {{ signerActionForm.get("valueInput")?.value }}
+              </mat-option>
+
+              <mat-option *ngFor="let tag of filteredAnchorTags" [value]="tag">
+                {{ tag }}
+              </mat-option>
+
+              <mat-option *ngIf="anchorTags.length === 0" disabled>
+                {{ 'DocumentHasNoAnchorTags' | ecTranslate }}
+              </mat-option>
+              <mat-option *ngIf="anchorTags.length > 0 && filteredAnchorTags.length === 0" disabled>
+                {{ 'NoAnchorTagFound' | ecTranslate }}
+              </mat-option>
+            </mat-select>
           </mat-form-field>
         </div>
         <div

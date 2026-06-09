@@ -297,7 +297,7 @@ namespace EC.Manager.ContractTemplateSettings
                 .Where(x => x.ContractTemplateSigner.ContractTemplateId == templateId)
                 .ToListAsync();
 
-            if (!signatureSettings.Any(x => x.SignatureType != SignatureTypeSetting.Text && x.SignatureType != SignatureTypeSetting.DatePicker && !string.IsNullOrEmpty(x.ValueInput) && x.ValueInput.StartsWith("[") && x.ValueInput.EndsWith("]")))
+            if (!signatureSettings.Any(x => x.SignatureType != SignatureTypeSetting.Text && x.SignatureType != SignatureTypeSetting.DatePicker && !string.IsNullOrEmpty(x.ValueInput) && x.ValueInput.StartsWith("<<") && x.ValueInput.EndsWith(">>")))
             {
                 return;
             }
@@ -319,8 +319,8 @@ namespace EC.Manager.ContractTemplateSettings
                 if (setting.SignatureType != SignatureTypeSetting.Text &&
                     setting.SignatureType != SignatureTypeSetting.DatePicker &&
                     !string.IsNullOrEmpty(setting.ValueInput) &&
-                    setting.ValueInput.StartsWith("[") &&
-                    setting.ValueInput.EndsWith("]"))
+                    setting.ValueInput.StartsWith("<<") &&
+                    setting.ValueInput.EndsWith(">>"))
                 {
                     var position = EC.Utils.PdfTextFinder.FindAnchorPosition(pdfBytes, setting.ValueInput);
                     if (position != null)

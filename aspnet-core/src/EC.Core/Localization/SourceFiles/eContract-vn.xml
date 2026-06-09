@@ -386,5 +386,9 @@
 		<text name="FontSize" value="Cỡ chữ" />
 		<text name="DoubleClickToFillText" value="Nhấp vào để điền văn bản" />
 		<text name="DoubleClickToEditText" value="Nhấp vào để chỉnh sửa văn bản" />
+		<text name="SearchAnchorTag" value="Tìm mã neo..." />
+		<text name="None" value="— Không có —" />
+		<text name="NoAnchorTagFound" value="Không tìm thấy mã neo phù hợp" />
+		<text name="DocumentHasNoAnchorTags" value="Tài liệu chưa có mã neo &lt;&lt;...&gt;&gt;" />
 	</texts>
 </localizationDictionary>

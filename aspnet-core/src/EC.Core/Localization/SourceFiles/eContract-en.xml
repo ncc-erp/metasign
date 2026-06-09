@@ -387,5 +387,9 @@
 	  <text name="DoubleClickToFillText" value="Double click to fillText" />
 	  <text name="DoubleClickToEditText" value="Double click to editText" />
 	  <text name="Send" value="Send" />
+	  <text name="SearchAnchorTag" value="Search anchor tag..." />
+	  <text name="None" value="— None —" />
+	  <text name="NoAnchorTagFound" value="No matching anchor tags found" />
+	  <text name="DocumentHasNoAnchorTags" value="Document does not have anchor tags &lt;&lt;...&gt;&gt;" />
   </texts>
 </localizationDictionary>

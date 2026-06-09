@@ -674,5 +674,9 @@
 		<text name="NoData" value="Không có dữ liệu!" />
 		<text name="SignerNotBeenSet" value="Tồn tại người ký chưa được thiết lập vị trí ký!" />
 		<text name="showSignDate" value="Hiển thị ngày ký"/>
+		<text name="SearchAnchorTag" value="Tìm mã neo..." />
+		<text name="None" value="— Không có —" />
+		<text name="NoAnchorTagFound" value="Không tìm thấy mã neo phù hợp" />
+		<text name="DocumentHasNoAnchorTags" value="Tài liệu chưa có mã neo &lt;&lt;...&gt;&gt;" />
 	</texts>
 </localizationDictionary>

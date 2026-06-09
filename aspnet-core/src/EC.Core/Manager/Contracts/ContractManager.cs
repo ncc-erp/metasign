@@ -1862,8 +1862,8 @@ namespace EC.Manager.Contracts
                             if (setting.SignatureType != SignatureTypeSetting.Text && 
                                 setting.SignatureType != SignatureTypeSetting.DatePicker && 
                                 !string.IsNullOrEmpty(setting.ValueInput) && 
-                                setting.ValueInput.StartsWith("[") && 
-                                setting.ValueInput.EndsWith("]"))
+                                setting.ValueInput.StartsWith("<<") && 
+                                setting.ValueInput.EndsWith(">>"))
                             {
                                 var position = PdfTextFinder.FindAnchorPosition(pdfBytes, setting.ValueInput);
                                 if (position != null)
@@ -1934,8 +1934,8 @@ namespace EC.Manager.Contracts
                                 if (setting.SignatureType != SignatureTypeSetting.Text && 
                                     setting.SignatureType != SignatureTypeSetting.DatePicker && 
                                     !string.IsNullOrEmpty(setting.ValueInput) && 
-                                    setting.ValueInput.StartsWith("[") && 
-                                    setting.ValueInput.EndsWith("]"))
+                                    setting.ValueInput.StartsWith("<<") && 
+                                    setting.ValueInput.EndsWith(">>"))
                                 {
                                     anchorTagsToReplace.Add(setting.ValueInput);
                                 }
@@ -1953,8 +1953,8 @@ namespace EC.Manager.Contracts
                 try
                 {
                     var anchorRegex = new System.Text.RegularExpressions.Regex(
-                        @"\[[^\]]*(?:metasign|chuky|chu\s*ky|signature|sign|stamp|electronic|digital)[^\]]*\]", 
-                        System.Text.RegularExpressions.RegexOptions.IgnoreCase
+                        @"<<[^<>]+>>",
+                        System.Text.RegularExpressions.RegexOptions.None
                     );
                     
                     var selections = doc.FindAllPattern(anchorRegex);

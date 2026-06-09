@@ -1,4 +1,4 @@
-﻿using Abp.AutoMapper;
+using Abp.AutoMapper;
 using EC.Entities;
 using EC.Manager.ContractTemplateSettings.Dto;
 using EC.Manager.ContractTemplateSigners.Dto;
@@ -65,5 +65,6 @@ namespace EC.Manager.ContractTemplates.Dto
         public GetContractTemplateDto ContractTemplate { get; set; }
         public List<GetContractTemplateSettingDto> SignatureSettings { get; set; }
         public List<GetContractTemplateSignerDto> SignerSettings { get; set; }
+        public List<string> AnchorTags { get; set; }
     }
 }

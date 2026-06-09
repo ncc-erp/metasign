@@ -344,3 +344,35 @@
     height: 87.55vh;
   }
 }
+
+/* Ô tìm kiếm mã neo bên trong dropdown */
+::ng-deep .anchor-search-option {
+  padding: 4px 8px !important;
+  line-height: normal !important;
+  height: auto !important;
+  cursor: default !important;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: white;
+}
+
+::ng-deep .anchor-search-option .mat-option-text {
+  display: block;
+}
+
+.anchor-search-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #dde1e8;
+  border-radius: 4px;
+  font-size: 13px;
+  outline: none;
+  box-sizing: border-box;
+  background: #f8f9fa;
+}
+
+.anchor-search-input:focus {
+  border-color: #5b67ca;
+  background: #fff;
+}

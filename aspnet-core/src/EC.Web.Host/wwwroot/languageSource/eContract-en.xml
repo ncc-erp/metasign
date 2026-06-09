@@ -620,5 +620,9 @@
 		<text name="NoData" value="No data!" />
 		<text name="SignerNotBeenSet" value="There exists a signer whose signing position has not been set!" />
 		<text name="showSignDate" value="Show signing date"/>
+		<text name="SearchAnchorTag" value="Search anchor tag..." />
+		<text name="None" value="— None —" />
+		<text name="NoAnchorTagFound" value="No matching anchor tags found" />
+		<text name="DocumentHasNoAnchorTags" value="Document does not have anchor tags &lt;&lt;...&gt;&gt;" />
 	</texts>
 </localizationDictionary>
