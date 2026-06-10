@@ -501,12 +501,21 @@ namespace EC.Manager.SignerSignatureSettings
                 .Where(x => x.Id == contractId)
                 .FirstOrDefaultAsync();
 
-            if (contract == null || string.IsNullOrEmpty(contract.FileBase64))
+            if (contract == null)
             {
                 return;
             }
 
-            byte[] pdfBytes = Convert.FromBase64String(contract.FileBase64.Contains(",") ? contract.FileBase64.Split(',')[1] : contract.FileBase64);
+            var contractBase64 = string.IsNullOrEmpty(contract.FileBase64)
+                ? await _fileStoringManager.DownloadUnsignedContractBase64(contractId)
+                : contract.FileBase64;
+
+            if (string.IsNullOrEmpty(contractBase64))
+            {
+                return;
+            }
+
+            byte[] pdfBytes = Convert.FromBase64String(contractBase64.Contains(",") ? contractBase64.Split(',')[1] : contractBase64);
             var foundPositions = new List<TextPosition>();
 
             foreach (var setting in signatureSettings)
