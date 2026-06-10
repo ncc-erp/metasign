@@ -817,10 +817,6 @@ export class DesignContractComponent
     }
   }
 
-  saveSignatureSettings() {
-    this.handleChangePositionSignature();
-  }
-
   drop(event: any) {
     const containerBounds =
       event.container.element.nativeElement.getBoundingClientRect();

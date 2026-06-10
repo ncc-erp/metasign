@@ -199,6 +199,7 @@
     <div
       [@contractSelect]="focusSignatureId ? 'open' : 'closed'"
       *ngIf="focusSignatureId"
+      [formGroup]="signerActionForm"
       class="contract_design--select"
     >
       <div class="design_right--signer">
@@ -210,6 +211,7 @@
             [disabled]="!isAllowEditSignature()"
             (selectionChange)="handleChangesignerEdit()"
             [(ngModel)]="valueSignerContractEdit"
+            [ngModelOptions]="{ standalone: true }"
           >
             <mat-option
               *ngFor="let signer of signerContract"
@@ -229,7 +231,58 @@
         </mat-form-field>
       </div>
 
-      <div [formGroup]="signerActionForm" class="design_right--position">
+      <div
+        *ngIf="
+          currentSigner.signatureType !== signatureType.Text &&
+          currentSigner.signatureType !== signatureType.DatePicker
+        "
+        class="position_signer"
+      >
+        {{ "AnchorTag" | ecTranslate }}
+        <mat-form-field appearance="outline">
+          <mat-select
+            formControlName="valueInput"
+            [disabled]="!isAllowEditSignature()"
+            placeholder="Chọn mã neo"
+            (openedChange)="anchorTagSearch = ''"
+            (selectionChange)="handleChangePositionSignature()"
+          >
+            <!-- Ô tìm kiếm trong dropdown -->
+            <mat-option disabled class="anchor-search-option">
+              <input
+                class="anchor-search-input"
+                [(ngModel)]="anchorTagSearch"
+                [ngModelOptions]="{ standalone: true }"
+                [placeholder]="'SearchAnchorTag' | ecTranslate"
+                (click)="$event.stopPropagation()"
+                (keydown)="$event.stopPropagation()"
+                autocomplete="off"
+              />
+            </mat-option>
+
+            <!-- Giá trị đã lưu không có trong danh sách -->
+            <mat-option
+              *ngIf="signerActionForm.get('valueInput')?.value && !anchorTags.includes(signerActionForm.get('valueInput')?.value)"
+              [value]="signerActionForm.get('valueInput')?.value"
+            >
+              {{ signerActionForm.get("valueInput")?.value }}
+            </mat-option>
+
+            <mat-option *ngFor="let tag of filteredAnchorTags" [value]="tag">
+              {{ tag }}
+            </mat-option>
+
+            <mat-option *ngIf="anchorTags.length === 0" disabled>
+              {{ 'DocumentHasNoAnchorTags' | ecTranslate }}
+            </mat-option>
+            <mat-option *ngIf="anchorTags.length > 0 && filteredAnchorTags.length === 0" disabled>
+              {{ 'NoAnchorTagFound' | ecTranslate }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="design_right--position">
         <h5 class="position_signer">{{ "Location" | ecTranslate }}</h5>
         <div class="position_signer">
           {{ "CoordinatesX" | ecTranslate }}
@@ -242,6 +295,8 @@
               formControlName="left"
               class="position_signer--input"
               matInput
+              (blur)="handleChangePositionSignature()"
+              (keyup.enter)="handleChangePositionSignature()"
             />
           </mat-form-field>
         </div>
@@ -256,58 +311,9 @@
               formControlName="top"
               class="position_signer--input"
               matInput
+              (blur)="handleChangePositionSignature()"
+              (keyup.enter)="handleChangePositionSignature()"
             />
-          </mat-form-field>
-        </div>
-        <div
-          *ngIf="
-            currentSigner.signatureType !== signatureType.Text &&
-            currentSigner.signatureType !== signatureType.DatePicker
-          "
-          class="position_signer"
-        >
-          {{ "AnchorTag" | ecTranslate }}
-          <mat-form-field appearance="outline">
-            <mat-select
-              formControlName="valueInput"
-              [disabled]="!isAllowEditSignature()"
-              placeholder="Chọn mã neo"
-              (openedChange)="anchorTagSearch = ''"
-            >
-              <!-- Ô tìm kiếm trong dropdown -->
-              <mat-option disabled class="anchor-search-option">
-                <input
-                  class="anchor-search-input"
-                  [(ngModel)]="anchorTagSearch"
-                  [ngModelOptions]="{ standalone: true }"
-                  [placeholder]="'SearchAnchorTag' | ecTranslate"
-                  (click)="$event.stopPropagation()"
-                  (keydown)="$event.stopPropagation()"
-                  autocomplete="off"
-                />
-              </mat-option>
-
-              <mat-option [value]="null">{{ 'None' | ecTranslate }}</mat-option>
-
-              <!-- Giá trị đã lưu không có trong danh sách -->
-              <mat-option
-                *ngIf="signerActionForm.get('valueInput')?.value && !anchorTags.includes(signerActionForm.get('valueInput')?.value)"
-                [value]="signerActionForm.get('valueInput')?.value"
-              >
-                {{ signerActionForm.get("valueInput")?.value }}
-              </mat-option>
-
-              <mat-option *ngFor="let tag of filteredAnchorTags" [value]="tag">
-                {{ tag }}
-              </mat-option>
-
-              <mat-option *ngIf="anchorTags.length === 0" disabled>
-                {{ 'DocumentHasNoAnchorTags' | ecTranslate }}
-              </mat-option>
-              <mat-option *ngIf="anchorTags.length > 0 && filteredAnchorTags.length === 0" disabled>
-                {{ 'NoAnchorTagFound' | ecTranslate }}
-              </mat-option>
-            </mat-select>
           </mat-form-field>
         </div>
         <div
@@ -324,6 +330,8 @@
               formControlName="width"
               class="position_signer--input"
               matInput
+              (blur)="handleChangePositionSignature()"
+              (keyup.enter)="handleChangePositionSignature()"
             />
           </mat-form-field>
           {{ "Height" | ecTranslate }}
@@ -336,6 +344,8 @@
               formControlName="height"
               class="position_signer--input"
               matInput
+              (blur)="handleChangePositionSignature()"
+              (keyup.enter)="handleChangePositionSignature()"
             />
           </mat-form-field>
         </div>
@@ -405,14 +415,6 @@
             
           ></mat-slide-toggle>
         </div>
-
-        <button
-          [disabled]="!isAllowEditSignature()"
-          class="btn-continue button mt-3 w-100 py-2 d-flex align-items-center justify-content-center"
-          (click)="saveSignatureSettings()"
-        >
-          <i class="fa-solid fa-floppy-disk mr-2"></i> {{ "Save" | ecTranslate }}
-        </button>
       </div>
     </div>
   </div>

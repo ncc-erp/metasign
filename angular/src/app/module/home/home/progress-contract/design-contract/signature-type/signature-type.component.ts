@@ -157,7 +157,7 @@ export class SignatureTypeComponent extends AppComponentBase implements OnInit, 
                     this.signatureValue.signatureType === this.ContractSettingType.DatePicker ||
                     this.signatureValue.signatureType === this.ContractSettingType.Dropdown;
 
-    if (!isInput && this.signatureValue.valueInput && this.signatureValue.valueInput.startsWith('[') && this.signatureValue.valueInput.endsWith(']')) {
+    if (!isInput && this.signatureValue.valueInput && this.signatureValue.valueInput.startsWith('<<') && this.signatureValue.valueInput.endsWith('>>')) {
       signaturePosition.valueInput = '';
     }
 
