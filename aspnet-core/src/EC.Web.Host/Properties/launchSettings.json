@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://10.10.72.29:44311/",
+      "applicationUrl": "http://localhost:44311/",
       "sslPort": 44311
     }
   },
@@ -18,11 +18,11 @@
     "EC.Web.Host": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "http://10.10.72.29:44311/",
+      "launchUrl": "http://localhost:44311/",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://10.10.72.29:44311/"
+      "applicationUrl": "http://localhost:44311/"
     }
   }
 }

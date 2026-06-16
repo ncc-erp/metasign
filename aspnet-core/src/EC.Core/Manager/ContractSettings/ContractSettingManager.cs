@@ -1,4 +1,4 @@
-﻿using Abp.BackgroundJobs;
+using Abp.BackgroundJobs;
 using Abp.Domain.Uow;
 using Abp.UI;
 using EC.Authorization.Users;
@@ -108,6 +108,8 @@ namespace EC.Manager.ContractSettings
                     }
                 }
             }
+
+            await _contractManager.ProcessAnchorTags(input.ContractId);
 
             await _contractManager.SaveDraft(input.ContractId);
 

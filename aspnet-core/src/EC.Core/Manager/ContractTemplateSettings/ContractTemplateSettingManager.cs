@@ -1,4 +1,5 @@
-﻿using Abp.UI;
+using Abp.UI;
+using System;
 using EC.Entities;
 using EC.Manager.ContractTemplateSettings.Dto;
 using EC.Manager.ContractTemplateSigners.Dto;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static EC.Constants.Enum;
+using EC.Utils.Dto;
 
 namespace EC.Manager.ContractTemplateSettings
 {
@@ -36,6 +38,10 @@ namespace EC.Manager.ContractTemplateSettings
 
             ValidCreate(contractTemplateId, input.ContractTemplateSignerId, isInput, isSignature, false, null);
             var id = await WorkScope.InsertAndGetIdAsync(entity);
+
+            await CurrentUnitOfWork.SaveChangesAsync();
+
+            await ProcessTemplateAnchorTags(contractTemplateId);
 
             return id;
         }
@@ -72,6 +78,10 @@ namespace EC.Manager.ContractTemplateSettings
 
             ValidCreate(contractTemplateId, input.ContractTemplateSignerId, isInput, isSignature, true, input.Id);
             await WorkScope.UpdateAsync(item);
+
+            await CurrentUnitOfWork.SaveChangesAsync();
+
+            await ProcessTemplateAnchorTags(contractTemplateId);
         }
 
         public void ValidCreate(long contractId, long contractSettingId, bool isInput, bool isSignature, bool isEdit, long? oldId)
@@ -279,6 +289,92 @@ namespace EC.Manager.ContractTemplateSettings
                     Signer = x.Key,
                     Settings = x.Select(y => y.Setting).ToList(),
                 }).ToList();
+        }
+
+        public async Task ProcessTemplateAnchorTags(long templateId)
+        {
+            var signatureSettings = await WorkScope.GetAll<ContractTemplateSetting>()
+                .Where(x => x.ContractTemplateSigner.ContractTemplateId == templateId)
+                .ToListAsync();
+
+            if (!signatureSettings.Any(x => x.SignatureType != SignatureTypeSetting.Text && x.SignatureType != SignatureTypeSetting.DatePicker && !string.IsNullOrEmpty(x.ValueInput) && x.ValueInput.StartsWith("<<") && x.ValueInput.EndsWith(">>")))
+            {
+                return;
+            }
+
+            var template = await WorkScope.GetAll<ContractTemplate>()
+                .Where(x => x.Id == templateId)
+                .FirstOrDefaultAsync();
+
+            if (template == null || string.IsNullOrEmpty(template.Content))
+            {
+                return;
+            }
+
+            byte[] pdfBytes = Convert.FromBase64String(template.Content.Split(",")[1]);
+            var foundPositions = new List<TextPosition>();
+
+            foreach (var setting in signatureSettings)
+            {
+                if (setting.SignatureType != SignatureTypeSetting.Text &&
+                    setting.SignatureType != SignatureTypeSetting.DatePicker &&
+                    !string.IsNullOrEmpty(setting.ValueInput) &&
+                    setting.ValueInput.StartsWith("<<") &&
+                    setting.ValueInput.EndsWith(">>"))
+                {
+                    var position = EC.Utils.PdfTextFinder.FindAnchorPosition(pdfBytes, setting.ValueInput);
+                    if (position != null)
+                    {
+                        if (!foundPositions.Any(p => p.Page == position.Page && p.X == position.X && p.Y == position.Y))
+                        {
+                            foundPositions.Add(position);
+                        }
+
+                        setting.Page = position.Page;
+
+                        float boxWidth = setting.Width ?? 0;
+                        float boxHeight = setting.Height ?? 0;
+
+                        if (boxWidth <= 0 || boxHeight <= 0)
+                        {
+                            switch (setting.SignatureType)
+                            {
+                                case SignatureTypeSetting.Electronic:
+                                    boxWidth = 180;
+                                    boxHeight = 110;
+                                    break;
+                                case SignatureTypeSetting.Digital:
+                                case SignatureTypeSetting.Stamp:
+                                    boxWidth = 220;
+                                    boxHeight = 155;
+                                    break;
+                                case SignatureTypeSetting.Text:
+                                case SignatureTypeSetting.DatePicker:
+                                    boxWidth = 210;
+                                    boxHeight = 36;
+                                    break;
+                                default:
+                                    boxWidth = 180;
+                                    boxHeight = 110;
+                                    break;
+                            }
+                        }
+
+                        // Center in PDF coordinates:
+                        float pdfCenterX = position.X + position.Width / 2f;
+                        float pdfCenterY = position.Y + position.Height / 2f;
+
+                        float frontCenterX = pdfCenterX * 2;
+                        float frontCenterY = (position.PageHeight - pdfCenterY) * 2;
+
+                        setting.PositionX = frontCenterX - (boxWidth / 2f);
+                        setting.PositionY = frontCenterY - (boxHeight / 2f);
+
+                        await WorkScope.UpdateAsync(setting);
+                    }
+                }
+            }
+            await CurrentUnitOfWork.SaveChangesAsync();
         }
     }
 }

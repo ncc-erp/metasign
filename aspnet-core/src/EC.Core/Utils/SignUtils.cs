@@ -1,4 +1,4 @@
-﻿using Abp.UI;
+using Abp.UI;
 using AngleSharp.Text;
 using EC.Manager.ContractSignings.Dto;
 using iTextSharp.text;
@@ -16,6 +16,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using static EC.Constants.Enum;
+using EC.Utils.Dto;
 
 namespace EC.Utils
 {
@@ -274,6 +275,5 @@ namespace EC.Utils
                 return "data:application/pdf;base64," + outputBase64;
             }
         }
-
     }
 }
