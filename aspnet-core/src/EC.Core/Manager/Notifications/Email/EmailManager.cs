@@ -3,6 +3,7 @@ using Abp.Timing;
 using Abp.UI;
 using EC.Constants.Dictionary;
 using EC.Entities;
+using EC.Manager.Contracts;
 using EC.Manager.Notifications.Email.Dto;
 using EC.Manager.Notifications.Templates;
 using HRMv2.NccCore;
@@ -33,17 +34,19 @@ namespace EC.Manager.Notifications.Email
         public IQueryable<EmailDto> IQGetEmailTemplate()
         {
             return WorkScope.GetAll<EmailTemplate>()
-                    .Select(s => new EmailDto
-                    {
-                        Id = s.Id,
-                        Name = s.Name,
-                        Description = s.Description,
-                        BodyMessage = s.BodyMessage.Replace("\"", "'"),
-                        Type = s.Type,
-                        CCs = s.CCs,
-                        SendToEmail = s.SendToEmail
-                    });
+                 .Select(s => new EmailDto
+                 {
+                     Id = s.Id,
+                     Name = s.Name,
+                     Description = s.Description,
+                     BodyMessage = s.BodyMessage.Replace("\"", "'"),
+                     Type = s.Type,
+                     CCs = s.CCs,
+                     SendToEmail = s.SendToEmail,
+                 });
         }
+
+
 
         public void SendMail(MailPreviewInfoDto input)
         {
@@ -94,8 +97,8 @@ namespace EC.Manager.Notifications.Email
             var bodyMessage = typeOfEntity.GetProperty("BodyMessage").GetValue(mailEntity) as string;
             var subject = typeOfDto.GetProperty("Subject").GetValue(data) != null ? typeOfDto.GetProperty("Subject").GetValue(data) as string : "";
 
-            var properties = typeOfDto.GetProperties().Where(s => s.Name != "SendToEmail" 
-            && s.Name != "SignUrl" 
+            var properties = typeOfDto.GetProperties().Where(s => s.Name != "SendToEmail"
+            && s.Name != "SignUrl"
             && s.Name != "AuthorEmail"
             && s.Name != "ContractCode").Select(s => s.Name).ToArray();
             foreach (var property in properties)
@@ -209,11 +212,32 @@ namespace EC.Manager.Notifications.Email
             return input;
         }
 
-        public MailPreviewInfoDto GetEmailContentById(MailFuncEnum mailType, long id)
+        public MailPreviewInfoDto GetEmailContentById(MailFuncEnum mailType, long id, long mailTemplateId)
         {
-            var template = WorkScope.GetAll<EmailTemplate>().Where(x => x.Type == mailType).FirstOrDefault();
+            var template = WorkScope.GetAll<EmailTemplate>()
+                .Where(x => x.Id == mailTemplateId)
+                .FirstOrDefault();
+
+            if (template == null)
+            {
+                template = WorkScope.GetAll<EmailTemplate>()
+                    .OrderBy(x => x.Id)
+                    .FirstOrDefault();
+            }
+
+            if (template == null)
+            {
+                throw new UserFriendlyException("No email template found");
+            }
 
             var data = EmailDispatchData(mailType, id);
+
+            var contract = WorkScope.GetAll<Contract>().Where(x => x.Id == id).FirstOrDefault();
+
+            if (contract != null)
+            {
+               contract.EmailTemplateId = template.Id;
+            }
 
             return GenerateEmailContent(data.Result, template);
         }
@@ -232,12 +256,27 @@ namespace EC.Manager.Notifications.Email
                if (!mails.Contains(e))
                {
                    var isSeedMailExist = DictionaryHelper.SeedMailDic.ContainsKey(e);
+
+                   //Vietnamese template
                    mailTemplates.Add(
                        new EmailTemplate
                        {
                            Subject = isSeedMailExist ? DictionaryHelper.SeedMailDic[e].Subject : string.Empty,
                            Name = isSeedMailExist ? DictionaryHelper.SeedMailDic[e].Name : string.Empty,
                            BodyMessage = TemplateHelper.ContentEmailTemplate(e),
+                           Description = isSeedMailExist ? DictionaryHelper.SeedMailDic[e].Description : string.Empty,
+                           Type = e,
+                           TenantId = tenantId
+                       }
+                   );
+
+                   //English template   
+                   mailTemplates.Add(
+                       new EmailTemplate
+                       {
+                           Subject = isSeedMailExist ? DictionaryHelper.SeedMailDic[e].Subject : string.Empty,
+                           Name = isSeedMailExist ? DictionaryHelper.SeedMailDic[e].Name + " - EN" : string.Empty,
+                           BodyMessage = TemplateHelper.ContentEmailEnglishTemplate(e),
                            Description = isSeedMailExist ? DictionaryHelper.SeedMailDic[e].Description : string.Empty,
                            Type = e,
                            TenantId = tenantId
@@ -284,22 +323,21 @@ namespace EC.Manager.Notifications.Email
             };
         }
 
-        public EmailTemplateDto GetEmailTemplateDto(MailFuncEnum type)
+        public EmailTemplateDto GetEmailTemplateDto(MailFuncEnum type, long? emailTemplateId)
         {
-            var emailTemplateDto = WorkScope.GetAll<EmailTemplate>()
-                .Where(s => s.Type == type)
-                .Select(s => new EmailTemplateDto
-                {
-                    Id = s.Id,
-                    Type = s.Type,
-                    BodyMessage = s.BodyMessage,
-                    CCs = s.CCs,
-                    Name = s.Name,
-                    Subject = s.Subject,
-                    SendToEmail = s.SendToEmail
-                }).FirstOrDefault();
-
-            return emailTemplateDto;
+            return WorkScope.GetAll<EmailTemplate>()
+             .Where(s => emailTemplateId.HasValue ? s.Id == emailTemplateId.Value : s.Type == type)
+             .Select(s => new EmailTemplateDto
+             {
+                 Id = s.Id,
+                 Type = s.Type,
+                 BodyMessage = s.BodyMessage,
+                 CCs = s.CCs,
+                 Name = s.Name,
+                 Subject = s.Subject,
+                 SendToEmail = s.SendToEmail
+             })
+             .FirstOrDefault();
         }
 
         public void SetSendStatus(long id)

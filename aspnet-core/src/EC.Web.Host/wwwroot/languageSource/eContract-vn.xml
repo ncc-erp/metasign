@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <localizationDictionary culture="vn">
 	<texts>
 		<text name="Home" value="Trang chủ" />
@@ -321,6 +321,7 @@
 		<text name="YouHadDocumentNeedSign" value="Bạn có tài liệu cần kí" />
 		<text name="CoordinatesX" value="Cách X" />
 		<text name="CoordinatesY" value="Cách Y" />
+		<text name="AnchorTag" value="Mã neo (Anchor Tag)" />
 		<text name="YouHaveReceivedACopyOfTheDocument" value="Bạn đã nhận được bản sao tài liệu" />
 		<text name="Viewer" value="Người xem" />
 		<text name="ApprovedBy" value="Người duyệt" />
@@ -672,5 +673,10 @@
 		<text name="FileError" value="File có lỗi vui lòng kiểm tra lại!" />
 		<text name="NoData" value="Không có dữ liệu!" />
 		<text name="SignerNotBeenSet" value="Tồn tại người ký chưa được thiết lập vị trí ký!" />
+		<text name="showSignDate" value="Hiển thị ngày ký"/>
+		<text name="SearchAnchorTag" value="Tìm mã neo..." />
+		<text name="None" value="— Không có —" />
+		<text name="NoAnchorTagFound" value="Không tìm thấy mã neo phù hợp" />
+		<text name="DocumentHasNoAnchorTags" value="Tài liệu chưa có mã neo &lt;&lt;...&gt;&gt;" />
 	</texts>
 </localizationDictionary>

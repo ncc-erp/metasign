@@ -1,4 +1,3 @@
-﻿using Microsoft.AspNetCore.Identity;
 using Abp.Authorization;
 using Abp.Authorization.Users;
 using Abp.Configuration;
@@ -6,32 +5,37 @@ using Abp.Configuration.Startup;
 using Abp.Dependency;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
+using Abp.Extensions;
+using Abp.UI;
 using Abp.Zero.Configuration;
+using Amazon.Runtime.Internal.Util;
 using EC.Authorization.Roles;
 using EC.Authorization.Users;
-using EC.MultiTenancy;
-using Abp.UI;
 using EC.Configuration;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using System.Threading.Tasks;
-using System;
-using Google.Apis.Auth;
-using System.Linq;
-using Abp.Extensions;
-using Microsoft.IdentityModel.Tokens;
-using System.Net.Http.Headers;
-using System.Net.Http;
-using System.IdentityModel.Tokens.Jwt;
-using static EC.Constants.Enum;
-using Microsoft.Extensions.Configuration;
+using EC.Manager.Contracts;
+using EC.MultiTenancy;
 using EC.WebService.Mezon.Dto;
+using Google.Apis.Auth;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using static EC.Constants.Enum;
 
 namespace EC.Authorization
 {
     public class LogInManager : AbpLogInManager<Tenant, Role, User>
     {
         private readonly IConfiguration _configuration;
+        private readonly IContractManager _contractManager;
+
         public LogInManager(
             UserManager userManager, 
             IMultiTenancyConfig multiTenancyConfig,
@@ -44,7 +48,8 @@ namespace EC.Authorization
             IPasswordHasher<User> passwordHasher, 
             RoleManager roleManager,
             IConfiguration configuration,
-            UserClaimsPrincipalFactory claimsPrincipalFactory) 
+            UserClaimsPrincipalFactory claimsPrincipalFactory,
+            IContractManager contractManager) 
             : base(
                   userManager, 
                   multiTenancyConfig,
@@ -59,6 +64,7 @@ namespace EC.Authorization
                   claimsPrincipalFactory)
         {
             _configuration = configuration;
+            _contractManager = contractManager;
         }
 
 
@@ -106,7 +112,7 @@ namespace EC.Authorization
           
             try
             {
-                var emailAddress = input.sub;
+                var emailAddress = input.email;
                 var clientAppId = _configuration.GetValue<string>("Oauth2Mezon:CLient_Id");
                 var corectAudience = input.aud.Any(s => s== clientAppId);
                 var correctIssuer = input.iss == "https://oauth2.mezon.ai";
@@ -125,6 +131,34 @@ namespace EC.Authorization
             }catch(InvalidJwtException e)
             {
                 return new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidUserNameOrEmailAddress, null);
+            }
+        }
+
+        [UnitOfWork]
+        public async Task<Boolean> LoginAsyncWithMezonForSignContract(AuthOauth2Mezon input, Int64 contractId, string tenancyName = null, bool shouldLockout = true)
+        {
+            try
+            {
+                var emailAddress = input.email;
+                var clientAppId = _configuration.GetValue<string>("Oauth2Mezon:CLient_Id");
+                var corectAudience = input.aud.Any(s => s == clientAppId);
+                var correctIssuer = input.iss == "https://oauth2.mezon.ai";
+                var correctExpriryTime = input.auth_time != null || input.auth_time > 0;
+
+                Tenant tenant = null;
+
+                if (corectAudience && correctExpriryTime && correctIssuer)
+                {
+                    return await ValidateAndLoginUserForMezonSignContractAsync(tenant, contractId, emailAddress, tenancyName, shouldLockout);
+                }
+                else
+                {
+                    throw new UserFriendlyException(string.Format("User name or email address is invalid"));
+                }
+            }
+            catch (InvalidJwtException)
+            {
+                throw new UserFriendlyException(string.Format("User name or email address is invalid"));
             }
         }
 
@@ -211,6 +245,46 @@ namespace EC.Authorization
                 return await CreateLoginResultAsync(user, tenant);
             }
         }
+
+        private async Task<Boolean> ValidateAndLoginUserForMezonSignContractAsync(Tenant tenant, Int64 contractId, string emailAddress, string tenancyName, bool shouldLockout)
+        {
+            using (UnitOfWorkManager.Current.SetTenantId(null))
+            {
+                if (!MultiTenancyConfig.IsEnabled)
+                {
+                    tenant = await GetDefaultTenantAsync();
+                }
+                else if (!string.IsNullOrWhiteSpace(tenancyName))
+                {
+                    tenant = await TenantRepository.FirstOrDefaultAsync(t => t.TenancyName == tenancyName);
+                    if (tenant == null)
+                    {
+                        throw new UserFriendlyException(string.Format("Tenant not found"));
+                    }
+
+                    if (!tenant.IsActive)
+                    {
+                        throw new UserFriendlyException(string.Format("Tenant is not active"));
+                    }
+                }
+            }
+
+            var tenantId = tenant == null ? (int?)null : tenant.Id;
+            using (UnitOfWorkManager.Current.SetTenantId(tenantId))
+            {
+                await UserManager.InitializeOptionsAsync(tenantId);
+
+                var contracts = await _contractManager.GetByContractIdAndEmailAddress(contractId, emailAddress);
+
+                if (contracts.Count == 0)
+                {
+                    throw new UserFriendlyException(string.Format("You don't have permission to view this contract"));
+                }
+
+                return true;
+            }
+        }
+
         public async Task<AbpLoginResult<Tenant, User>> LoginAsyncWithMicrosoft(string token, string secretCode, string tenancyName = null, bool shouldLockout = true)
         {
             if (token.IsNullOrEmpty())

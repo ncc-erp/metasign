@@ -10,7 +10,8 @@ export interface ContractDto {
     creatorUser: string
     creationTime: string
     file: string
-    fileBase64: string
+  fileBase64: string
+  emailTemplateId?: number
 }
 export interface ContractImages {
     contractPage: number

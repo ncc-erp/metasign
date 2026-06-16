@@ -19,6 +19,7 @@ namespace EC.Entities
         public virtual User User { get; set; }
         public string Name { get; set; }
         public string EmailContent { get; set; }
+        public long? EmailTemplateId { get; set; }
         public string Code { get; set; }
         public string File { get; set; }
         public string FileBase64 { get; set; }
@@ -27,5 +28,5 @@ namespace EC.Entities
         public long? ContractTemplateId { get; set; }
         public Guid? ContractGuid { get; set; }
         public Guid? MassGuid { get; set; }
-    }
+        }
 }

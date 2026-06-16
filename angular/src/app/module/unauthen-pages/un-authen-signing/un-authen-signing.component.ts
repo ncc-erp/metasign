@@ -1,8 +1,18 @@
-import { ContractInvalidateDialogComponent } from './contract-invalidate-dialog/contract-invalidate-dialog.component';
+import { ContractInvalidateDialogComponent } from "./contract-invalidate-dialog/contract-invalidate-dialog.component";
 import { MatIconRegistry } from "@angular/material/icon";
 import { map, concatMap } from "rxjs/operators";
-import { FillInputDto, SignInputDto } from "./../../../service/model/design-contract.dto";
-import { BreakPoint, ContractInvalidate, ContractSettingType, EContractStatusId, SignType, loginApp } from "./../../../../shared/AppEnums";
+import {
+  FillInputDto,
+  SignInputDto,
+} from "./../../../service/model/design-contract.dto";
+import {
+  BreakPoint,
+  ContractInvalidate,
+  ContractSettingType,
+  EContractStatusId,
+  SignType,
+  loginApp,
+} from "./../../../../shared/AppEnums";
 import { MatDialog } from "@angular/material/dialog";
 import { SignDto, SignMultipleDto } from "./../../../service/model/sign.dto";
 import { saveAs } from "file-saver";
@@ -16,7 +26,7 @@ import {
   QueryList,
   ViewChild,
   ViewChildren,
-  HostListener
+  HostListener,
 } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { DomSanitizer } from "@angular/platform-browser";
@@ -33,12 +43,12 @@ import { CertDetailDialogComponent } from "./cert-detail-dialog/cert-detail-dial
 import { CertificateDetailDto } from "@app/service/model/certificateDetail.dto";
 import { DesktopAppServiceService } from "@app/service/api/desktop-app-service.service";
 import { PreviewContractComponent } from "@app/module/home/home/progress-contract/upload-contract/preview-contract/preview-contract.component";
-import { ContractDialogConfirmComponent } from './contract-dialog-confirm/contract-dialog-confirm.component';
-import { DialogDownloadComponent } from '@app/module/contract/contract-manage/dialog-download/dialog-download.component';
-import { ContractFileStoringService } from '@app/service/api/contract-file-storing.service';
-import CustomProtocolCheck from 'custom-protocol-check';
-import { ContractPublicService } from '@app/service/api/contract-public.service';
-import * as FileSaver from 'file-saver';
+import { ContractDialogConfirmComponent } from "./contract-dialog-confirm/contract-dialog-confirm.component";
+import { DialogDownloadComponent } from "@app/module/contract/contract-manage/dialog-download/dialog-download.component";
+import { ContractFileStoringService } from "@app/service/api/contract-file-storing.service";
+import CustomProtocolCheck from "custom-protocol-check";
+import { ContractPublicService } from "@app/service/api/contract-public.service";
+import * as FileSaver from "file-saver";
 @Component({
   selector: "app-un-authen-signing",
   templateUrl: "./un-authen-signing.component.html",
@@ -46,11 +56,14 @@ import * as FileSaver from 'file-saver';
 })
 export class UnAuthenSigningComponent
   extends AppComponentBase
-  implements OnInit {
+  implements OnInit
+{
   private contractSettingId: number = 0;
   private contracId: number = 0;
   private tenantName = "";
-  signatureTypeList = AppConsts.signatureTypeList.concat(AppConsts.otherTypeList);
+  signatureTypeList = AppConsts.signatureTypeList.concat(
+    AppConsts.otherTypeList
+  );
   contractBase64: string = "";
   signatureSetting: SignatureSettings[] = [];
   contractInfo: ContractSignerSignatureSettingDto;
@@ -66,16 +79,16 @@ export class UnAuthenSigningComponent
   statusSign: string = "Start";
   contractfiles: ContractSignatureSettingDto[] = [];
   contractFilePreview: ContractSignatureSettingDto[] = [];
-  scalePreview: number = 1.45
+  scalePreview: number = 1.45;
   filledInput: FillInputDto[] = [];
   signatureDefaultElectronic = {} as {
-    contractBase64: string,
-    signatureType: ContractSettingType
+    contractBase64: string;
+    signatureType: ContractSettingType;
   };
   signatureDefaultStamp = {} as {
-    contractBase64: string,
-    signatureType: ContractSettingType
-  };;
+    contractBase64: string;
+    signatureType: ContractSettingType;
+  };
   isInput: boolean = false;
   signatureSettingTemp: SignatureSettings[] = [];
   imageSignatureDigital: string;
@@ -87,14 +100,16 @@ export class UnAuthenSigningComponent
   statusContractSign: boolean = false;
   scaleValue: number;
   isCheckConfirm: boolean = false;
-  isCheckShowConfirm: boolean
+  isCheckShowConfirm: boolean;
   isCreator: boolean;
   contractStatus: number;
   ContractRole = ContractRole;
   isComplete: boolean;
   screenWidth: number;
-  SignType = SignType
+  SignType = SignType;
   massGuid: string;
+  focusedSignatureId: number | null = null;
+  ContractSettingType = ContractSettingType;
   @ViewChild("contractScrolls") contractScroll: ElementRef;
   @ViewChild("pageContainer") pageContainer: ElementRef;
   @ViewChildren("signature")
@@ -108,7 +123,7 @@ export class UnAuthenSigningComponent
     private router: Router,
     private matIconRegistry: MatIconRegistry,
     private domSanitizer: DomSanitizer,
-    private contractPublicService:ContractPublicService,
+    private contractPublicService: ContractPublicService,
     private desktopAppServiceService: DesktopAppServiceService,
     private contractFileStoringService: ContractFileStoringService
   ) {
@@ -140,7 +155,6 @@ export class UnAuthenSigningComponent
       )
     );
 
-
     this.matIconRegistry.addSvgIcon(
       "stamp",
       this.domSanitizer.bypassSecurityTrustResourceUrl(
@@ -163,13 +177,51 @@ export class UnAuthenSigningComponent
   ngOnInit(): void {
     this.updateScale();
     this.getSignatureSetting();
-    this.screenWidth = window.innerWidth
+    this.screenWidth = window.innerWidth;
   }
 
-  @HostListener('window:resize')
+  @HostListener("window:resize")
   onWindowResize() {
     this.screenWidth = window.innerWidth;
     this.updateScale();
+  }
+
+  // Add method to handle signature focus
+  onSignatureFocus(signature: SignatureSettings) {
+    this.focusedSignatureId = signature.id;
+  }
+
+  // Method to check if signature is focused and digital
+  isDigitalSignatureFocused(): boolean {
+    return (
+      this.focusedSignatureId != null &&
+      this.signatureSettingTemp?.find(
+        (signature) =>
+          signature.id === this.focusedSignatureId &&
+          signature.signatureType === ContractSettingType.Digital
+      ) != null
+    );
+  }
+
+  // Method to get the focused signature object
+  getFocusedSignature(): SignatureSettings | undefined {
+    if (!this.focusedSignatureId || !this.signatureSettingTemp) {
+      return undefined;
+    }
+
+    return this.signatureSettingTemp.find(
+      (signature) => signature.id === this.focusedSignatureId
+    );
+  }
+
+  // Method to handle the toggle change
+  onShowSignDateChange(event: any) {
+    const focusedSignature = this.getFocusedSignature();
+    if (focusedSignature) {
+      focusedSignature.isShowSignDate = event.checked;
+      // You might want to save this change or emit an event here
+      console.log(this.signatureSettingTemp)
+    }
   }
 
   handleOpenContractInvalidate() {
@@ -178,64 +230,84 @@ export class UnAuthenSigningComponent
         data: {
           contractSettingId: this.contractSettingId,
           role: ContractInvalidate.contractCreator,
-          title: "CancelDocument"
+          title: "CancelDocument",
         },
         width: this.screenWidth <= BreakPoint.mobile ? "80%" : "50%",
         height: this.screenWidth <= BreakPoint.Ipad ? "80%" : "60%",
-        panelClass: 'contract-dialog',
+        panelClass: "contract-dialog",
       });
-    }
-    else {
+    } else {
       this.dialog.open(ContractDialogConfirmComponent, {
         data: {
           contractSettingId: this.contractSettingId,
-          role: ContractInvalidate.contractSigner
+          role: ContractInvalidate.contractSigner,
         },
         width: this.screenWidth <= BreakPoint.IpadMini ? "70%" : "30%",
         height: this.screenWidth <= BreakPoint.Ipad ? "60%" : "40%",
-        panelClass: 'confirm-dialog',
+        panelClass: "confirm-dialog",
       });
     }
   }
 
   updateScale() {
-    const targetWidth = 820
+    const targetWidth = 820;
     const screenWidth = window.innerWidth; // Chiều rộng màn hình hiện tại
     const scaleX = screenWidth / 1224;
     this.scaleValue = screenWidth <= targetWidth ? scaleX : 1;
   }
 
   handleValueContractText(signature) {
-    let existItem = this.filledInput.find(x => x.signerSignatureSettingId == signature.id)
+    let existItem = this.filledInput.find(
+      (x) => x.signerSignatureSettingId == signature.id
+    );
     if (existItem) {
-      existItem.content = signature.valueInput
+      existItem.content = signature.valueInput;
     }
-    if (!existItem && !signature.isSigned && signature?.signatureType !== ContractSettingType.Digital && signature?.signatureType !== ContractSettingType.Electronic) {
-      this.filledInput.push(
-        {
-          base64Pdf: this.contractInfo.contractBase64,
-          content: signature.valueInput,
-          fontSize: signature.fontSize,
-          fontFamily: signature.fontFamily,
-          pageHeight: signature.heightPage,
-          signerSignatureSettingId: signature.id,
-          color: signature.fontColor,
-          signatureType: signature.signatureType
-        } as FillInputDto
-      )
+    if (
+      !existItem &&
+      !signature.isSigned &&
+      signature?.signatureType !== ContractSettingType.Digital &&
+      signature?.signatureType !== ContractSettingType.Electronic
+    ) {
+      this.filledInput.push({
+        base64Pdf: this.contractInfo.contractBase64,
+        content: signature.valueInput,
+        fontSize: signature.fontSize,
+        fontFamily: signature.fontFamily,
+        pageHeight: signature.heightPage,
+        signerSignatureSettingId: signature.id,
+        color: signature.fontColor,
+        signatureType: signature.signatureType,
+      } as FillInputDto);
     }
   }
 
   async handleSave(type) {
-    let queryParameters = { id: this.contracId, contracInfo: this.contractInfo.contractName }
+    let queryParameters = {
+      id: this.contracId,
+      contracInfo: this.contractInfo.contractName,
+    };
 
-    let signatures = this.signatureSetting.filter(x => x.signatureType == ContractSettingType.Digital
-      || x.signatureType == ContractSettingType.Electronic || x.signatureType == ContractSettingType.Stamp)
+    let signatures = this.signatureSetting.filter(
+      (x) =>
+        x.signatureType == ContractSettingType.Digital ||
+        x.signatureType == ContractSettingType.Electronic ||
+        x.signatureType == ContractSettingType.Stamp
+    );
 
-    let setupInputs = this.signatureSetting.filter(x => (x.signatureType == ContractSettingType.Text
-      || x.signatureType == ContractSettingType.DatePicker) && x.isAllowSigning)
-    this.filledInput = this.filledInput.filter(input => (input.signatureType === ContractSettingType.Text && !!input.content?.trimEnd()) || (input.signatureType === ContractSettingType.DatePicker && input.content !== "Invalid date")
-    )
+    let setupInputs = this.signatureSetting.filter(
+      (x) =>
+        (x.signatureType == ContractSettingType.Text ||
+          x.signatureType == ContractSettingType.DatePicker) &&
+        x.isAllowSigning
+    );
+    this.filledInput = this.filledInput.filter(
+      (input) =>
+        (input.signatureType === ContractSettingType.Text &&
+          !!input.content?.trimEnd()) ||
+        (input.signatureType === ContractSettingType.DatePicker &&
+          input.content !== "Invalid date")
+    );
 
     if (this.filledInput.length < setupInputs.length) {
       abp.message.error(this.ecTransform("PleaseFillOutAllFields"));
@@ -247,7 +319,7 @@ export class UnAuthenSigningComponent
       return;
     }
     this.contractLoadding = true;
-    this.statusContractSign = true
+    this.statusContractSign = true;
     this.isSaving = true;
     let statusSignatureElectronic: boolean = false;
     let statusSignatureDigital: boolean = false;
@@ -256,364 +328,519 @@ export class UnAuthenSigningComponent
       if (signature.signatureType === ContractSettingType.Digital) {
         statusSignatureDigital = true;
       }
-      if (signature.signatureType === ContractSettingType.Electronic || signature.signatureType == ContractSettingType.Stamp) {
+      if (
+        signature.signatureType === ContractSettingType.Electronic ||
+        signature.signatureType == ContractSettingType.Stamp
+      ) {
         statusSignatureElectronic = true;
       }
     });
 
     if (type === SignType.massContractSigning) {
-      this.signatureSettingService.getMassContractNotSign(this.massGuid).subscribe((value) => {
-        value.result.forEach(async (contract) => {
-          if (!contract.isSigned) {
-            let queryParameters = { id: contract.contractId, contracInfo: this.contractInfo.contractName }
+      this.signatureSettingService
+        .getMassContractNotSign(this.massGuid)
+        .subscribe((value) => {
+          value.result.forEach(async (contract) => {
+            if (!contract.isSigned) {
+              let queryParameters = {
+                id: contract.contractId,
+                contracInfo: this.contractInfo.contractName,
+              };
 
-            if (this.filledInput.length > 0) {
-              let text = []
-              contract.signature.forEach(data => {
-                if (data.signatureType === ContractSettingType.Text || data.signatureType === ContractSettingType.DatePicker) {
-                  text.push(data)
-                }
-              })
-
-              let data = this.filledInput.filter(data => {
-                return data.signatureType === ContractSettingType.DatePicker || data.signatureType === ContractSettingType.Text
-              }).sort((a, b) => a.signerSignatureSettingId - b.signerSignatureSettingId)
-
-              for (let i = 0; i < text.length; i++) {
-                for (let j = i; j < data.length; j++) {
-                  text[i].base64Pdf = data[j].base64Pdf
-                  text[i].color = data[j].color
-                  text[i].content = data[j].content
-                  text[i].pageHeight = data[j].pageHeight
-                  text[i].signatureType = data[j].signatureType
-                  text[i].fontSize = data[j].fontSize
-                  break;
-                }
-              }
-
-              let dto = {
-                base64Pdf: contract.base64Pdf,
-                listInput: text
-              } as SignInputDto
-
-
-              await this.contractSigningService.SignInput(dto).toPromise().then(rs => {
-                contract.base64Pdf = rs.result
-
-                if (this.filledInput.length == this.signatureSetting.length) {
-                  let signingResult = {
-                    contractSettingId: contract.contractSettingId,
-                    signResult: rs.result,
+              if (this.filledInput.length > 0) {
+                let text = [];
+                contract.signature.forEach((data) => {
+                  if (
+                    data.signatureType === ContractSettingType.Text ||
+                    data.signatureType === ContractSettingType.DatePicker
+                  ) {
+                    text.push(data);
                   }
-                  this.contractSigningService.insertSigningResultAndComplete(signingResult).pipe(
-                    concatMap(() => this.contractFileStoringService.clearContractDownloadFiles(contract.contractId)))
-                    .subscribe()
-                  this.router.navigate(["/app/signging/signing-result"], { queryParams: queryParameters });
-                  this.statusContractSign = false
-                  localStorage.removeItem('typeLoginSigning');
-                  return
-                }
-              })
+                });
 
-            }
+                let data = this.filledInput
+                  .filter((data) => {
+                    return (
+                      data.signatureType === ContractSettingType.DatePicker ||
+                      data.signatureType === ContractSettingType.Text
+                    );
+                  })
+                  .sort(
+                    (a, b) =>
+                      a.signerSignatureSettingId - b.signerSignatureSettingId
+                  );
 
-            if (statusSignatureElectronic && statusSignatureDigital) {
-              let digital = []
-              contract.signature.forEach(data => {
-
-                if (data.signatureType === ContractSettingType.Digital) {
-                  digital.push(data)
-                }
-              })
-
-              let data = this.listSignature.filter(data => data.signatureType === ContractSettingType.Digital)
-                .sort((a, b) => a.signerSignatureSettingid - b.signerSignatureSettingid)
-              for (let i = 0; i < digital.length; i++) {
-                for (let j = i; j < data.length; j++) {
-                  digital[i].beginDateCA = data[j].beginDateCA
-                  digital[i].certSerial = data[j].certSerial
-                  digital[i].endDateCA = data[j].endDateCA
-                  digital[i].organizationCA = data[j].organizationCA
-                  digital[i].ownCA = data[j].ownCA
-                  digital[i].page = data[j].page
-                  digital[i].height = data[j].height
-                  digital[i].pageHeight = data[j].pageHeight
-                  digital[i].signatureType = data[j].signatureType
-                  digital[i].uid = data[j].uid
-                  digital[i].width = data[j].width
-                  digital[i].x = data[j].x
-                  digital[i].y = data[j].y
-                  break;
-
-                }
-
-              }
-
-              let signatureDigitalPayload = {
-                base64Pdf: contract.base64Pdf,
-                signatureBase64: this.imageSignatureDigital,
-                signatures: digital
-              }
-              this.desktopAppServiceService.SignDigital(signatureDigitalPayload).pipe(concatMap((value) => {
-                if (value == null || value == "") {
-                  this.statusSign = "Start";
-                  this.idPage = -1;
-                  abp.message.error(this.ecTransform("SigningFailedPleaseRecheckUSB"))
-                  return
-                }
-
-                let signature = [];
-                contract.signature.forEach(data => {
-                  if (data.signatureType === ContractSettingType.Electronic || data.signatureType === ContractSettingType.Stamp) {
-                    signature.push(data)
-                  }
-                })
-                let data = this.listSignature.filter(data => {
-                  return data.signatureType === ContractSettingType.Stamp || data.signatureType === ContractSettingType.Electronic
-                }).sort((a, b) => a.signerSignatureSettingid - b.signerSignatureSettingid)
-                for (let i = 0; i < signature.length; i++) {
+                for (let i = 0; i < text.length; i++) {
                   for (let j = i; j < data.length; j++) {
-
-                    signature[i].isNewSignature = data[j].isNewSignature
-                    signature[i].signartureBase64 = data[j].signartureBase64
-                    signature[i].signatureType = data[j].signatureType
-                    signature[i].pageHeight = data[j].pageHeight
+                    text[i].base64Pdf = data[j].base64Pdf;
+                    text[i].color = data[j].color;
+                    text[i].content = data[j].content;
+                    text[i].pageHeight = data[j].pageHeight;
+                    text[i].signatureType = data[j].signatureType;
+                    text[i].fontSize = data[j].fontSize;
                     break;
                   }
                 }
 
-                let signatureElectronicPayload = {
-                  contractId: this.contracId,
-                  signSignatures: signature,
-                  contractBase64: value
+                let dto = {
+                  base64Pdf: contract.base64Pdf,
+                  listInput: text,
+                } as SignInputDto;
+
+                await this.contractSigningService
+                  .SignInput(dto)
+                  .toPromise()
+                  .then((rs) => {
+                    contract.base64Pdf = rs.result;
+
+                    if (
+                      this.filledInput.length == this.signatureSetting.length
+                    ) {
+                      let signingResult = {
+                        contractSettingId: contract.contractSettingId,
+                        signResult: rs.result,
+                      };
+                      this.contractSigningService
+                        .insertSigningResultAndComplete(signingResult)
+                        .pipe(
+                          concatMap(() =>
+                            this.contractFileStoringService.clearContractDownloadFiles(
+                              contract.contractId
+                            )
+                          )
+                        )
+                        .subscribe();
+                      this.router.navigate(["/app/signging/signing-result"], {
+                        queryParams: queryParameters,
+                      });
+                      this.statusContractSign = false;
+                      localStorage.removeItem("typeLoginSigning");
+                      return;
+                    }
+                  });
+              }
+
+              if (statusSignatureElectronic && statusSignatureDigital) {
+                let digital = [];
+                contract.signature.forEach((data) => {
+                  if (data.signatureType === ContractSettingType.Digital) {
+                    digital.push(data);
+                  }
+                });
+
+                let data = this.listSignature
+                  .filter(
+                    (data) => data.signatureType === ContractSettingType.Digital
+                  )
+                  .sort(
+                    (a, b) =>
+                      a.signerSignatureSettingid - b.signerSignatureSettingid
+                  );
+                for (let i = 0; i < digital.length; i++) {
+                  for (let j = i; j < data.length; j++) {
+                    digital[i].beginDateCA = data[j].beginDateCA;
+                    digital[i].certSerial = data[j].certSerial;
+                    digital[i].endDateCA = data[j].endDateCA;
+                    digital[i].organizationCA = data[j].organizationCA;
+                    digital[i].ownCA = data[j].ownCA;
+                    digital[i].page = data[j].page;
+                    digital[i].height = data[j].height;
+                    digital[i].pageHeight = data[j].pageHeight;
+                    digital[i].signatureType = data[j].signatureType;
+                    digital[i].uid = data[j].uid;
+                    digital[i].width = data[j].width;
+                    digital[i].x = data[j].x;
+                    digital[i].y = data[j].y;
+                    digital[i].isShowSignDate = data[j].isShowSignDate;
+                    break;
+                  }
+                }
+
+                // let signatureDigitalPayload = {
+                //   base64Pdf: contract.base64Pdf,
+                //   signatureBase64: this.imageSignatureDigital,
+                //   signatures: digital,
+                // };
+
+                // attach isShowSignDate from signatureSettingTemp when signerSignatureSettingid matches
+                const signatureDigitalWithShowSignDate = digital.map((sig) => {
+                  const setting = this.signatureSettingTemp?.find(
+                    (s) => s.id === sig.signerSignatureSettingid
+                  );
+                  return {
+                    ...sig,
+                    isShowSignDate:
+                      setting?.isShowSignDate ?? sig.isShowSignDate,
+                  };
+                });
+
+                this.desktopAppServiceService
+                  .SignDigital(signatureDigitalWithShowSignDate)
+                  .pipe(
+                    concatMap((value) => {
+                      if (value == null || value == "") {
+                        this.statusSign = "Start";
+                        this.idPage = -1;
+                        abp.message.error(
+                          this.ecTransform("SigningFailedPleaseRecheckUSB")
+                        );
+                        return;
+                      }
+
+                      let signature = [];
+                      contract.signature.forEach((data) => {
+                        if (
+                          data.signatureType ===
+                            ContractSettingType.Electronic ||
+                          data.signatureType === ContractSettingType.Stamp
+                        ) {
+                          signature.push(data);
+                        }
+                      });
+                      let data = this.listSignature
+                        .filter((data) => {
+                          return (
+                            data.signatureType === ContractSettingType.Stamp ||
+                            data.signatureType ===
+                              ContractSettingType.Electronic
+                          );
+                        })
+                        .sort(
+                          (a, b) =>
+                            a.signerSignatureSettingid -
+                            b.signerSignatureSettingid
+                        );
+                      for (let i = 0; i < signature.length; i++) {
+                        for (let j = i; j < data.length; j++) {
+                          signature[i].isNewSignature = data[j].isNewSignature;
+                          signature[i].signartureBase64 =
+                            data[j].signartureBase64;
+                          signature[i].signatureType = data[j].signatureType;
+                          signature[i].pageHeight = data[j].pageHeight;
+                          break;
+                        }
+                      }
+
+                      let signatureElectronicPayload = {
+                        contractId: this.contracId,
+                        signSignatures: signature,
+                        contractBase64: value,
+                      };
+                      return this.contractSigningService.signMultiple(
+                        signatureElectronicPayload
+                      );
+                    }),
+                    concatMap((rs) => {
+                      this.isSaving = false;
+                      this.contractLoadding = false;
+                      let signingResult = {
+                        contractSettingId: contract.contractSettingId,
+                        signResult: rs.result,
+                      };
+                      return this.contractSigningService.insertSigningResult(
+                        signingResult
+                      );
+                    }),
+                    concatMap(() => {
+                      return this.contractFileStoringService.clearContractDownloadFiles(
+                        contract.contractId
+                      );
+                    })
+                  )
+                  .subscribe(
+                    () => {
+                      this.router.navigate(["/app/signging/signing-result"], {
+                        queryParams: queryParameters,
+                      });
+                      this.statusContractSign = false;
+                      localStorage.removeItem("typeLoginSigning");
+                    },
+                    () => {
+                      this.isSaving = false;
+                      this.contractLoadding = false;
+                      this.statusContractSign = false;
+                    }
+                  );
+                return;
+              }
+
+              if (statusSignatureDigital) {
+                let digital = [];
+                contract.signature.forEach((data) => {
+                  if (data.signatureType === ContractSettingType.Digital) {
+                    digital.push(data);
+                  }
+                });
+
+                let data = this.listSignature
+                  .filter(
+                    (data) => data.signatureType === ContractSettingType.Digital
+                  )
+                  .sort(
+                    (a, b) =>
+                      a.signerSignatureSettingid - b.signerSignatureSettingid
+                  );
+                for (let i = 0; i < digital.length; i++) {
+                  for (let j = i; j < data.length; j++) {
+                    digital[i].beginDateCA = data[j].beginDateCA;
+                    digital[i].certSerial = data[j].certSerial;
+                    digital[i].endDateCA = data[j].endDateCA;
+                    digital[i].organizationCA = data[j].organizationCA;
+                    digital[i].ownCA = data[j].ownCA;
+                    digital[i].page = data[j].page;
+                    digital[i].height = data[j].height;
+                    digital[i].pageHeight = data[j].pageHeight;
+                    digital[i].signatureType = data[j].signatureType;
+                    digital[i].uid = data[j].uid;
+                    digital[i].width = data[j].width;
+                    digital[i].x = data[j].x;
+                    digital[i].y = data[j].y;
+                    digital[i].isShowSignDate = data[j].isShowSignDate;
+                    break;
+                  }
+                }
+
+                let signatureDigitalPayload = {
+                  base64Pdf: contract.base64Pdf,
+                  signatureBase64: this.imageSignatureDigital,
+                  signatures: digital,
                 };
-                return this.contractSigningService.signMultiple(signatureElectronicPayload)
-              }), concatMap((rs) => {
+                this.desktopAppServiceService
+                  .SignDigital(signatureDigitalPayload)
+                  .pipe(
+                    concatMap((rs) => {
+                      if (rs == null || rs == "") {
+                        this.statusSign = "Start";
+                        this.idPage = -1;
+                        abp.message.error(
+                          this.ecTransform("SigningFailedPleaseRecheckUSB")
+                        );
+                        return;
+                      }
 
-                this.isSaving = false;
-                this.contractLoadding = false;
-                let signingResult = {
-                  contractSettingId: contract.contractSettingId,
-                  signResult: rs.result
-                }
-                return this.contractSigningService.insertSigningResult(signingResult)
-              }), concatMap(() => {
-                return this.contractFileStoringService.clearContractDownloadFiles(contract.contractId)
-              })).subscribe(() => {
-                this.router.navigate(["/app/signging/signing-result"], { queryParams: queryParameters });
-                this.statusContractSign = false;
-                localStorage.removeItem('typeLoginSigning');
-              },
-                () => {
-                  this.isSaving = false
-                  this.contractLoadding = false;
-                  this.statusContractSign = false
-                }
-              )
-              return;
-            }
+                      this.isSaving = false;
+                      this.contractLoadding = false;
+                      let signingResult = {
+                        contractSettingId: contract.contractSettingId,
+                        signResult: rs,
+                        hasDigital: true,
+                      };
+                      return this.contractSigningService.insertSigningResultAndComplete(
+                        signingResult
+                      );
+                    }),
+                    concatMap(() => {
+                      return this.contractFileStoringService.clearContractDownloadFiles(
+                        contract.contractId
+                      );
+                    })
+                  )
+                  .subscribe(
+                    () => {
+                      this.router.navigate(["/app/signging/signing-result"], {
+                        queryParams: queryParameters,
+                      });
+                      this.statusContractSign = false;
+                      localStorage.removeItem("typeLoginSigning");
+                    },
+                    () => {
+                      this.isSaving = false;
+                      this.contractLoadding = false;
+                      this.statusContractSign = false;
+                    }
+                  );
 
-            if (statusSignatureDigital) {
-              let digital = []
-              contract.signature.forEach(data => {
-                if (data.signatureType === ContractSettingType.Digital) {
-                  digital.push(data)
-                }
-              })
-
-              let data = this.listSignature.filter(data => data.signatureType === ContractSettingType.Digital)
-                .sort((a, b) => a.signerSignatureSettingid - b.signerSignatureSettingid)
-              for (let i = 0; i < digital.length; i++) {
-                for (let j = i; j < data.length; j++) {
-
-                  digital[i].beginDateCA = data[j].beginDateCA
-                  digital[i].certSerial = data[j].certSerial
-                  digital[i].endDateCA = data[j].endDateCA
-                  digital[i].organizationCA = data[j].organizationCA
-                  digital[i].ownCA = data[j].ownCA
-                  digital[i].page = data[j].page
-                  digital[i].height = data[j].height
-                  digital[i].pageHeight = data[j].pageHeight
-                  digital[i].signatureType = data[j].signatureType
-                  digital[i].uid = data[j].uid
-                  digital[i].width = data[j].width
-                  digital[i].x = data[j].x
-                  digital[i].y = data[j].y
-                  break;
-
-                }
-
+                return;
               }
 
-              let signatureDigitalPayload = {
-                base64Pdf: contract.base64Pdf,
-                signatureBase64: this.imageSignatureDigital,
-                signatures: digital,
-              };
-              this.desktopAppServiceService
-                .SignDigital(signatureDigitalPayload).pipe(concatMap((rs) => {
-                  if (rs == null || rs == "") {
-                    this.statusSign = "Start";
-                    this.idPage = -1;
-                    abp.message.error(this.ecTransform("SigningFailedPleaseRecheckUSB"))
-                    return
+              if (statusSignatureElectronic) {
+                let signature = [];
+                contract.signature.forEach((data) => {
+                  if (
+                    data.signatureType === ContractSettingType.Electronic ||
+                    data.signatureType === ContractSettingType.Stamp
+                  ) {
+                    signature.push(data);
                   }
-
-                  this.isSaving = false;
-                  this.contractLoadding = false;
-                  let signingResult = {
-                    contractSettingId: contract.contractSettingId,
-                    signResult: rs,
-                    hasDigital: true
+                });
+                let data = this.listSignature
+                  .filter((data) => {
+                    return (
+                      data.signatureType === ContractSettingType.Stamp ||
+                      data.signatureType === ContractSettingType.Electronic
+                    );
+                  })
+                  .sort(
+                    (a, b) =>
+                      a.signerSignatureSettingid - b.signerSignatureSettingid
+                  );
+                for (let i = 0; i < signature.length; i++) {
+                  for (let j = i; j < data.length; j++) {
+                    signature[i].isNewSignature = data[j].isNewSignature;
+                    signature[i].signartureBase64 = data[j].signartureBase64;
+                    signature[i].signatureType = data[j].signatureType;
+                    signature[i].pageHeight = data[j].pageHeight;
+                    break;
                   }
-                  return this.contractSigningService.insertSigningResultAndComplete(signingResult)
-                }), concatMap(() => {
-                  return this.contractFileStoringService.clearContractDownloadFiles(contract.contractId)
-                }))
-                .subscribe(
-                  () => {
-                    this.router.navigate(["/app/signging/signing-result"], { queryParams: queryParameters })
-                    this.statusContractSign = false
-                    localStorage.removeItem('typeLoginSigning');
-                  },
-                  () => {
-                    this.isSaving = false;
-                    this.contractLoadding = false;
-                    this.statusContractSign = false
-                  }
-                );
-
-              return;
-            }
-
-            if (statusSignatureElectronic) {
-              let signature = [];
-              contract.signature.forEach(data => {
-                if (data.signatureType === ContractSettingType.Electronic || data.signatureType === ContractSettingType.Stamp) {
-                  signature.push(data)
                 }
-              })
-              let data = this.listSignature.filter(data => {
-                return data.signatureType === ContractSettingType.Stamp || data.signatureType === ContractSettingType.Electronic
-              }).sort((a, b) => a.signerSignatureSettingid - b.signerSignatureSettingid)
-              for (let i = 0; i < signature.length; i++) {
-                for (let j = i; j < data.length; j++) {
+                let signInput = {
+                  contractId: contract.contractId,
+                  signSignatures: signature,
+                  contractBase64: contract.base64Pdf,
+                  showSignDate: contract.showSignDate,
+                } as SignMultipleDto;
 
-                  signature[i].isNewSignature = data[j].isNewSignature
-                  signature[i].signartureBase64 = data[j].signartureBase64
-                  signature[i].signatureType = data[j].signatureType
-                  signature[i].pageHeight = data[j].pageHeight
-                  break;
-
-                }
-
+                this.contractSigningService
+                  .signMultiple(signInput)
+                  .pipe(
+                    concatMap(() => {
+                      return this.contractFileStoringService.clearContractDownloadFiles(
+                        contract.contractId
+                      );
+                    })
+                  )
+                  .subscribe(
+                    () => {
+                      this.isSaving = false;
+                      this.contractLoadding = false;
+                      this.router.navigate(["/app/signging/signing-result"], {
+                        queryParams: queryParameters,
+                      });
+                      this.statusContractSign = false;
+                      localStorage.removeItem("typeLoginSigning");
+                    },
+                    () => {
+                      this.statusContractSign = false;
+                      this.isSaving = false;
+                      this.contractLoadding = false;
+                    }
+                  );
+                return;
               }
-              let signInput = {
-                contractId: contract.contractId,
-                signSignatures: signature,
-                contractBase64: contract.base64Pdf
-              } as SignMultipleDto;
-
-              this.contractSigningService.signMultiple(signInput).pipe(concatMap(() => {
-                return this.contractFileStoringService.clearContractDownloadFiles(contract.contractId)
-              })).subscribe(
-                () => {
-                  this.isSaving = false;
-                  this.contractLoadding = false;
-                  this.router.navigate(["/app/signging/signing-result"], { queryParams: queryParameters });
-                  this.statusContractSign = false;
-                  localStorage.removeItem('typeLoginSigning');
-                },
-                () => {
-                  this.statusContractSign = false
-                  this.isSaving = false;
-                  this.contractLoadding = false;
-                }
-              );
-              return;
-
             }
-          }
-        })
-      })
-      return
+          });
+        });
+      return;
     }
     if (type === SignType.contractSigning) {
       if (this.filledInput.length > 0) {
         let dto = {
           base64Pdf: this.contractInfo.contractBase64,
-          listInput: this.filledInput
-        } as SignInputDto
+          listInput: this.filledInput,
+        } as SignInputDto;
 
-        await this.contractSigningService.SignInput(dto).toPromise().then(rs => {
-          this.contractInfo.contractBase64 = rs.result
+        await this.contractSigningService
+          .SignInput(dto)
+          .toPromise()
+          .then((rs) => {
+            this.contractInfo.contractBase64 = rs.result;
 
-          if (this.filledInput.length == this.signatureSetting.length) {
-            let signingResult = {
-              contractSettingId: this.contractSettingId,
-              signResult: rs.result,
+            if (this.filledInput.length == this.signatureSetting.length) {
+              let signingResult = {
+                contractSettingId: this.contractSettingId,
+                signResult: rs.result,
+              };
+              this.contractSigningService
+                .insertSigningResultAndComplete(signingResult)
+                .pipe(
+                  concatMap(() =>
+                    this.contractFileStoringService.clearContractDownloadFiles(
+                      this.contracId
+                    )
+                  )
+                )
+                .subscribe();
+              this.router.navigate(["/app/signging/signing-result"], {
+                queryParams: queryParameters,
+              });
+              this.statusContractSign = false;
+              localStorage.removeItem("typeLoginSigning");
+              return;
             }
-            this.contractSigningService.insertSigningResultAndComplete(signingResult).pipe(
-              concatMap(() => this.contractFileStoringService.clearContractDownloadFiles(this.contracId)))
-              .subscribe()
-            this.router.navigate(["/app/signging/signing-result"], { queryParams: queryParameters });
-            this.statusContractSign = false
-            localStorage.removeItem('typeLoginSigning');
-            return
-          }
-        })
+          });
       }
 
       if (statusSignatureElectronic && statusSignatureDigital) {
+        console.log(true);
 
         let signatureDigital = this.listSignature.filter(
           (x) => x.signatureType == ContractSettingType.Digital
         );
         let signatureElectronic = this.listSignature.filter(
-          (x) => x.signatureType == ContractSettingType.Electronic || x.signatureType == ContractSettingType.Stamp
+          (x) =>
+            x.signatureType == ContractSettingType.Electronic ||
+            x.signatureType == ContractSettingType.Stamp
         );
+
+        const signatureDigitalWithFlags = signatureDigital.map((sig) => {
+          const setting = this.signatureSettingTemp?.find(
+            (s) => s.id === sig.signerSignatureSettingid
+          );
+          return {
+            ...sig,
+            isShowSignDate: setting?.isShowSignDate ?? sig.isShowSignDate,
+          };
+        });
 
         let signatureDigitalPayload = {
           base64Pdf: this.contractInfo.contractBase64,
           signatureBase64: this.imageSignatureDigital,
-          signatures: signatureDigital
-        }
-        this.desktopAppServiceService.SignDigital(signatureDigitalPayload).pipe(concatMap((value) => {
-          if (value == null || value == "") {
-            this.statusSign = "Start";
-            this.idPage = -1;
-            abp.message.error(this.ecTransform("SigningFailedPleaseRecheckUSB"))
-            return
-          }
+          signatures: signatureDigitalWithFlags,
+        };
 
-          let signatureElectronicPayload = {
-            contractId: this.contracId,
-            signSignatures: signatureElectronic,
-            contractBase64: value
-          };
-          return this.contractSigningService.signMultiple(signatureElectronicPayload)
-        }), concatMap((rs) => {
+        this.desktopAppServiceService
+          .SignDigital(signatureDigitalPayload)
+          .pipe(
+            concatMap((value) => {
+              if (value == null || value == "") {
+                this.statusSign = "Start";
+                this.idPage = -1;
+                abp.message.error(
+                  this.ecTransform("SigningFailedPleaseRecheckUSB")
+                );
+                return;
+              }
 
-          this.isSaving = false;
-          this.contractLoadding = false;
-          let signingResult = {
-            contractSettingId: this.contractSettingId,
-            signResult: rs.result
-          }
-          return this.contractSigningService.insertSigningResult(signingResult)
-        }), concatMap(() => {
-          return this.contractFileStoringService.clearContractDownloadFiles(this.contracId)
-        })).subscribe(() => {
-          this.router.navigate(["/app/signging/signing-result"], { queryParams: queryParameters });
-          this.statusContractSign = false;
-          localStorage.removeItem('typeLoginSigning');
-        },
-          () => {
-            this.isSaving = false
-            this.contractLoadding = false;
-            this.statusContractSign = false
-          }
-        )
+              let signatureElectronicPayload = {
+                contractId: this.contracId,
+                signSignatures: signatureElectronic,
+                contractBase64: value,
+              };
+              return this.contractSigningService.signMultiple(
+                signatureElectronicPayload
+              );
+            }),
+            concatMap((rs) => {
+              this.isSaving = false;
+              this.contractLoadding = false;
+              let signingResult = {
+                contractSettingId: this.contractSettingId,
+                signResult: rs.result,
+              };
+              return this.contractSigningService.insertSigningResult(
+                signingResult
+              );
+            }),
+            concatMap(() => {
+              return this.contractFileStoringService.clearContractDownloadFiles(
+                this.contracId
+              );
+            })
+          )
+          .subscribe(
+            () => {
+              this.router.navigate(["/app/signging/signing-result"], {
+                queryParams: queryParameters,
+              });
+              this.statusContractSign = false;
+              localStorage.removeItem("typeLoginSigning");
+            },
+            () => {
+              this.isSaving = false;
+              this.contractLoadding = false;
+              this.statusContractSign = false;
+            }
+          );
         return;
       }
 
@@ -621,42 +848,71 @@ export class UnAuthenSigningComponent
         let signatureDigital = this.listSignature.filter(
           (x) => x.signatureType == ContractSettingType.Digital
         );
+
+        // let signatureDigitalPayload = {
+        //   base64Pdf: this.contractInfo.contractBase64,
+        //   signatureBase64: this.imageSignatureDigital,
+        //   signatures: signatureDigital,
+        // };
+
+        const signatureDigitalWithShowSignDate = signatureDigital.map((sig) => {
+          const setting = this.signatureSettingTemp?.find(
+            (s) => s.id === sig.signerSignatureSettingid
+          );
+          return {
+            ...sig,
+            isShowSignDate: setting?.isShowSignDate ?? sig.isShowSignDate,
+          };
+        });
+
         let signatureDigitalPayload = {
           base64Pdf: this.contractInfo.contractBase64,
           signatureBase64: this.imageSignatureDigital,
-          signatures: signatureDigital,
+          signatures: signatureDigitalWithShowSignDate,
         };
-        this.desktopAppServiceService
-          .SignDigital(signatureDigitalPayload).pipe(concatMap((rs) => {
-            if (rs == null || rs == "") {
-              this.statusSign = "Start";
-              this.idPage = -1;
-              abp.message.error(this.ecTransform("SigningFailedPleaseRecheckUSB"))
-              return
-            }
 
-            this.isSaving = false;
-            this.contractLoadding = false;
-            let signingResult = {
-              contractSettingId: this.contractSettingId,
-              signResult: rs,
-              hasDigital: true
-            }
-            return this.contractSigningService.insertSigningResultAndComplete(signingResult)
-          }), concatMap(() => {
-            return this.contractFileStoringService.clearContractDownloadFiles(this.contracId)
-          }))
+        this.desktopAppServiceService
+          .SignDigital(signatureDigitalPayload)
+          .pipe(
+            concatMap((rs) => {
+              if (rs == null || rs == "") {
+                this.statusSign = "Start";
+                this.idPage = -1;
+                abp.message.error(
+                  this.ecTransform("SigningFailedPleaseRecheckUSB")
+                );
+                return;
+              }
+
+              this.isSaving = false;
+              this.contractLoadding = false;
+              let signingResult = {
+                contractSettingId: this.contractSettingId,
+                signResult: rs,
+                hasDigital: true,
+              };
+              return this.contractSigningService.insertSigningResultAndComplete(
+                signingResult
+              );
+            }),
+            concatMap(() => {
+              return this.contractFileStoringService.clearContractDownloadFiles(
+                this.contracId
+              );
+            })
+          )
           .subscribe(
             () => {
-              this.router.navigate(["/app/signging/signing-result"], { queryParams: queryParameters })
-              this.statusContractSign = false
-              localStorage.removeItem('typeLoginSigning');
+              this.router.navigate(["/app/signging/signing-result"], {
+                queryParams: queryParameters,
+              });
+              this.statusContractSign = false;
+              localStorage.removeItem("typeLoginSigning");
             },
             () => {
               this.isSaving = false;
               this.contractLoadding = false;
-              this.statusContractSign = false
-
+              this.statusContractSign = false;
             }
           );
 
@@ -665,32 +921,42 @@ export class UnAuthenSigningComponent
 
       if (statusSignatureElectronic) {
         let signatureElectronic = this.listSignature.filter(
-          (x) => x.signatureType == ContractSettingType.Electronic || x.signatureType == ContractSettingType.Stamp
+          (x) =>
+            x.signatureType == ContractSettingType.Electronic ||
+            x.signatureType == ContractSettingType.Stamp
         );
         let signInput = {
           contractId: this.contracId,
           signSignatures: signatureElectronic,
-          contractBase64: this.contractInfo.contractBase64
+          contractBase64: this.contractInfo.contractBase64,
         } as SignMultipleDto;
 
-        this.contractSigningService.signMultiple(signInput).pipe(concatMap(() => {
-          return this.contractFileStoringService.clearContractDownloadFiles(this.contracId)
-        })).subscribe(
-          () => {
-            this.isSaving = false;
-            this.contractLoadding = false;
-            this.router.navigate(["/app/signging/signing-result"], { queryParams: queryParameters });
-            this.statusContractSign = false;
-            localStorage.removeItem('typeLoginSigning');
-          },
-          () => {
-            this.statusContractSign = false
-            this.isSaving = false;
-            this.contractLoadding = false;
-          }
-        );
+        this.contractSigningService
+          .signMultiple(signInput)
+          .pipe(
+            concatMap(() => {
+              return this.contractFileStoringService.clearContractDownloadFiles(
+                this.contracId
+              );
+            })
+          )
+          .subscribe(
+            () => {
+              this.isSaving = false;
+              this.contractLoadding = false;
+              this.router.navigate(["/app/signging/signing-result"], {
+                queryParams: queryParameters,
+              });
+              this.statusContractSign = false;
+              localStorage.removeItem("typeLoginSigning");
+            },
+            () => {
+              this.statusContractSign = false;
+              this.isSaving = false;
+              this.contractLoadding = false;
+            }
+          );
         return;
-
       }
     }
   }
@@ -711,7 +977,6 @@ export class UnAuthenSigningComponent
       });
   }
 
-
   private async getSignatureSetting() {
     let jwt = localStorage.getItem("JWT");
     if (!jwt || jwt == "") {
@@ -723,111 +988,126 @@ export class UnAuthenSigningComponent
           status: 1,
         },
       });
+      return; // Important: stop execution if no JWT
     }
+    
     localStorage.setItem("notSignNow", "1");
     let currentLogin = this.parseJwt(jwt);
-    let type = localStorage.getItem("typeLoginSigning")
+    let type = localStorage.getItem("typeLoginSigning");
     let email;
     if (+type === loginApp.microsoft) {
-      email = currentLogin.preferred_username
+      email = currentLogin.preferred_username;
+    } else if (+type === loginApp.mezon) {
+      email = currentLogin.email;
     } else {
-      email = currentLogin.email
+      // Google or default
+      email = currentLogin.email;
     }
 
-    this.contractSigningService.getSignatureDigitalBase64().subscribe(rs => {
-      this.imageSignatureDigital =
-        "data:image/png;base64," + rs.result;
-    })
-    this.signatureSettingService.getSignatureSetting(
-      this.contractSettingId,
-      email
-    ).subscribe(async (rs: any) => {
-      this.massGuid = rs.result?.massGuid;
-      this.signatureSettingTemp = JSON.parse(JSON.stringify(rs.result.signatureSettings));
-      this.isCreator = rs.result.isCreator;
-      this.contractStatus = rs.result.role;
-      if (rs.result.status === EContractStatusId.Cancelled) {
-        this.router.navigate([`/app/signging/email-valid`], {
-          queryParams: {
-            settingId: this.contractSettingId,
-            contractId: this.contracId,
-            tenantName: this.tenantName,
-            status: ContractRole.Signer,
-          },
-        });
-      }
-      let contractfiles = JSON.parse(JSON.stringify({ ...rs.result }));
-      this.isComplete = rs.result.isComplete;
-      this.isCheckShowConfirm = rs.result.role === ContractRole.Signer
-      this.signatureSetting = contractfiles.signatureSettings.filter(
-        (value) => {
-          return value.isAllowSigning;
-        }
-      );
-      if (rs.result.signatureDefault?.signatureType === ContractSettingType.Stamp) {
-        this.signatureDefaultStamp = {
-          ...rs.result.signatureDefault
-        }
-      } else {
-        this.signatureDefaultElectronic = {
-          ...rs.result.signatureDefault
-        }
-      }
-      this.contractInfo = contractfiles;
-
-      this.contractfiles = await this.generateImageStringsFromBase64PDF(
-        contractfiles.contractBase64.split(",")[1]
-      );
-      this.contractfiles.forEach((file) => {
-        file.fileBase64 = "data:image/jpeg;base64," + file.fileBase64;
-        this.signatureSettingTemp.forEach((signature) => {
-          signature.signatureTypeName = this.checkIconTypeSignature(
-            signature.signatureType
+    this.contractSigningService.getSignatureDigitalBase64().subscribe((rs) => {
+      this.imageSignatureDigital = "data:image/png;base64," + rs.result;
+    });
+    this.signatureSettingService
+      .getSignatureSetting(this.contractSettingId, email)
+      .subscribe(
+        async (rs: any) => {
+          this.massGuid = rs.result?.massGuid;
+          this.signatureSettingTemp = JSON.parse(
+            JSON.stringify(rs.result.signatureSettings)
           );
-          if (signature.page === file.contractPage) {
-            signature.heightPage = file.height;
-            file.signatureSettings.push(signature);
+          this.isCreator = rs.result.isCreator;
+          this.contractStatus = rs.result.role;
+          if (rs.result.status === EContractStatusId.Cancelled) {
+            this.router.navigate([`/app/signging/email-valid`], {
+              queryParams: {
+                settingId: this.contractSettingId,
+                contractId: this.contracId,
+                tenantName: this.tenantName,
+                status: ContractRole.Signer,
+              },
+            });
           }
-          if (ContractSettingType.Text === signature.signatureType) {
-            this.isInput = true;
-          }
-        });
-
-      });
-
-      this.contractFilePreview = await this.generateImageStringsFromBase64PDF(
-        contractfiles.contractBase64.split(",")[1], this.scalePreview
-      );
-
-      this.contractFilePreview.forEach((file, index) => {
-        file.fileBase64 = "data:image/jpeg;base64," + file.fileBase64;
-        this.signatureSettingTemp.forEach((signature) => {
-          signature.signatureTypeName = this.checkIconTypeSignature(
-            signature.signatureType
+          let contractfiles = JSON.parse(JSON.stringify({ ...rs.result }));
+          this.isComplete = rs.result.isComplete;
+          this.isCheckShowConfirm = rs.result.role === ContractRole.Signer;
+          this.signatureSetting = contractfiles.signatureSettings.filter(
+            (value) => {
+              return value.isAllowSigning;
+            }
           );
-          if (signature.page === file.contractPage) {
-
-            file.signatureSettings.push({ ...signature, positionX: signature.positionX * (this.scalePreview / 2), positionY: signature.positionY * (this.scalePreview / 2), width: signature.width * (this.scalePreview / 2), height: signature.height * (this.scalePreview / 2), fontSize: signature.fontSize * (this.scalePreview / 2) });
-
+          if (
+            rs.result.signatureDefault?.signatureType ===
+            ContractSettingType.Stamp
+          ) {
+            this.signatureDefaultStamp = {
+              ...rs.result.signatureDefault,
+            };
+          } else {
+            this.signatureDefaultElectronic = {
+              ...rs.result.signatureDefault,
+            };
           }
-          if (ContractSettingType.Text === signature.signatureType) {
-            this.isInput = true;
-          }
-        });
-      });
-      this.contractLoadding = false;
-      this.signature.notifyOnChanges();
-    },
-      () =>
-        this.router.navigate([`/app/signging/email-valid`], {
-          queryParams: {
-            settingId: this.contractSettingId,
-            contractId: this.contracId,
-            tenantName: this.tenantName,
-            status: 1,
-          },
-        })
-    );
+          this.contractInfo = contractfiles;
+
+          this.contractfiles = await this.generateImageStringsFromBase64PDF(
+            contractfiles.contractBase64.split(",")[1]
+          );
+          this.contractfiles.forEach((file) => {
+            file.fileBase64 = "data:image/jpeg;base64," + file.fileBase64;
+            this.signatureSettingTemp.forEach((signature) => {
+              signature.signatureTypeName = this.checkIconTypeSignature(
+                signature.signatureType
+              );
+              if (signature.page === file.contractPage) {
+                signature.heightPage = file.height;
+                file.signatureSettings.push(signature);
+              }
+              if (ContractSettingType.Text === signature.signatureType) {
+                this.isInput = true;
+              }
+            });
+          });
+
+          this.contractFilePreview =
+            await this.generateImageStringsFromBase64PDF(
+              contractfiles.contractBase64.split(",")[1],
+              this.scalePreview
+            );
+
+          this.contractFilePreview.forEach((file, index) => {
+            file.fileBase64 = "data:image/jpeg;base64," + file.fileBase64;
+            this.signatureSettingTemp.forEach((signature) => {
+              signature.signatureTypeName = this.checkIconTypeSignature(
+                signature.signatureType
+              );
+              if (signature.page === file.contractPage) {
+                file.signatureSettings.push({
+                  ...signature,
+                  positionX: signature.positionX * (this.scalePreview / 2),
+                  positionY: signature.positionY * (this.scalePreview / 2),
+                  width: signature.width * (this.scalePreview / 2),
+                  height: signature.height * (this.scalePreview / 2),
+                  fontSize: signature.fontSize * (this.scalePreview / 2),
+                });
+              }
+              if (ContractSettingType.Text === signature.signatureType) {
+                this.isInput = true;
+              }
+            });
+          });
+          this.contractLoadding = false;
+          this.signature.notifyOnChanges();
+        },
+        () =>
+          this.router.navigate([`/app/signging/email-valid`], {
+            queryParams: {
+              settingId: this.contractSettingId,
+              contractId: this.contracId,
+              tenantName: this.tenantName,
+              status: 1,
+            },
+          })
+      );
   }
 
   parseJwt(token: string) {
@@ -864,7 +1144,7 @@ export class UnAuthenSigningComponent
   }
 
   async handlePostSignature($event, signature) {
-    this.signatureElectronic?.push($event)
+    this.signatureElectronic?.push($event);
     let indexSignature = this.listSignature.findIndex(
       (value) =>
         value.signerSignatureSettingid === $event.signerSignatureSettingid
@@ -874,8 +1154,8 @@ export class UnAuthenSigningComponent
       case ContractSettingType.Electronic:
         this.signatureDefaultElectronic = {
           contractBase64: $event.signartureBase64,
-          signatureType: $event.signatureType
-        }
+          signatureType: $event.signatureType,
+        };
         if (indexSignature !== -1) {
           this.listSignature.forEach((x) => {
             if (x.signatureType === ContractSettingType.Electronic) {
@@ -891,10 +1171,9 @@ export class UnAuthenSigningComponent
         break;
       case ContractSettingType.Digital:
         if (indexSignature !== -1) {
-
           let certDetail = {
             ...this.listSignature[indexSignature],
-            isDownloadApp: false
+            isDownloadApp: false,
           };
           let ref = this.dialog.open(CertDetailDialogComponent, {
             data: certDetail,
@@ -904,8 +1183,7 @@ export class UnAuthenSigningComponent
 
           ref?.afterClosed().subscribe((rs: CertificateDetailDto) => {
             if (rs?.certSerial) {
-
-              signature.ownCA = rs.ownCA
+              signature.ownCA = rs.ownCA;
               this.listSignature.forEach((value) => {
                 if (
                   value.signerSignatureSettingid ===
@@ -921,14 +1199,13 @@ export class UnAuthenSigningComponent
               });
             }
           });
-        }
-        else {
+        } else {
           signature.loading = true;
           this.statusEmitSignatureDigital = false;
           this.desktopAppServiceService.getCertificate().subscribe({
             next: (result) => {
               let ref;
-              this.statusEmitSignatureDigital = true
+              this.statusEmitSignatureDigital = true;
               signature.loading = false;
               if (result.Status !== 0) {
                 let certDetail = {
@@ -938,7 +1215,7 @@ export class UnAuthenSigningComponent
                   uid: result.CertDetailInfo.Uid,
                   beginDateCA: result.CertDetailInfo.BeginDateCA,
                   endDateCA: result.CertDetailInfo.EndDateCA,
-                  isDownloadApp: false
+                  isDownloadApp: false,
                 };
                 ref = this.dialog.open(CertDetailDialogComponent, {
                   data: certDetail,
@@ -966,7 +1243,7 @@ export class UnAuthenSigningComponent
               CustomProtocolCheck(
                 "metasign://",
                 () => {
-                  this.statusEmitSignatureDigital = true
+                  this.statusEmitSignatureDigital = true;
                   signature.loading = false;
                   let certDetail = {
                     isDownloadApp: true,
@@ -978,21 +1255,20 @@ export class UnAuthenSigningComponent
                   });
                 },
                 () => {
-                  this.statusEmitSignatureDigital = true
+                  this.statusEmitSignatureDigital = true;
                   signature.loading = false;
-                }, 200
+                },
+                200
               );
-
             },
           });
         }
         break;
       case ContractSettingType.Stamp:
-        this.signatureDefaultStamp =
-        {
+        this.signatureDefaultStamp = {
           contractBase64: $event.signartureBase64,
-          signatureType: $event.signatureType
-        }
+          signatureType: $event.signatureType,
+        };
         if (indexSignature !== -1) {
           this.listSignature.forEach((x) => {
             if (x.signatureType === ContractSettingType.Stamp) {
@@ -1021,7 +1297,7 @@ export class UnAuthenSigningComponent
     const headerPage = 51;
 
     if (increase === true) {
-      this.idPage++
+      this.idPage++;
     }
 
     if (this.idPage >= this.contractInput.length) {
@@ -1031,7 +1307,8 @@ export class UnAuthenSigningComponent
     let { heightHalf, ponsitonMaker } = this.scrollContractEvent(this.idPage);
     this.checkStatusSign(this.contractInput[this.idPage].nativeElement.data);
     this.pageContainer.nativeElement.scrollTo(0, ponsitonMaker - distance);
-    this.contractScroll.nativeElement.style.top = ponsitonMaker - headerPage + heightHalf + "px";
+    this.contractScroll.nativeElement.style.top =
+      ponsitonMaker - headerPage + heightHalf + "px";
   }
 
   handleScrollMarker(id: number) {
@@ -1040,14 +1317,16 @@ export class UnAuthenSigningComponent
     const el = document.getElementById(`${id}`);
 
     this.idPage = this.contractInput.findIndex(
-      (value: { nativeElement: { id: string } }) => value.nativeElement.id === el.id
+      (value: { nativeElement: { id: string } }) =>
+        value.nativeElement.id === el.id
     );
 
     let { heightHalf, ponsitonMaker } = this.scrollContractEvent(this.idPage);
     this.checkStatusSign(this.contractInput[this.idPage].nativeElement.data);
     this.pageContainer.nativeElement.scrollTo(0, ponsitonMaker - distance);
 
-    this.contractScroll.nativeElement.style.top = ponsitonMaker - headerPage + heightHalf + "px";
+    this.contractScroll.nativeElement.style.top =
+      ponsitonMaker - headerPage + heightHalf + "px";
   }
 
   scrollContractEvent(id) {
@@ -1055,17 +1334,21 @@ export class UnAuthenSigningComponent
       const currentElementId = this.contractInput[id].nativeElement.id;
       this.contractInput.forEach((element: ElementRef) => {
         const elementId = element.nativeElement.id;
-        element.nativeElement.classList.toggle('highlighted', elementId === currentElementId);
+        element.nativeElement.classList.toggle(
+          "highlighted",
+          elementId === currentElementId
+        );
       });
     }
     let heightHalf = this.contractInput[id].nativeElement.clientHeight / 2;
     let ponsitonMaker = this.getAbsoluteOffsetFromGivenElement(
       this.contractInput[id].nativeElement,
-      this.pageContainer.nativeElement).top;
+      this.pageContainer.nativeElement
+    ).top;
     return {
       heightHalf,
-      ponsitonMaker
-    }
+      ponsitonMaker,
+    };
   }
 
   checkStatusSign(value: any) {
@@ -1093,18 +1376,26 @@ export class UnAuthenSigningComponent
     document.getElementById(`${idPage}`).scrollIntoView({ behavior: "smooth" });
   }
 
-  handleClick(index: number) {
+  handleClick(index: number, signatureId: number) {
     this.idPage = index;
+    this.focusedSignatureId = signatureId;
     this.handleContractScroll(false);
+    console.log(this.focusedSignatureId);
   }
 
   isShowNavigateArrow() {
     return this.contractInfo?.role == ContractRole.Signer;
   }
-  getAbsoluteOffsetFromGivenElement(el, relativeEl) {   // finds the offset of el from relativeEl
+  getAbsoluteOffsetFromGivenElement(el, relativeEl) {
+    // finds the offset of el from relativeEl
     var _x = 0;
     var _y = 0;
-    while (el && el != relativeEl && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
+    while (
+      el &&
+      el != relativeEl &&
+      !isNaN(el.offsetLeft) &&
+      !isNaN(el.offsetTop)
+    ) {
       _x += el.offsetLeft - el.scrollLeft + el.clientLeft;
       _y += el.offsetTop - el.scrollTop + el.clientTop;
       el = el.offsetParent;
@@ -1112,7 +1403,10 @@ export class UnAuthenSigningComponent
     return { top: _y, left: _x };
   }
 
-  generateImageStringsFromBase64PDF = async (base64PDF: string, scalePreview?: number) => {
+  generateImageStringsFromBase64PDF = async (
+    base64PDF: string,
+    scalePreview?: number
+  ) => {
     const arrayBuffer = Uint8Array.from(atob(base64PDF), (c) =>
       c.charCodeAt(0)
     ).buffer;
@@ -1150,30 +1444,38 @@ export class UnAuthenSigningComponent
   previewContract() {
     this.contractFilePreview = this.contractFilePreview.map((file, index1) => {
       return {
-        ...file, signatureSettings: file.signatureSettings.map((signature, index2) => {
-          let valueSignature = this.signatureElectronic?.find(item => item?.signerSignatureSettingid === signature.id)
+        ...file,
+        signatureSettings: file.signatureSettings.map((signature, index2) => {
+          let valueSignature = this.signatureElectronic?.find(
+            (item) => item?.signerSignatureSettingid === signature.id
+          );
           return {
-            ...signature, valueInput: signature.signatureType === ContractSettingType.DatePicker || signature.signatureType === ContractSettingType.Text ? this.contractfiles[index1]?.signatureSettings[index2].valueInput : valueSignature?.signartureBase64
-          }
-        }
-        )
-      }
-    })
+            ...signature,
+            valueInput:
+              signature.signatureType === ContractSettingType.DatePicker ||
+              signature.signatureType === ContractSettingType.Text
+                ? this.contractfiles[index1]?.signatureSettings[index2]
+                    .valueInput
+                : valueSignature?.signartureBase64,
+          };
+        }),
+      };
+    });
 
     const dialogRef = this.dialog.open(PreviewContractComponent, {
       data: {
         contractFilePreviewDesign: this.contractFilePreview,
         isSignedPreview: true,
-        contractFileName: this.contractInfo?.contractName
+        contractFileName: this.contractInfo?.contractName,
       },
-      width: '1000px',
-      maxWidth: '1000px',
-      panelClass: 'email-dialog',
-    })
-    dialogRef.afterClosed().subscribe(rs => {
+      width: "1000px",
+      maxWidth: "1000px",
+      panelClass: "email-dialog",
+    });
+    dialogRef.afterClosed().subscribe((rs) => {
       if (rs) {
       }
-    })
+    });
   }
   downloadPdf(fileName: string): void {
     this.dialog.open(DialogDownloadComponent, {
@@ -1181,29 +1483,31 @@ export class UnAuthenSigningComponent
         fileName: fileName,
         idContract: this.contracId,
       },
-      minWidth: '36%',
-      minHeight: '250px',
-    })
+      minWidth: "36%",
+      minHeight: "250px",
+    });
   }
 
   displayIconSignatureSidebar(signatureType: number) {
-    return this.signatureTypeList.find(signatureTypeItem => signatureTypeItem.id === signatureType).icon
+    return this.signatureTypeList.find(
+      (signatureTypeItem) => signatureTypeItem.id === signatureType
+    ).icon;
   }
   converFile(s) {
     var buf = new ArrayBuffer(s.length);
     var view = new Uint8Array(buf);
-    for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+    for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xff;
     return buf;
   }
-  downloadFileExe(fileByte, fileName:string) {
+  downloadFileExe(fileByte, fileName: string) {
     const file = new Blob([this.converFile(atob(fileByte))], {
-      type: ""
+      type: "",
     });
     FileSaver.saveAs(file, fileName);
   }
   downloadApp() {
-    this.contractPublicService.downloadApp().subscribe((rs)=>{
-      this.downloadFileExe(rs.result,'metasign.exe');
-  })
+    this.contractPublicService.downloadApp().subscribe((rs) => {
+      this.downloadFileExe(rs.result, "metasign.exe");
+    });
   }
 }

@@ -1696,6 +1696,9 @@ namespace EC.Migrations
                     b.Property<string>("EmailContent")
                         .HasColumnType("text");
 
+                    b.Property<long?>("EmailTemplateId")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime?>("ExpriredTime")
                         .HasColumnType("timestamp without time zone");
 
@@ -2118,6 +2121,9 @@ namespace EC.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsShowSignDate")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsSigned")
                         .HasColumnType("boolean");
 
@@ -2436,6 +2442,9 @@ namespace EC.Migrations
                         .HasColumnType("real");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsShowSignDate")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("IsSigned")

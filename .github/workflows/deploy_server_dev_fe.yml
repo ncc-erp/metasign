@@ -20,9 +20,8 @@ jobs:
       env:
         cache-name: cache-node-modules
       with:
-        path: |
-          **/node_modules
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json,**/package-lock.json') }}
+        path: angular/node_modules
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('angular/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-

@@ -24,7 +24,7 @@ namespace EC.WebService.Mezon
             var client_id = _configuration.GetValue<string>("Oauth2Mezon:Client_Id");
             var client_secret = _configuration.GetValue<string>("Oauth2Mezon:Client_Secret");
             var grant_type = _configuration.GetValue<string>("Oauth2Mezon:Grant_Type");
-            var redirect_uri = _configuration.GetValue<string>("Oauth2Mezon:Redirect_URI");
+            var redirect_uri = _configuration.GetValue<string>("Oauth2Mezon:Login_Redirect_URI");
 
             var formData = new Dictionary<string, string>
             {
@@ -43,7 +43,30 @@ namespace EC.WebService.Mezon
             return infoAuth;
         }
 
+        public async Task<AuthOauth2Mezon> GetInfoForViewContractMezon(string code, string redirect_uri)
+        {
+            var url = _configuration.GetValue<string>("Oauth2Mezon:Url_Oauth2Mezon");
+            var urlInfo = _configuration.GetValue<string>("Oauth2Mezon:Url_UserInfo");
+            var client_id = _configuration.GetValue<string>("Oauth2Mezon:Client_Id");
+            var client_secret = _configuration.GetValue<string>("Oauth2Mezon:Client_Secret");
+            var grant_type = _configuration.GetValue<string>("Oauth2Mezon:Grant_Type");
 
+            var formData = new Dictionary<string, string>
+            {
+               { "client_id", client_id },
+                       { "client_secret", client_secret },
+                       { "grant_type", grant_type },
+                       { "redirect_uri", redirect_uri },
+                       { "code", code }
+             };
+
+            var response = await PostFormUrlEncodedAsync<TokenResponse>(url, formData);
+            SetAuthorizationToken(response.AccessToken);
+            
+            var infoAuth = await PostAsync<AuthOauth2Mezon>(urlInfo, null);
+            infoAuth.accessToken = response.IdToken;
+            return infoAuth;
+        }
     }
 }
 

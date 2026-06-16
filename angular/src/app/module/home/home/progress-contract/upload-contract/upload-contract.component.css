@@ -1,5 +1,6 @@
 .home {
   height: 76vh;
+  overflow-y: auto;
 }
 
 .container {
@@ -266,19 +267,16 @@
 @media only screen and (max-height: 749px) {
   .drop_box {
     padding: 0;
-    height: 250px;
+    height: 200px;
+  }
+
+  .drop_box svg {
+    width: 80px;
+    height: 80px;
   }
 
   .home {
     padding: 8px !important;
-  }
-
-  .info-contract {
-    transform: translateY(-10px);
-  }
-
-  #upload-form {
-    transform: translateY(-16px);
   }
 }
 

@@ -1,4 +1,4 @@
-﻿using Abp.Application.Services.Dto;
+using Abp.Application.Services.Dto;
 using System;
 using System.Collections.Generic;
 using static EC.Constants.Enum;
@@ -24,6 +24,7 @@ namespace EC.Manager.SignerSignatureSettings.Dto
         public string FontFamily { get; set; }
         public string FontColor { get; set; }
         public string ValueInput { get; set; }
+        public bool IsShowSignDate { get; set; }
     }
 
     public class GetContractSignerSignatureSettingDto
@@ -39,6 +40,7 @@ namespace EC.Manager.SignerSignatureSettings.Dto
         public List<GetSignerSignatureSettingDto> SignatureSettings { get; set; }
         public bool IsCreator { get; set; }
         public Guid? MassGuid{ get; set; }
+        public List<string> AnchorTags { get; set; }
     }
 
     public class GetSigningSignatureSettingDto : GetSignerSignatureSettingDto

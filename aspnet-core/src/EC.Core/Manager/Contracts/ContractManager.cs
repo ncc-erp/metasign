@@ -1,4 +1,4 @@
-﻿using Abp.BackgroundJobs;
+using Abp.BackgroundJobs;
 using Abp.Collections.Extensions;
 using Abp.Json;
 using Abp.Logging;
@@ -19,8 +19,10 @@ using EC.Manager.Notifications.Email.Dto;
 using EC.Manager.Notifications.Notification;
 using EC.Manager.SignerSignatureSettings.Dto;
 using EC.Manager.SignServerWorkers;
+using EC.Manager.ContractTemplateSettings.Dto;
 using EC.MultiTenancy;
 using EC.Utils;
+using EC.Utils.Dto;
 using EC.WebService.PDFConverter;
 using HRMv2.NccCore;
 using iTextSharp.text;
@@ -312,12 +314,23 @@ namespace EC.Manager.Contracts
         public async Task CreateMassContract(CreateMassContractDto input)
         {
             var loginUserId = AbpSession.UserId.Value;
-            var template = WorkScope.GetAll<ContractTemplate>().Where(x => x.Id == input.Id).FirstOrDefault();
+            var template = await WorkScope.GetAll<ContractTemplate>().Where(x => x.Id == input.Id).FirstOrDefaultAsync();
 
-            var loginUserEmail = WorkScope.GetAll<User>()
+            var signatureSettings = await WorkScope.GetAll<ContractTemplateSetting>()
+                .Where(x => x.ContractTemplateSigner.ContractTemplateId == template.Id)
+                .ToListAsync();
+
+            var anchorTags = signatureSettings
+                .Where(x => x.SignatureType != SignatureTypeSetting.Text && x.SignatureType != SignatureTypeSetting.DatePicker)
+                .Where(x => !string.IsNullOrEmpty(x.ValueInput) && x.ValueInput.StartsWith("[") && x.ValueInput.EndsWith("]"))
+                .Select(x => x.ValueInput)
+                .Distinct()
+                .ToList();
+
+            var loginUserEmail = await WorkScope.GetAll<User>()
                 .Where(x => x.Id == loginUserId)
                 .Select(x => x.EmailAddress)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
             var massGuid = Guid.NewGuid();
             var numOfContracts = input.RowData.Count;
             for (int i = 0; i < numOfContracts; i++)
@@ -356,7 +369,7 @@ namespace EC.Manager.Contracts
                 var base64 = "";
                 if (!string.IsNullOrEmpty(template.MassWordContent))
                 {
-                    var base64Convert = await FillAndRepaceContent(template.MassWordContent, template.MassField, input.RowData[i].ListFieldDto);
+                    var base64Convert = await FillAndRepaceContent(template.MassWordContent, template.MassField, input.RowData[i].ListFieldDto, input.RowData[i].Signers, anchorTags);
                     base64 = await SignUtils.FillPdfWithText(fillInput, location, base64Convert, _webHostEnvironment.WebRootPath);
                 }
                 else
@@ -398,7 +411,7 @@ namespace EC.Manager.Contracts
                         Color = item1.Color,
                         SignerMassGuid = item1.MassGuid
                     };
-                    signer.Id = WorkScope.InsertAndGetId(signer);
+                    signer.Id = await WorkScope.InsertAndGetIdAsync(signer);
                     var signatureSetting = item1.SignatureSettings.Select(x => new SignerSignatureSetting
                     {
                         ContractSettingId = signer.Id,
@@ -413,7 +426,7 @@ namespace EC.Manager.Contracts
                         FontColor = x.FontColor,
                         ValueInput = x.ValueInput,
                     }).ToList();
-                    WorkScope.InsertRange(signatureSetting);
+                    await WorkScope.InsertRangeAsync(signatureSetting);
                 }
 
                 #endregion Create Signer and SignatureSetting
@@ -423,12 +436,14 @@ namespace EC.Manager.Contracts
                 var sendMailDto = new SendMailDto
                 {
                     ContractId = entity.Id,
-                    MailContent = GetContractMailContent(entity.Id)
+                    MailContent = GetContractMailContent(entity.Id, input.MailTemplateId)
                 };
                 await SendMailToViewer(sendMailDto);
                 await SendMail(sendMailDto);
 
                 #endregion Send Mail
+
+                await ProcessAnchorTags(entity.Id);
             }
         }
 
@@ -472,7 +487,8 @@ namespace EC.Manager.Contracts
             if (input.DownloadType == DownloadContractType.Contract)
             {
                 return base64Contract;
-            };
+            }
+            ;
 
             var signatures = new List<SignartureDto>();
 
@@ -536,7 +552,8 @@ namespace EC.Manager.Contracts
             if (input.DownloadType == DownloadContractType.Certificate)
             {
                 return base64Certificate;
-            };
+            }
+            ;
 
             List<FileDto> listFile = new List<FileDto>();
 
@@ -633,6 +650,34 @@ namespace EC.Manager.Contracts
                 }).ToList();
             query = query.Where(x => x.Email != userEmail).ToList();
             return query;
+        }
+        
+        public async Task<List<GetContractDto>> GetByContractIdAndEmailAddress(Int64 contractId, String emailAddress)
+        {
+            var tenantId = AbpSession.TenantId;
+            var contractSettings = WorkScope.GetAll<ContractSetting>();
+
+            return await WorkScope.GetAll<Contract>()
+                .Where(x => x.TenantId == tenantId && x.Id == contractId
+                    && contractSettings.Any(cs => cs.ContractId == x.Id && cs.SignerEmail == emailAddress))
+                .Select(x => new GetContractDto
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Code = x.Code,
+                    File = x.File,
+                    Status = x.Status,
+                    CreationTime = x.CreationTime,
+                    UserId = x.UserId,
+                    ExpriedTime = x.ExpriredTime,
+                    UpdatedUser = x.LastModifierUser.FullName,
+                    UpdatedTime = x.LastModificationTime,
+                    ContractGuid = x.ContractGuid,
+                    ContractBase64 = x.FileBase64,
+                    NumberOfSetting = contractSettings.Count(cs => cs.ContractId == x.Id && cs.ContractRole == ContractRole.Signer),
+                    CountCompleted = contractSettings.Count(cs => cs.ContractId == x.Id && cs.ContractRole == ContractRole.Signer && cs.IsComplete),
+                })
+                .ToListAsync();
         }
 
         public async Task<GridResult<GetContractDto>> GetContractByFilterPaging(GetContractByFilterDto input)
@@ -978,9 +1023,9 @@ namespace EC.Manager.Contracts
                 .ToListAsync();
         }
 
-        public MailPreviewInfoDto GetContractMailContent(long contractId)
+        public MailPreviewInfoDto GetContractMailContent(long contractId, long mailTemplateId)
         {
-            return _emailManager.GetEmailContentById(MailFuncEnum.Signing, contractId);
+            return _emailManager.GetEmailContentById(MailFuncEnum.Signing, contractId, mailTemplateId);
         }
 
         public async Task<GetContractStatisticDto> GetContractStatistic()
@@ -1360,7 +1405,8 @@ namespace EC.Manager.Contracts
                 clonedMailContent.MailHistory = CreateContractHistory(contractCreator, contractId, content.Result.SendToEmail, content.Result.ContractRole, IsReSent);
 
                 _backgroundJobManager.Enqueue<SendMail, MailPreviewInfoDto>(clonedMailContent, BackgroundJobPriority.High, TimeSpan.FromSeconds(0));
-            };
+            }
+            ;
         }
 
         public async Task ResendMailOne(ReSendMailDto input)
@@ -1413,6 +1459,8 @@ namespace EC.Manager.Contracts
 
             await WorkScope.UpdateAsync(contract);
 
+            await ProcessAnchorTags(contractId);
+
             return contractId;
         }
 
@@ -1421,6 +1469,8 @@ namespace EC.Manager.Contracts
             var contract = WorkScope.GetAll<Contract>()
                 .Include(x => x.User)
                 .Where(x => x.Id == input.ContractId).FirstOrDefault();
+
+            var template = WorkScope.GetAll<EmailTemplate>().Where(x => x.Id == input.MailContent.TemplateId).FirstOrDefault();
 
             string contractCreator = contract.User.EmailAddress;
 
@@ -1434,11 +1484,14 @@ namespace EC.Manager.Contracts
                 .ToListAsync();
 
             var isOrder = signers.Any(x => x.ProcesOrder != 1);
-            List<ResultTemplateEmail<ContractMailTemplateDto>> maiContents = signers.Where(x => !x.IsComplete)
-            .Select(x => new ResultTemplateEmail<ContractMailTemplateDto>
-            {
-                Result = SetContractMailTemplate(x, baseUrl)
-            }).ToList();
+            List<ResultTemplateEmail<ContractMailTemplateDto>> maiContents = signers
+              .Where(x => !x.IsComplete)
+              .Select(x =>
+              {
+                  var mailTemplate = SetContractMailTemplate(x, baseUrl);
+                  return new ResultTemplateEmail<ContractMailTemplateDto> { Result = mailTemplate };
+              })
+              .ToList();
 
             var lastcontent = new ResultTemplateEmail<ContractMailTemplateDto>();
             if (maiContents.Count == 0 && isOrder /*&& !isSendAll*/)
@@ -1498,7 +1551,8 @@ namespace EC.Manager.Contracts
                     {
                         break;
                     }
-                };
+                }
+                ;
             }
 
             var contractSettingId = signers.Where(x => x.SignerEmail == contractCreator)
@@ -1531,6 +1585,10 @@ namespace EC.Manager.Contracts
             var contract = WorkScope.GetAll<Contract>()
                 .Include(x => x.User)
                 .Where(x => x.Id == input.ContractId).FirstOrDefault();
+
+            var template = WorkScope.GetAll<EmailTemplate>().Where(x => x.Id == input.MailContent.TemplateId).FirstOrDefault();
+
+
             string contractCreator = contract.User.EmailAddress;
             var baseUrl = _appConfiguration.GetValue<string>("App:ClientRootAddress");
 
@@ -1543,9 +1601,10 @@ namespace EC.Manager.Contracts
             if (viewers.Count > 0)
             {
                 string notiReceivers = viewers.Select(x => x.SignerEmail).JoinAsString(", ");
-                List<ResultTemplateEmail<ContractMailTemplateDto>> maiContents = viewers.Select(x => new ResultTemplateEmail<ContractMailTemplateDto>
+                List<ResultTemplateEmail<ContractMailTemplateDto>> maiContents = viewers.Select(x =>
                 {
-                    Result = SetContractMailTemplate(x, baseUrl)
+                    var mailTemplate = SetContractMailTemplate(x, baseUrl);
+                    return new ResultTemplateEmail<ContractMailTemplateDto> { Result = mailTemplate };
                 }).ToList();
 
                 var delaySendMail = 0;
@@ -1564,7 +1623,8 @@ namespace EC.Manager.Contracts
                     var item = await WorkScope.GetAsync<ContractSetting>(mailInput.ContractSettingId.Value);
                     item.IsComplete = true;
                     CurrentUnitOfWork.SaveChanges();
-                };
+                }
+                ;
                 contract.Status = ContractStatus.Inprogress;
                 await WorkScope.UpdateAsync(contract);
             }
@@ -1756,7 +1816,8 @@ namespace EC.Manager.Contracts
             if (IsReSent)
             {
                 sentedTranslate = "reSent";
-            };
+            }
+            ;
             return new CreaContractHistoryDto
             {
                 Action = HistoryAction.SendMail,
@@ -1768,12 +1829,13 @@ namespace EC.Manager.Contracts
             };
         }
 
-        private async Task<string> FillAndRepaceContent(string massWordContent, string massField, List<string> listFieldDto)
+        private async Task<string> FillAndRepaceContent(string massWordContent, string massField, List<string> listFieldDto, List<SignerMassDto> signers, List<string> anchorTags)
         {
             var filePath = Path.Combine(_webHostEnvironment.WebRootPath, "tempReplace", Guid.NewGuid().ToString() + ".docx");
             var bytes = Convert.FromBase64String(massWordContent.Split(',')[1].Trim());
             var fieldName = JsonConvert.DeserializeObject<List<string>>(massField);
             File.WriteAllBytes(filePath, bytes);
+            
             using (Document doc = new Document())
             {
                 doc.LoadFromFile(filePath);
@@ -1783,11 +1845,168 @@ namespace EC.Manager.Contracts
                 }
                 doc.SaveToFile(filePath, FileFormat.Auto);
             }
-            await ConvertToPdf(filePath, Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder));
-            var outputFile = Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder, Path.GetFileNameWithoutExtension(filePath) + ".pdf");
-            var result = Convert.ToBase64String(File.ReadAllBytes(outputFile));
-            File.Delete(filePath);
-            File.Delete(outputFile);
+            
+            string tempPdfFolder = Path.Combine(_webHostEnvironment.WebRootPath, tempConvertFolder);
+            await ConvertToPdf(filePath, tempPdfFolder);
+            var tempPdfFile = Path.Combine(tempPdfFolder, Path.GetFileNameWithoutExtension(filePath) + ".pdf");
+            byte[] pdfBytes = File.ReadAllBytes(tempPdfFile);
+            
+            if (signers != null)
+            {
+                foreach (var signer in signers)
+                {
+                    if (signer.SignatureSettings != null)
+                    {
+                        foreach (var setting in signer.SignatureSettings)
+                        {
+                            if (setting.SignatureType != SignatureTypeSetting.Text && 
+                                setting.SignatureType != SignatureTypeSetting.DatePicker && 
+                                !string.IsNullOrEmpty(setting.ValueInput) && 
+                                setting.ValueInput.StartsWith("<<") && 
+                                setting.ValueInput.EndsWith(">>"))
+                            {
+                                var position = PdfTextFinder.FindAnchorPosition(pdfBytes, setting.ValueInput);
+                                if (position != null)
+                                {
+                                    setting.Page = position.Page;
+                                    
+                                    float boxWidth = setting.Width ?? 0;
+                                    float boxHeight = setting.Height ?? 0;
+                                    
+                                    if (boxWidth <= 0 || boxHeight <= 0)
+                                    {
+                                        switch (setting.SignatureType)
+                                        {
+                                            case SignatureTypeSetting.Electronic:
+                                                boxWidth = 180;
+                                                boxHeight = 110;
+                                                break;
+                                            case SignatureTypeSetting.Digital:
+                                            case SignatureTypeSetting.Stamp:
+                                                boxWidth = 220;
+                                                boxHeight = 155;
+                                                break;
+                                            case SignatureTypeSetting.Text:
+                                            case SignatureTypeSetting.DatePicker:
+                                                boxWidth = 210;
+                                                boxHeight = 36;
+                                                break;
+                                            default:
+                                                boxWidth = 180;
+                                                boxHeight = 110;
+                                                break;
+                                        }
+                                    }
+                                    
+                                    float pdfCenterX = position.X + position.Width / 2f;
+                                    float pdfCenterY = position.Y + position.Height / 2f;
+                                    
+                                    float frontCenterX = pdfCenterX * 2;
+                                    float frontCenterY = (position.PageHeight - pdfCenterY) * 2;
+                                    
+                                    setting.PositionX = frontCenterX - (boxWidth / 2f);
+                                    setting.PositionY = frontCenterY - (boxHeight / 2f);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (File.Exists(tempPdfFile))
+            {
+                File.Delete(tempPdfFile);
+            }
+            
+            using (Document doc = new Document())
+            {
+                doc.LoadFromFile(filePath);
+                
+                var anchorTagsToReplace = new List<string>();
+                if (signers != null)
+                {
+                    foreach (var signer in signers)
+                    {
+                        if (signer.SignatureSettings != null)
+                        {
+                            foreach (var setting in signer.SignatureSettings)
+                            {
+                                if (setting.SignatureType != SignatureTypeSetting.Text && 
+                                    setting.SignatureType != SignatureTypeSetting.DatePicker && 
+                                    !string.IsNullOrEmpty(setting.ValueInput) && 
+                                    setting.ValueInput.StartsWith("<<") && 
+                                    setting.ValueInput.EndsWith(">>"))
+                                {
+                                    anchorTagsToReplace.Add(setting.ValueInput);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if (anchorTags != null)
+                {
+                    anchorTagsToReplace.AddRange(anchorTags);
+                }
+                
+                var autoDetectedTags = new List<string>();
+                try
+                {
+                    var anchorRegex = new System.Text.RegularExpressions.Regex(
+                        @"<<[^<>]+>>",
+                        System.Text.RegularExpressions.RegexOptions.None
+                    );
+                    
+                    var selections = doc.FindAllPattern(anchorRegex);
+                    if (selections != null)
+                    {
+                        foreach (var selection in selections)
+                        {
+                            string matchedText = selection.SelectedText;
+                            if (!string.IsNullOrEmpty(matchedText) && !autoDetectedTags.Contains(matchedText))
+                            {
+                                autoDetectedTags.Add(matchedText);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Warn($"[FillAndRepaceContent] Error auto-detecting anchor tags: {ex.Message}");
+                }
+                
+                var allTagsToReplace = anchorTagsToReplace
+                    .Concat(autoDetectedTags)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+                
+                Logger.Warn($"[FillAndRepaceContent] anchorTags to replace: {string.Join(", ", allTagsToReplace)}");
+                
+                foreach (var tag in allTagsToReplace)
+                {
+                    string spaces = new string(' ', tag.Length);
+                    var regex = new System.Text.RegularExpressions.Regex(System.Text.RegularExpressions.Regex.Escape(tag));
+                    int replacedCount = doc.Replace(regex, spaces);
+                    Logger.Warn($"[FillAndRepaceContent] Replaced tag '{tag}' with spaces. Replaced count: {replacedCount}");
+                }
+                
+                doc.SaveToFile(filePath, FileFormat.Auto);
+            }
+            
+            await ConvertToPdf(filePath, tempPdfFolder);
+            var finalPdfFile = Path.Combine(tempPdfFolder, Path.GetFileNameWithoutExtension(filePath) + ".pdf");
+            var resultBytes = File.ReadAllBytes(finalPdfFile);
+            var result = Convert.ToBase64String(resultBytes);
+            
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+            if (File.Exists(finalPdfFile))
+            {
+                File.Delete(finalPdfFile);
+            }
+            
             return "data:application/pdf;base64," + result;
         }
 
@@ -1809,6 +2028,92 @@ namespace EC.Manager.Contracts
                 ContractSettingIdHaveBoth = contractSettingIdHaveBoth,
                 NormalSignerId = normalSignerId,
             };
+        }
+
+        public async Task ProcessAnchorTags(long contractId)
+        {
+            var signatureSettings = await WorkScope.GetAll<SignerSignatureSetting>()
+                .Where(x => x.ContractSetting.ContractId == contractId)
+                .ToListAsync();
+
+            if (!signatureSettings.Any(x => x.SignatureType != SignatureTypeSetting.Text && x.SignatureType != SignatureTypeSetting.DatePicker && !string.IsNullOrEmpty(x.ValueInput) && x.ValueInput.StartsWith("[") && x.ValueInput.EndsWith("]")))
+            {
+                return;
+            }
+
+            var pdfBase64 = await _fileStoringManager.DownloadUnsignedContractBase64(contractId);
+            if (string.IsNullOrEmpty(pdfBase64))
+            {
+                return;
+            }
+
+            byte[] pdfBytes = Convert.FromBase64String(pdfBase64.Split(",")[1]);
+            var foundPositions = new List<TextPosition>();
+
+            foreach (var setting in signatureSettings)
+            {
+                if (setting.SignatureType != SignatureTypeSetting.Text && setting.SignatureType != SignatureTypeSetting.DatePicker && !string.IsNullOrEmpty(setting.ValueInput) && setting.ValueInput.StartsWith("[") && setting.ValueInput.EndsWith("]"))
+                {
+                    var position = PdfTextFinder.FindAnchorPosition(pdfBytes, setting.ValueInput);
+                    if (position != null)
+                    {
+                        if (!foundPositions.Any(p => p.Page == position.Page && p.X == position.X && p.Y == position.Y))
+                        {
+                            foundPositions.Add(position);
+                        }
+
+                        setting.Page = position.Page;
+
+                        float boxWidth = setting.Width ?? 0;
+                        float boxHeight = setting.Height ?? 0;
+
+                        if (boxWidth <= 0 || boxHeight <= 0)
+                        {
+                            switch (setting.SignatureType)
+                            {
+                                case SignatureTypeSetting.Electronic:
+                                    boxWidth = 180;
+                                    boxHeight = 110;
+                                    break;
+                                case SignatureTypeSetting.Digital:
+                                case SignatureTypeSetting.Stamp:
+                                    boxWidth = 220;
+                                    boxHeight = 155;
+                                    break;
+                                case SignatureTypeSetting.Text:
+                                case SignatureTypeSetting.DatePicker:
+                                    boxWidth = 210;
+                                    boxHeight = 36;
+                                    break;
+                                default:
+                                    boxWidth = 180;
+                                    boxHeight = 110;
+                                    break;
+                            }
+                        }
+
+                        // Center in PDF coordinates:
+                        float pdfCenterX = position.X + position.Width / 2f;
+                        float pdfCenterY = position.Y + position.Height / 2f;
+
+                        // Convert PDF center to frontend coordinates (scale * 2, Y-axis inverted)
+                        float frontCenterX = pdfCenterX * 2;
+                        float frontCenterY = (position.PageHeight - pdfCenterY) * 2;
+
+                        // Set top-left corner of the box
+                        setting.PositionX = frontCenterX - (boxWidth / 2f);
+                        setting.PositionY = frontCenterY - (boxHeight / 2f);
+
+                        if (setting.SignatureType == SignatureTypeSetting.Text || setting.SignatureType == SignatureTypeSetting.DatePicker)
+                        {
+                            setting.ValueInput = string.Empty;
+                        }
+
+                        await WorkScope.UpdateAsync(setting);
+                    }
+                }
+            }
+            await CurrentUnitOfWork.SaveChangesAsync();
         }
 
         private ContractMailTemplateDto SetContractMailTemplate(ContractSetting contractSetting, string baseUrl)

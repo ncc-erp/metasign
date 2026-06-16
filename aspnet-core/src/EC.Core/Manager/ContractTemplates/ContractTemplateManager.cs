@@ -1,4 +1,4 @@
-﻿using Abp.Collections.Extensions;
+using Abp.Collections.Extensions;
 using Abp.Domain.Uow;
 using Abp.UI;
 using EC.Entities;
@@ -217,7 +217,9 @@ namespace EC.Manager.ContractTemplates
                         SignerEmail = x.ContractTemplateSigner.SignerEmail,
                         SignerName = x.ContractTemplateSigner.SignerName,
                         Color = x.ContractTemplateSigner.Color,
-                        ValueInput = x.ValueInput
+                        ValueInput = x.ValueInput,
+                        IsShowSignDate = x.IsShowSignDate
+
                     }).ToList();
                 var signers = WorkScope.GetAll<ContractTemplateSigner>()
                     .Where(x => x.ContractTemplateId == id)
@@ -233,11 +235,14 @@ namespace EC.Manager.ContractTemplates
                         Color = x.Color,
                         ContractTemplateId = x.ContractTemplateId
                     }).ToList();
+                var anchorTags = PdfTextFinder.ScanAnchorTags(item.Content);
+
                 return new GetSignatureForContracttemplateDto
                 {
                     ContractTemplate = contractTemplate,
                     SignatureSettings = settings,
-                    SignerSettings = signers
+                    SignerSettings = signers,
+                    AnchorTags = anchorTags
                 };
             }
         }

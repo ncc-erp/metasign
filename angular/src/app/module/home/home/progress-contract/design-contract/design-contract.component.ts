@@ -64,7 +64,8 @@ import { PreviewContractComponent } from "../upload-contract/preview-contract/pr
 })
 export class DesignContractComponent
   extends AppComponentBase
-  implements OnInit {
+  implements OnInit
+{
   contractId: number;
   step: number;
   signerContract: SignerContract[];
@@ -72,7 +73,7 @@ export class DesignContractComponent
   fieldsColor: string;
   contractFile: any;
   contractFilePreview: any;
-  scalePreview: number = 1.45
+  scalePreview: number = 1.45;
   signerActionForm: FormGroup;
   focusSignatureId: number;
   valueSignerContractEdit: number;
@@ -94,10 +95,33 @@ export class DesignContractComponent
   templateContractId: number;
   templateContract: boolean;
   useTemplateContract: boolean;
-  signerChange: any
-  sizeTextArea: { width: number, height: number, fontSize: number, fontFamily: string } = { width: AppConsts.DEFAULT_INPUT_WIDTH, height: AppConsts.DEFAULT_INPUT_HEIGHT, fontSize: this.fontSizeList[AppConsts.defaultFontSize], fontFamily: this.fontList[0] }
-  initSizeTextArea: { width: number, height: number } = { width: AppConsts.DEFAULT_INPUT_WIDTH, height: AppConsts.DEFAULT_INPUT_HEIGHT }
-  sizeDatePicker: { width: number, height: number, fontSize: number, fontFamily: string } = { width: AppConsts.DEFAULT_INPUT_WIDTH, height: AppConsts.DEFAULT_INPUT_HEIGHT, fontSize: this.fontSizeList[AppConsts.defaultFontSize], fontFamily: this.fontList[0] }
+  signerChange: any;
+  sizeTextArea: {
+    width: number;
+    height: number;
+    fontSize: number;
+    fontFamily: string;
+  } = {
+    width: AppConsts.DEFAULT_INPUT_WIDTH,
+    height: AppConsts.DEFAULT_INPUT_HEIGHT,
+    fontSize: this.fontSizeList[AppConsts.defaultFontSize],
+    fontFamily: this.fontList[0],
+  };
+  initSizeTextArea: { width: number; height: number } = {
+    width: AppConsts.DEFAULT_INPUT_WIDTH,
+    height: AppConsts.DEFAULT_INPUT_HEIGHT,
+  };
+  sizeDatePicker: {
+    width: number;
+    height: number;
+    fontSize: number;
+    fontFamily: string;
+  } = {
+    width: AppConsts.DEFAULT_INPUT_WIDTH,
+    height: AppConsts.DEFAULT_INPUT_HEIGHT,
+    fontSize: this.fontSizeList[AppConsts.defaultFontSize],
+    fontFamily: this.fontList[0],
+  };
   templateContractEdit: boolean;
   private isCheckSignerType: boolean;
   private isCheckInputType: boolean;
@@ -105,11 +129,20 @@ export class DesignContractComponent
   private currentSiger: SignatureSettings[] = [];
   private isCheckSigner: boolean;
   private isPreOrder: boolean;
-  isCheckLengthSigner: number[] = []
-  isCheckLengthInput: number[] = []
+  isCheckLengthSigner: number[] = [];
+  isCheckLengthInput: number[] = [];
   signatureTypeList = AppConsts.signatureTypeList;
   otherTypeList = AppConsts.otherTypeList;
   batchContract: boolean;
+  anchorTags: string[] = [];
+  anchorTagSearch: string = '';
+
+  get filteredAnchorTags(): string[] {
+    if (!this.anchorTagSearch || !this.anchorTagSearch.trim()) return this.anchorTags;
+    const keyword = this.anchorTagSearch.toLowerCase().trim();
+    return this.anchorTags.filter(tag => tag.toLowerCase().includes(keyword));
+  }
+
   @ViewChild("dropZone", { read: ElementRef }) dropZone: ElementRef;
   @ViewChildren("page") elements: any;
 
@@ -156,6 +189,7 @@ export class DesignContractComponent
       left: [null, [Validators.min(0), Validators.max(1544)]],
       width: [{ value: null, disabled: true }],
       height: [{ value: null, disabled: true }],
+      valueInput: [null],
     });
 
     if (this.contractId) {
@@ -170,15 +204,19 @@ export class DesignContractComponent
           this.valueSignerContract = this.signerContract[0].id;
           this.fieldsColor = this.signerContract[0].color;
           this.contractName = this.signerContract[0].contractFileName;
-          this.isPreOrder = this.signerContract.every(item => item.procesOrder === 1);
-          this.isCheckSigner = this.signerContract.length > 1 && this.isPreOrder;
+          this.isPreOrder = this.signerContract.every(
+            (item) => item.procesOrder === 1
+          );
+          this.isCheckSigner =
+            this.signerContract.length > 1 && this.isPreOrder;
         });
 
       this.signerSignatureSettingService
         .getSignatureSettingForContractDesign(this.contractId)
         .subscribe(async (rs) => {
           this.contractFile = await this.generateImageStringsFromBase64PDF(
-            rs.result.contractBase64.split(",")[1], 2
+            rs.result.contractBase64.split(",")[1],
+            2
           );
 
           this.contractFile.forEach((value) => {
@@ -186,10 +224,11 @@ export class DesignContractComponent
               "data:image/jpeg;base64," + value.fileBase64);
           });
 
-
-          this.contractFilePreview = await this.generateImageStringsFromBase64PDF(
-            rs.result.contractBase64.split(",")[1], this.scalePreview
-          );
+          this.contractFilePreview =
+            await this.generateImageStringsFromBase64PDF(
+              rs.result.contractBase64.split(",")[1],
+              this.scalePreview
+            );
 
           this.contractFilePreview.forEach((value) => {
             return (value.fileBase64 =
@@ -197,10 +236,11 @@ export class DesignContractComponent
           });
 
           this.getContractSignatureSetting(rs.result);
+          this.anchorTags = rs.result.anchorTags || [];
           this.contractLoadding = false;
-          this.isCheckType(rs.result.signatureSettings)
+          this.isCheckType(rs.result.signatureSettings);
         });
-      return
+      return;
     }
 
     if (this.templateContractId) {
@@ -208,7 +248,8 @@ export class DesignContractComponent
         .getContractTemplate(this.templateContractId)
         .subscribe(async (rs) => {
           this.contractFile = await this.generateImageStringsFromBase64PDF(
-            rs.result.contractTemplate.content.split(",")[1], 2
+            rs.result.contractTemplate.content.split(",")[1],
+            2
           );
           this.contractName = rs.result.contractTemplate.fileName;
           this.contractFile.forEach((value) => {
@@ -225,15 +266,18 @@ export class DesignContractComponent
           this.valueSignerContract = this.signerContract[0].id;
           this.fieldsColor = this.signerContract[0].color;
           this.contractName = rs.result.contractTemplate.fileName;
-          this.contractFilePreview = await this.generateImageStringsFromBase64PDF(
-            rs.result.contractTemplate.content.split(",")[1], this.scalePreview
-          );
+          this.contractFilePreview =
+            await this.generateImageStringsFromBase64PDF(
+              rs.result.contractTemplate.content.split(",")[1],
+              this.scalePreview
+            );
           this.contractFilePreview.forEach((value) => {
             return (value.fileBase64 =
               "data:image/jpeg;base64," + value.fileBase64);
           });
 
           this.getContractSignatureSetting(rs.result);
+          this.anchorTags = rs.result.anchorTags || [];
           this.contractLoadding = false;
         });
     }
@@ -252,7 +296,14 @@ export class DesignContractComponent
       contractPage.signatureSettings = [];
       signature.signatureSettings.forEach((signature) => {
         if (signature.page === contractPage.contractPage) {
-          contractPage.signatureSettings.push({ ...signature, positionX: signature.positionX * (this.scalePreview / 2), positionY: signature.positionY * (this.scalePreview / 2), width: signature.width * (this.scalePreview / 2), height: signature.height * (this.scalePreview / 2), fontSize: signature.fontSize * (this.scalePreview / 2) });
+          contractPage.signatureSettings.push({
+            ...signature,
+            positionX: signature.positionX * (this.scalePreview / 2),
+            positionY: signature.positionY * (this.scalePreview / 2),
+            width: signature.width * (this.scalePreview / 2),
+            height: signature.height * (this.scalePreview / 2),
+            fontSize: signature.fontSize * (this.scalePreview / 2),
+          });
         }
       });
     });
@@ -307,8 +358,13 @@ export class DesignContractComponent
     this.currentSigner.fontSize = this.fontSize;
     this.currentSigner.positionX = this.signerActionForm.value.left;
     this.currentSigner.positionY = this.signerActionForm.value.top;
+    this.currentSigner.valueInput = this.signerActionForm.value.valueInput;
+    this.currentSigner.isShowSignDate =
+      this.signerActionForm.value.isShowSignDate;
     this.updateSignature(this.currentSigner);
+
   }
+
 
   handleChangesigner() {
     const signer = this.signerContract.find(
@@ -321,7 +377,8 @@ export class DesignContractComponent
   handleChangesignerEdit() {
     this.currentSigner.contractSettingId = this.valueSignerContractEdit;
     if (this.templateContractId) {
-      this.currentSigner.contractTemplateSignerId = this.valueSignerContractEdit;
+      this.currentSigner.contractTemplateSignerId =
+        this.valueSignerContractEdit;
     }
     this.updateSignature(this.currentSigner);
   }
@@ -336,8 +393,12 @@ export class DesignContractComponent
       this.fontFamily = $event.fontFamily;
       this.fontSize = $event.fontSize;
     }
+    // Reset ô search khi chọn ô chữ ký mới
+    this.anchorTagSearch = '';
     this.focusSignatureId = $event.id;
-    this.valueSignerContractEdit = this.contractId ? $event.contractSettingId : $event.contractTemplateSignerId;
+    this.valueSignerContractEdit = this.contractId
+      ? $event.contractSettingId
+      : $event.contractTemplateSignerId;
     this.oldValueSignerContractEdit = this.valueSignerContractEdit;
     this.currentSigner = $event;
     this.signerActionForm.patchValue({
@@ -345,13 +406,14 @@ export class DesignContractComponent
       left: $event.positionX,
       width: $event.width,
       height: $event.height,
+      valueInput: $event.valueInput,
     });
   }
 
   valueUpdateSignature($event) {
     if ($event.signatureType === ContractSettingType.Text) {
-      this.sizeTextArea.width = $event.width
-      this.sizeTextArea.height = $event.height
+      this.sizeTextArea.width = $event.width;
+      this.sizeTextArea.height = $event.height;
     }
 
     const signature = {
@@ -375,10 +437,9 @@ export class DesignContractComponent
         .updateSignerSignatureSetting(value)
         .pipe(
           catchError((): any => {
-            this.valueSignerContractEdit = this.oldValueSignerContractEdit
+            this.valueSignerContractEdit = this.oldValueSignerContractEdit;
             this.currentSigner.contractSettingId = this.valueSignerContractEdit;
-          }
-          ),
+          }),
           switchMap(() =>
             this.signerSignatureSettingService.getSignatureSettingForContractDesign(
               this.contractId
@@ -387,7 +448,20 @@ export class DesignContractComponent
         )
         .subscribe((rs) => {
           this.getContractSignatureSetting(rs.result);
-          this.isCheckType(rs.result.signatureSettings)
+          this.isCheckType(rs.result.signatureSettings);
+          if (this.focusSignatureId) {
+            const updated = rs.result.signatureSettings.find(s => s.id === this.focusSignatureId);
+            if (updated) {
+              this.currentSigner = updated;
+              this.signerActionForm.patchValue({
+                top: updated.positionY,
+                left: updated.positionX,
+                width: updated.width,
+                height: updated.height,
+                valueInput: updated.valueInput
+              }, { emitEvent: false });
+            }
+          }
         });
     } else {
       let payload = {
@@ -404,17 +478,18 @@ export class DesignContractComponent
         fontFamily: value.fontFamily,
         fontColor: value.fontColor,
         isSigned: false,
-        valueInput: value.valueInput
+        valueInput: value.valueInput,
+        isShowSignDate: value.isShowSignDate,
       };
 
       this.contractTemplateSettingService
         .updateContractTemplateSetting(payload)
         .pipe(
           catchError((): any => {
-            this.valueSignerContractEdit = this.oldValueSignerContractEdit
-            this.currentSigner.contractTemplateSignerId = this.valueSignerContractEdit;
-          }
-          ),
+            this.valueSignerContractEdit = this.oldValueSignerContractEdit;
+            this.currentSigner.contractTemplateSignerId =
+              this.valueSignerContractEdit;
+          }),
           switchMap(() =>
             this.contractTemplateService.getContractTemplate(
               this.templateContractId
@@ -423,6 +498,19 @@ export class DesignContractComponent
         )
         .subscribe((rs) => {
           this.getContractSignatureSetting(rs.result);
+          if (this.focusSignatureId) {
+            const updated = rs.result.signatureSettings.find(s => s.id === this.focusSignatureId);
+            if (updated) {
+              this.currentSigner = updated;
+              this.signerActionForm.patchValue({
+                top: updated.positionY,
+                left: updated.positionX,
+                width: updated.width,
+                height: updated.height,
+                valueInput: updated.valueInput
+              }, { emitEvent: false });
+            }
+          }
         });
     }
   }
@@ -434,11 +522,21 @@ export class DesignContractComponent
         .deleteSignerSignatureSetting(event.id)
         .pipe(
           switchMap(() => {
-            this.currentSiger = this.currentSiger?.filter(x => x.id !== event.id)
-            this.isCheckLengthInput = this.isCheckLengthInput?.filter(x => x !== event.contractSettingId)
-            this.isCheckLengthSigner = this.isCheckLengthSigner?.filter(x => x !== event.contractSettingId)
-            if (this.currentSiger.length === 0 || this.isCheckLengthSigner.length === 0 || this.isCheckLengthInput.length === 0) {
-              this.messageCheck = undefined
+            this.currentSiger = this.currentSiger?.filter(
+              (x) => x.id !== event.id
+            );
+            this.isCheckLengthInput = this.isCheckLengthInput?.filter(
+              (x) => x !== event.contractSettingId
+            );
+            this.isCheckLengthSigner = this.isCheckLengthSigner?.filter(
+              (x) => x !== event.contractSettingId
+            );
+            if (
+              this.currentSiger.length === 0 ||
+              this.isCheckLengthSigner.length === 0 ||
+              this.isCheckLengthInput.length === 0
+            ) {
+              this.messageCheck = undefined;
             }
             return this.signerSignatureSettingService.getSignatureSettingForContractDesign(
               this.contractId
@@ -447,9 +545,9 @@ export class DesignContractComponent
         )
         .subscribe((rs) => {
           this.getContractSignatureSetting(rs.result);
-          this.isCheckType(rs.result.signatureSettings)
+          this.isCheckType(rs.result.signatureSettings);
         });
-      return
+      return;
     }
     if (this.templateContractId) {
       this.contractTemplateSettingService
@@ -474,28 +572,78 @@ export class DesignContractComponent
 
   handlechangeFontSize(event) {
     if (this.currentSigner.signatureType === ContractSettingType.Text) {
-      this.sizeTextArea.fontSize = event.value
+      this.sizeTextArea.fontSize = event.value;
     }
     if (this.currentSigner.signatureType === ContractSettingType.DatePicker) {
-      this.sizeDatePicker.fontSize = event.value
-      this.currentSigner.width = 25 * this.sizeDatePicker.fontSize / 2
-      this.currentSigner.height = 2 * this.sizeDatePicker.fontSize + 4
+      this.sizeDatePicker.fontSize = event.value;
+      this.currentSigner.width = (25 * this.sizeDatePicker.fontSize) / 2;
+      this.currentSigner.height = 2 * this.sizeDatePicker.fontSize + 4;
     }
     this.handleChangePositionSignature();
   }
 
   handlechangeFontFamily(event) {
     if (this.currentSigner.signatureType === ContractSettingType.Text) {
-      this.sizeTextArea.fontFamily = event.value
+      this.sizeTextArea.fontFamily = event.value;
     }
     if (this.currentSigner.signatureType === ContractSettingType.DatePicker) {
-      this.sizeDatePicker.fontFamily = event.value
+      this.sizeDatePicker.fontFamily = event.value;
     }
     this.handleChangePositionSignature();
   }
 
   handleChangeColor() {
     this.handleChangePositionSignature();
+  }
+
+  onShowSignDateChange(isShowSignDate: boolean) {
+    this.currentSigner.isShowSignDate = isShowSignDate;
+
+    if (this.contractId) {
+      // Update signer signature setting
+      this.signerSignatureSettingService
+        .updateSignerSignatureSetting(this.currentSigner)
+        .pipe(
+          switchMap(() =>
+            this.signerSignatureSettingService.getSignatureSettingForContractDesign(
+              this.contractId
+            )
+          )
+        )
+        .subscribe({
+          next: (rs) => {
+            this.getContractSignatureSetting(rs.result);
+            this.isCheckType(rs.result.signatureSettings);
+          },
+          error: () => {
+            this.currentSigner.isShowSignDate = !isShowSignDate;
+          },
+        });
+    } else {
+      // Update for contract template settings
+      const payload = {
+        ...this.currentSigner,
+        contractTemplateSignerId: this.currentSigner.contractTemplateSignerId,
+        isShowSignDate: isShowSignDate,
+      };
+      this.contractTemplateSettingService
+        .updateContractTemplateSetting(payload)
+        .pipe(
+          switchMap(() =>
+            this.contractTemplateService.getContractTemplate(
+              this.templateContractId
+            )
+          )
+        )
+        .subscribe({
+          next: (rs) => {
+            this.getContractSignatureSetting(rs.result);
+          },
+          error: () => {
+            this.currentSigner.isShowSignDate = !isShowSignDate;
+          },
+        });
+    }
   }
 
   checkSignatureType(value) {
@@ -506,8 +654,12 @@ export class DesignContractComponent
           lable: "Text",
         };
         return {
-          width: 25 * this.sizeTextArea.fontSize / 2 || AppConsts.DEFAULT_INPUT_WIDTH,
-          height: 2 * this.sizeTextArea.fontSize + 4 || AppConsts.DEFAULT_INPUT_HEIGHT,
+          width:
+            (25 * this.sizeTextArea.fontSize) / 2 ||
+            AppConsts.DEFAULT_INPUT_WIDTH,
+          height:
+            2 * this.sizeTextArea.fontSize + 4 ||
+            AppConsts.DEFAULT_INPUT_HEIGHT,
           fontSize: this.sizeTextArea.fontSize,
           fontFamily: this.sizeTextArea.fontFamily,
           fontColor: this.fontColor,
@@ -528,8 +680,12 @@ export class DesignContractComponent
         };
 
         return {
-          width: 25 * this.sizeDatePicker.fontSize / 2 || AppConsts.DEFAULT_INPUT_WIDTH,
-          height: 2 * this.sizeDatePicker.fontSize + 4 || AppConsts.DEFAULT_INPUT_HEIGHT,
+          width:
+            (25 * this.sizeDatePicker.fontSize) / 2 ||
+            AppConsts.DEFAULT_INPUT_WIDTH,
+          height:
+            2 * this.sizeDatePicker.fontSize + 4 ||
+            AppConsts.DEFAULT_INPUT_HEIGHT,
           fontSize: this.sizeDatePicker.fontSize,
           fontFamily: this.sizeDatePicker.fontFamily,
           fontColor: this.fontColor,
@@ -557,7 +713,108 @@ export class DesignContractComponent
   }
 
   handleDragEnd(type) {
-    this.onDrag = false
+    this.onDrag = false;
+  }
+
+  handleSignatureClick(signatureTypeId: number) {
+    const page = this.indexPdf || (this.contractFile && this.contractFile.length > 0 ? this.contractFile[0].contractPage : 1);
+    const signatureType = this.checkSignatureType(signatureTypeId);
+    const defaultX = 50;
+    const defaultY = 50;
+
+    const signature = {
+      contractSettingId: this.valueSignerContract,
+      isSigned: false,
+      positionX: defaultX,
+      positionY: defaultY,
+      signatureType: signatureTypeId,
+      page: +page,
+      isShowSignDate: true,
+      ...signatureType,
+    };
+
+    if (this.contractId) {
+      this.signerSignatureSettingService
+        .createSignerSignatureSetting({ ...signature, isShowSignDate: true })
+        .pipe(
+          catchError((): any => {
+            this.valueSignerContractEdit = this.oldValueSignerContractEdit;
+            this.currentSigner.contractSettingId =
+              this.valueSignerContractEdit;
+          }),
+          switchMap((value: any) => {
+            this.focusSignatureId = value.result;
+            this.currentSigner = {
+              id: value.result,
+              ...signature,
+            };
+            return this.signerSignatureSettingService.getSignatureSettingForContractDesign(
+              this.contractId
+            );
+          })
+        )
+        .subscribe((rs) => {
+          this.getContractSignatureSetting(rs.result);
+          this.valueSignerContractEdit = this.valueSignerContract;
+          this.oldValueSignerContractEdit = this.valueSignerContractEdit;
+          this.isCheckType(rs.result.signatureSettings);
+
+          this.signerActionForm.patchValue({
+            top: defaultY,
+            left: defaultX,
+            valueInput: '',
+            ...signatureType,
+          });
+        });
+    } else {
+      let payload = {
+        isSigned: false,
+        contractTemplateSignerId: this.valueSignerContract,
+        signatureType: signature.signatureType,
+        signatureTypeId: 0,
+        page: signature.page,
+        positionX: signature.positionX,
+        positionY: signature.positionY,
+        width: signature.width,
+        height: signature.height,
+        fontSize: signature.fontSize,
+        fontFamily: signature.fontFamily,
+        fontColor: signature.fontColor,
+        isShowSignDate: true,
+      };
+
+      this.contractTemplateSettingService
+        .createContractTemplateSetting(payload)
+        .pipe(
+          catchError((): any => {
+            this.valueSignerContractEdit = this.oldValueSignerContractEdit;
+            this.currentSigner.contractTemplateSignerId =
+              this.valueSignerContractEdit;
+          }),
+          switchMap((rs: any) => {
+            this.focusSignatureId = rs.result;
+            this.currentSigner = {
+              id: rs.result,
+              ...payload,
+            };
+            return this.contractTemplateService.getContractTemplate(
+              this.templateContractId
+            );
+          })
+        )
+        .subscribe((value) => {
+          this.getContractSignatureSetting(value.result);
+          this.valueSignerContractEdit = this.valueSignerContract;
+          this.oldValueSignerContractEdit = this.valueSignerContractEdit;
+
+          this.signerActionForm.patchValue({
+            top: defaultY,
+            left: defaultX,
+            valueInput: '',
+            ...signatureType,
+          });
+        });
+    }
   }
 
   drop(event: any) {
@@ -583,26 +840,23 @@ export class DesignContractComponent
       positionY: positionInContainer.y,
       signatureType: signatureTypeId,
       page: +indexPage,
+      isShowSignDate: true,
       ...signatureType,
     };
 
-    if (
-      itemBounds.x > containerBounds.right - signatureType.width
-    ) {
+    if (itemBounds.x > containerBounds.right - signatureType.width) {
       signature.positionX = positionInContainer.x - signatureType.width;
       signature.positionY = positionInContainer.y;
     }
 
-    if (
-      itemBounds.y > containerBounds.bottom - signatureType.height
-    ) {
+    if (itemBounds.y > containerBounds.bottom - signatureType.height) {
       signature.positionX = positionInContainer.x - signatureType.width;
       signature.positionY = positionInContainer.y - signatureType.height;
     }
 
     if (
-      itemBounds.x < containerBounds.left + signatureType.width
-      && itemBounds.y > containerBounds.bottom - signatureType.height
+      itemBounds.x < containerBounds.left + signatureType.width &&
+      itemBounds.y > containerBounds.bottom - signatureType.height
     ) {
       signature.positionX = positionInContainer.x;
       signature.positionY = positionInContainer.y - signatureType.height;
@@ -614,16 +868,15 @@ export class DesignContractComponent
       itemBounds.y >= containerBounds.top &&
       itemBounds.y <= containerBounds.bottom
     ) {
-
       if (this.contractId) {
         this.signerSignatureSettingService
-          .createSignerSignatureSetting(signature)
+          .createSignerSignatureSetting({ ...signature, isShowSignDate: true })
           .pipe(
             catchError((): any => {
-              this.valueSignerContractEdit = this.oldValueSignerContractEdit
-              this.currentSigner.contractSettingId = this.valueSignerContractEdit;
-            }
-            ),
+              this.valueSignerContractEdit = this.oldValueSignerContractEdit;
+              this.currentSigner.contractSettingId =
+                this.valueSignerContractEdit;
+            }),
             switchMap((value: any) => {
               this.focusSignatureId = value.result;
               this.currentSigner = {
@@ -638,11 +891,10 @@ export class DesignContractComponent
           .subscribe((rs) => {
             this.getContractSignatureSetting(rs.result);
             this.valueSignerContractEdit = this.valueSignerContract;
-            this.oldValueSignerContractEdit = this.valueSignerContractEdit
-            this.isCheckType(rs.result.signatureSettings)
+            this.oldValueSignerContractEdit = this.valueSignerContractEdit;
+            this.isCheckType(rs.result.signatureSettings);
           });
-      }
-      else {
+      } else {
         let payload = {
           isSigned: false,
           contractTemplateSignerId: this.valueSignerContract,
@@ -656,16 +908,17 @@ export class DesignContractComponent
           fontSize: signature.fontSize,
           fontFamily: signature.fontFamily,
           fontColor: signature.fontColor,
+          isShowSignDate: true,
         };
 
         this.contractTemplateSettingService
           .createContractTemplateSetting(payload)
           .pipe(
             catchError((): any => {
-              this.valueSignerContractEdit = this.oldValueSignerContractEdit
-              this.currentSigner.contractTemplateSignerId = this.valueSignerContractEdit;
-            }
-            ),
+              this.valueSignerContractEdit = this.oldValueSignerContractEdit;
+              this.currentSigner.contractTemplateSignerId =
+                this.valueSignerContractEdit;
+            }),
             switchMap((rs: any) => {
               this.focusSignatureId = rs.result;
               this.currentSigner = {
@@ -680,7 +933,7 @@ export class DesignContractComponent
           .subscribe((value) => {
             this.getContractSignatureSetting(value.result);
             this.valueSignerContractEdit = this.valueSignerContract;
-            this.oldValueSignerContractEdit = this.valueSignerContractEdit
+            this.oldValueSignerContractEdit = this.valueSignerContractEdit;
           });
         return;
       }
@@ -694,7 +947,8 @@ export class DesignContractComponent
     this.isCheckSignerType = data.some(
       (x) =>
         x.signatureType === ContractSettingType.Electronic ||
-        x.signatureType !== ContractSettingType.Digital || x.signatureType === ContractSettingType.Stamp
+        x.signatureType !== ContractSettingType.Digital ||
+        x.signatureType === ContractSettingType.Stamp
     );
     this.isCheckInputType = data.some(
       (x) =>
@@ -712,7 +966,8 @@ export class DesignContractComponent
 
       if (
         itemId.signatureType === ContractSettingType.Electronic ||
-        itemId.signatureType === ContractSettingType.Digital || itemId.signatureType === ContractSettingType.Stamp
+        itemId.signatureType === ContractSettingType.Digital ||
+        itemId.signatureType === ContractSettingType.Stamp
       ) {
         idSigner.push(itemId.contractSettingId);
       }
@@ -724,40 +979,43 @@ export class DesignContractComponent
 
     if (this.isCheckSigner) {
       if (
-        this.isCheckSignerType &&
-        this.isCheckLengthSigner.length === this.signerContract.length || this.isCheckSignerType && this.isCheckLengthSigner.length >= 1
+        (this.isCheckSignerType &&
+          this.isCheckLengthSigner.length === this.signerContract.length) ||
+        (this.isCheckSignerType && this.isCheckLengthSigner.length >= 1)
       ) {
         data.forEach((value) => {
           if (
-            (value.signatureType === ContractSettingType.Text) ||
-            (value.signatureType === ContractSettingType.DatePicker) &&
-            !seenValues.includes(value)
+            value.signatureType === ContractSettingType.Text ||
+            (value.signatureType === ContractSettingType.DatePicker &&
+              !seenValues.includes(value))
           ) {
             seenValues.push(value);
             this.currentSiger = seenValues;
             this.messageCheck = `
               <div style="font-size: 17px;">
-              ${this.ecTransform('OtherSignersWillReceiveAnEmailAfter')}
+              ${this.ecTransform("OtherSignersWillReceiveAnEmailAfter")}
               </div>`;
-            return
+            return;
           }
         });
       }
       if (
         (this.isCheckInputType &&
-          this.isCheckLengthInput.length === this.signerContract.length) || (this.isCheckInputType && this.isCheckLengthInput.length >= 2)
+          this.isCheckLengthInput.length === this.signerContract.length) ||
+        (this.isCheckInputType && this.isCheckLengthInput.length >= 2)
       ) {
         data.forEach((value) => {
           if (
-            (value.signatureType === ContractSettingType.Electronic) ||
-            (value.signatureType === ContractSettingType.Digital) || (value.signatureType === ContractSettingType.Stamp) &&
-            !seenValues.includes(value)
+            value.signatureType === ContractSettingType.Electronic ||
+            value.signatureType === ContractSettingType.Digital ||
+            (value.signatureType === ContractSettingType.Stamp &&
+              !seenValues.includes(value))
           ) {
             seenValues.push(value);
             this.currentSiger = seenValues;
             this.messageCheck = `
             <div style="font-size: 17px;">
-            ${this.ecTransform('OtherSignersWillReceiveAnEmailAfter')}
+            ${this.ecTransform("OtherSignersWillReceiveAnEmailAfter")}
             </div>`;
             return;
           }
@@ -768,39 +1026,53 @@ export class DesignContractComponent
 
   handleNext() {
     if (this.templateContractId && this.templateContract) {
-      this.contractTemplateService.updateProcessOrder(this.templateContractId).pipe().subscribe()
+      this.contractTemplateService
+        .updateProcessOrder(this.templateContractId)
+        .pipe()
+        .subscribe();
       this.router.navigate(["/app/templates"]);
-      abp.message.success(this.ecTransform('TemplateSavedSuccessfully'));
-      return
+      abp.message.success(this.ecTransform("TemplateSavedSuccessfully"));
+      return;
     }
     let contractSettingIdList = [];
     const encode = this.route.snapshot.queryParamMap.get("contractId");
     this.contractFile.forEach((contractFile) => {
       contractFile.signatureSettings.forEach((signature) => {
-        contractSettingIdList.push(this.contractId ? signature.contractSettingId : signature.contractTemplateSignerId);
+        contractSettingIdList.push(
+          this.contractId
+            ? signature.contractSettingId
+            : signature.contractTemplateSignerId
+        );
       });
     });
 
     let signatureUnique = Array.from(new Set(contractSettingIdList));
 
     if (this.signerContract.length === signatureUnique.length) {
-
       if (this.messageCheck) {
-        abp.message.confirm(this.messageCheck, this.ecTransform('AreYouSureYouWantToContinue'), (res) => {
-          if (res) {
-            this.contractService._currentStep.next(contractStep.EmailSetting);
-            this.contractService.updateProcessOrder(this.contractId).pipe().subscribe();
-            this.router.navigate(["/app/home/process/emailSetting"], {
-              queryParams: {
-                contractId: encode,
-                step: contractStep.EmailSetting,
-              },
-              queryParamsHandling: "merge",
-            });
-          }
-          return
-        }, { isHtml: true })
-        return
+        abp.message.confirm(
+          this.messageCheck,
+          this.ecTransform("AreYouSureYouWantToContinue"),
+          (res) => {
+            if (res) {
+              this.contractService._currentStep.next(contractStep.EmailSetting);
+              this.contractService
+                .updateProcessOrder(this.contractId)
+                .pipe()
+                .subscribe();
+              this.router.navigate(["/app/home/process/emailSetting"], {
+                queryParams: {
+                  contractId: encode,
+                  step: contractStep.EmailSetting,
+                },
+                queryParamsHandling: "merge",
+              });
+            }
+            return;
+          },
+          { isHtml: true }
+        );
+        return;
       }
 
       this.contractService._currentStep.next(contractStep.EmailSetting);
@@ -811,16 +1083,18 @@ export class DesignContractComponent
         },
         queryParamsHandling: "merge",
       });
-      return
+      return;
     } else {
-      abp.message.error(this.ecTransform('MissingSignatureLocationForRecipients'));
+      abp.message.error(
+        this.ecTransform("MissingSignatureLocationForRecipients")
+      );
     }
   }
 
   handleBack() {
     this.contractFile.forEach((contractFile) => {
       contractFile.signatureSettings.forEach((signature) => {
-        this.updateSignature(signature)
+        this.updateSignature(signature);
       });
     });
     if (this.contractId) {
@@ -829,12 +1103,14 @@ export class DesignContractComponent
       this.router.navigate(["/app/home/process/setting"], {
         queryParams: {
           contractId: encode,
-          ...(this.templateContractId && { templateContractId: this.templateContractId }),
+          ...(this.templateContractId && {
+            templateContractId: this.templateContractId,
+          }),
           step: contractStep.SignerSetting,
         },
         queryParamsHandling: "merge",
       });
-      return
+      return;
     }
 
     if (this.templateContractId) {
@@ -849,9 +1125,6 @@ export class DesignContractComponent
       });
       return;
     }
-    
-
-
   }
 
   isAllowEditSignature() {
@@ -875,7 +1148,7 @@ export class DesignContractComponent
   previewContract() {
     this.contractFile.forEach((contractFile) => {
       contractFile.signatureSettings.forEach((signature) => {
-        this.updateSignature(signature)
+        this.updateSignature(signature);
       });
     });
     const dialogRef = this.dialog.open(PreviewContractComponent, {
@@ -883,15 +1156,15 @@ export class DesignContractComponent
         contractFile: this.contractFile,
         contractFilePreviewDesign: this.contractFilePreview,
         isSignedPreview: true,
-        contractFileName: this.contractName
+        contractFileName: this.contractName,
       },
-      width: '1000px',
-      maxWidth: '1000px',
-      panelClass: 'email-dialog',
-    })
-    dialogRef.afterClosed().subscribe(rs => {
+      width: "1000px",
+      maxWidth: "1000px",
+      panelClass: "email-dialog",
+    });
+    dialogRef.afterClosed().subscribe((rs) => {
       if (rs) {
       }
-    })
+    });
   }
 }

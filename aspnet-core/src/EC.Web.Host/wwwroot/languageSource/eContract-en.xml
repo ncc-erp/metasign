@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <localizationDictionary culture="en">
 	<texts>
 		<text name="Home" value="Home" />
@@ -382,6 +382,7 @@
 		<text name="USBToken" value="USB Token" />
 		<text name="Recipient" value="Recipient" />
 		<text name="Location" value="Location" />
+		<text name="AnchorTag" value="Anchor Tag" />
 		<text name="Formatting" value="Formatting" />
 		<text name="PreviewContractResults" value="Preview contract results " />
 		<text name="MissingSignatureLocationForRecipients" value="Missing signature location for recipients" />
@@ -618,5 +619,10 @@
 		<text name="FileError" value="File has errors please check again!" />
 		<text name="NoData" value="No data!" />
 		<text name="SignerNotBeenSet" value="There exists a signer whose signing position has not been set!" />
+		<text name="showSignDate" value="Show signing date"/>
+		<text name="SearchAnchorTag" value="Search anchor tag..." />
+		<text name="None" value="— None —" />
+		<text name="NoAnchorTagFound" value="No matching anchor tags found" />
+		<text name="DocumentHasNoAnchorTags" value="Document does not have anchor tags &lt;&lt;...&gt;&gt;" />
 	</texts>
 </localizationDictionary>

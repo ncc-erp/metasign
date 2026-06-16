@@ -10,4 +10,9 @@
 
         public long UserId { get; set; }
     }
+
+    public class MezonSigningAuthenticateResult : AuthenticateResultModel
+    {
+        public string Email { get; set; }
+    }
 }

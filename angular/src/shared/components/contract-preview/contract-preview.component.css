@@ -62,8 +62,8 @@ header {
 .signature_type {
   border-radius: 7px;
   position: absolute;
-  width: 100px;
-  height: 100px;
+  width: 180px;
+  height: 110px;
   background-color: rgb(255, 214, 91);
   border: 3px solid #d1cbcb;
   display: flex;

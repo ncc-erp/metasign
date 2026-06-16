@@ -1,4 +1,8 @@
-<div [ngSwitch]="signature.signatureType" *ngIf="signatureSetting.role != 3">
+<div
+  [ngSwitch]="signature.signatureType"
+  *ngIf="signatureSetting.role != 3"
+  (click)="onFocus()"
+>
   <div *ngSwitchCase="ContractSettingType.Text">
     <div
       *ngIf="!signature.isSigned"
@@ -38,10 +42,15 @@
           class="signature-img"
           (click)="openDialog()"
           *ngIf="
-             signatureDefaultElectronic?.contractBase64 && signature.isTemporarySigned;
+            signatureDefaultElectronic?.contractBase64 &&
+              signature.isTemporarySigned;
             else elseBlock
           "
-          [src]="sanitizer.bypassSecurityTrustResourceUrl(signatureDefaultElectronic?.contractBase64)"
+          [src]="
+            sanitizer.bypassSecurityTrustResourceUrl(
+              signatureDefaultElectronic?.contractBase64
+            )
+          "
           alt="signature"
         />
       </div>
@@ -97,7 +106,8 @@
           class="signature_Digital"
         >
           <p>
-            Digitally signed by <br/> {{ signature.ownCA }}
+            Digitally signed by <br />
+            {{ signature.ownCA }}
           </p>
         </div>
         <div class="overlay-gray" *ngIf="!signature.isAllowSigning"></div>
@@ -179,10 +189,15 @@
           class="signature-img"
           (click)="openDialog()"
           *ngIf="
-          signatureDefaultStamp?.contractBase64 && signature.isTemporarySigned;
+            signatureDefaultStamp?.contractBase64 &&
+              signature.isTemporarySigned;
             else elseBlock
           "
-          [src]="sanitizer.bypassSecurityTrustResourceUrl(signatureDefaultStamp?.contractBase64)"
+          [src]="
+            sanitizer.bypassSecurityTrustResourceUrl(
+              signatureDefaultStamp?.contractBase64
+            )
+          "
           alt="signature"
         />
       </div>

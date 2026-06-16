@@ -1,6 +1,6 @@
 {
-  "remoteServiceBaseUrl": "https://metasign-api.nccsoft.vn",
-  "appBaseUrl": "https://metasign.nccsoft.vn",
+  "remoteServiceBaseUrl": "http://localhost:44311",
+  "appBaseUrl": "http://localhost:4200",
   "localeMappings": [
     {
       "from": "pt-BR",
