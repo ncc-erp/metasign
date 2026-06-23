@@ -25,5 +25,6 @@ export interface SignDto {
 export interface SignMultipleDto {
     contractId: number,
     signSignatures: SignDto[],
-    contractBase64?:string
+    contractBase64?:string,
+    concurrencyStamp?:string
 }

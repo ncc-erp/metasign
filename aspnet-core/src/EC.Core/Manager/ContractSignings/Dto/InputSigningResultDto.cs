@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,5 +11,6 @@ namespace EC.Manager.ContractSignings.Dto
         public long ContractSettingId { get; set; }
         public string SignResult { get; set; }
         public bool? HasDigital { get; set; }
+        public string ConcurrencyStamp { get; set; }
     }
 }

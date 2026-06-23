@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,5 +24,6 @@ namespace EC.Manager.ContractSignings.Dto
         public long ContractId { get; set; }
         public string ContractBase64 { get; set; }
         public List<SigningDto> SignSignatures { get; set; }
+        public string ConcurrencyStamp { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Abp.Application.Services.Dto;
+using Abp.Application.Services.Dto;
 using System;
 using System.Collections.Generic;
 using static EC.Constants.Enum;
@@ -40,6 +40,7 @@ namespace EC.Manager.SignerSignatureSettings.Dto
         public List<GetSignerSignatureSettingDto> SignatureSettings { get; set; }
         public bool IsCreator { get; set; }
         public Guid? MassGuid{ get; set; }
+        public string ConcurrencyStamp { get; set; }
     }
 
     public class GetSigningSignatureSettingDto : GetSignerSignatureSettingDto
@@ -59,6 +60,7 @@ namespace EC.Manager.SignerSignatureSettings.Dto
         public string Base64Pdf { get; set; }
         public List<GetMassContractNotSignSignatureDto> Signature { get; set; }
         public bool IsSigned { get; set; }
+        public string ConcurrencyStamp { get; set; }
     }
 
     public class GetMassContractNotSignSignatureDto

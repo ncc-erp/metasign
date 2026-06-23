@@ -1,4 +1,4 @@
-﻿using Abp.UI;
+using Abp.UI;
 using EC.Authorization.Users;
 using EC.Entities;
 using EC.Manager.Contracts;
@@ -321,6 +321,10 @@ namespace EC.Manager.SignerSignatureSettings
 
                 )
                 .FirstOrDefault();
+            var signingCount = await WorkScope.GetAll<ContractSigning>()
+                .Where(x => x.ContractId == contract.contractId)
+                .CountAsync();
+
             return new GetContractSignerSignatureSettingDto
             {
                 ContractId = contract.contractId,
@@ -334,8 +338,8 @@ namespace EC.Manager.SignerSignatureSettings
                 SignatureSettings = signatureSettings,
                 SignatureDefault = defaultSignature != default ? defaultSignature : null,
                 IsCreator = isCreator,
-                MassGuid = contract.MassGuid
-               
+                MassGuid = contract.MassGuid,
+                ConcurrencyStamp = signingCount.ToString()
             };
         }
 
@@ -470,6 +474,9 @@ namespace EC.Manager.SignerSignatureSettings
             foreach (var item in result)
             {
                 item.Base64Pdf = await _fileStoringManager.DownloadLatestContractBase64(item.ContractId);
+                item.ConcurrencyStamp = (await WorkScope.GetAll<ContractSigning>()
+                    .Where(x => x.ContractId == item.ContractId)
+                    .CountAsync()).ToString();
             }
             return result;
         }

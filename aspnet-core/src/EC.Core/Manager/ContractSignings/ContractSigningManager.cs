@@ -1,4 +1,4 @@
-﻿using Abp.BackgroundJobs;
+using Abp.BackgroundJobs;
 using Abp.Timing;
 using Abp.UI;
 using EC.Authorization.Users;
@@ -31,6 +31,9 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using static EC.Constants.Enum;
+using System.Collections.Concurrent;
+using System.Threading;
+using EC.SignalR;
 
 namespace EC.Manager.ContractSignings
 {
@@ -48,6 +51,7 @@ namespace EC.Manager.ContractSignings
         private readonly SignatureUserManager _signatureUserManager;
         private readonly SignServerWebService _signServerWebService;
         private readonly SignServerWorkerManager _signServerWorkerManager;
+        public IContractHubService ContractHubService { get; set; }
         public ContractSigningManager(IWorkScope workScope,
             SignServerWebService signServerWebService,
             SignServerWorkerManager signServerWorkerManager,
@@ -60,7 +64,8 @@ namespace EC.Manager.ContractSignings
             IWebHostEnvironment webHostEnvironment,
             EmailManager emailManager,
             NotificationManager notificationManager,
-            FileStoringManager fileStoringManager) : base(workScope)
+            FileStoringManager fileStoringManager,
+            IContractHubService contractHubService = null) : base(workScope)
         {
             _signServerWebService = signServerWebService;
             _signServerWorkerManager = signServerWorkerManager;
@@ -74,6 +79,32 @@ namespace EC.Manager.ContractSignings
             _hostingEnvironment = webHostEnvironment;
             _notificationManager = notificationManager;
             _fileStoringManager = fileStoringManager;
+            ContractHubService = contractHubService ?? NullContractHubService.Instance;
+        }
+
+        public static class ContractLockManager
+        {
+            private static readonly ConcurrentDictionary<long, SemaphoreSlim> _locks = new ConcurrentDictionary<long, SemaphoreSlim>();
+
+            public static SemaphoreSlim GetLock(long contractId)
+            {
+                return _locks.GetOrAdd(contractId, _ => new SemaphoreSlim(1, 1));
+            }
+        }
+
+        private async Task CheckConcurrencyStamp(long contractId, string clientStamp)
+        {
+            if (!string.IsNullOrEmpty(clientStamp))
+            {
+                var dbCount = await WorkScope.GetAll<ContractSigning>()
+                    .Where(x => x.ContractId == contractId)
+                    .CountAsync();
+
+                if (dbCount.ToString() != clientStamp)
+                {
+                    throw new UserFriendlyException("Hợp đồng đã được ký hoặc thay đổi bởi người khác. Vui lòng tải lại trang để cập nhật nội dung mới nhất.");
+                }
+            }
         }
 
         public async Task CompleteContract(long contractId)
@@ -245,74 +276,99 @@ namespace EC.Manager.ContractSignings
             var contractSetting = await WorkScope.GetAll<ContractSetting>()
                 .Where(x => x.Id == input.ContractSettingId)
                 .FirstOrDefaultAsync();
-            var signMethod = SignMethod.Input;
-            var guid = Guid.NewGuid();
-            if (input.HasDigital.HasValue && input.HasDigital.Value)
+
+            var contractId = contractSetting.ContractId;
+            var semaphore = ContractLockManager.GetLock(contractId);
+            await semaphore.WaitAsync();
+            try
             {
-                signMethod = SignMethod.UsbToken;
+                await CheckConcurrencyStamp(contractId, input.ConcurrencyStamp);
+
+                var signMethod = SignMethod.Input;
+                var guid = Guid.NewGuid();
+                if (input.HasDigital.HasValue && input.HasDigital.Value)
+                {
+                    signMethod = SignMethod.UsbToken;
+                }
+
+                var signatureBase64 = GetSignatureBase64();
+                contractSetting.IsComplete = true;
+                contractSetting.UpdateDate = Clock.Provider.Now;
+                contractSetting.LastModificationTime = Clock.Provider.Now;
+
+                await InsertSigningResult(contractSetting.ContractId, guid, input.SignResult, signMethod, signatureBase64, contractSetting.SignerEmail);
+
+                await UpdateSignedSignature(input.ContractSettingId);
+
+                var history = new CreaContractHistoryDto
+                {
+                    Action = HistoryAction.Sign,
+                    AuthorEmail = contractSetting.SignerEmail,
+                    ContractId = contractSetting.ContractId,
+                    ContractStatus = ContractStatus.Inprogress,
+                    TimeAt = DateTimeUtils.GetNow(),
+                    Note = $"{contractSetting.SignerEmail} signedTheDocument"
+                };
+                await _contractHistoryManager.Create(history);
+
+                CurrentUnitOfWork.SaveChanges();
+
+                var signers = await WorkScope.GetAll<ContractSetting>()
+                                .Include(x => x.Contract)
+                                .Include(x => x.Contract.User)
+                                .Where(x => x.ContractId == contractSetting.ContractId && x.ContractRole == ContractRole.Signer && !x.IsComplete)
+                                .ToListAsync();
+
+                var isOrder = signers.Any(x => x.ProcesOrder != 1);
+                if (isOrder)
+                {
+                    var firstContent = WorkScope.GetAll<ContractHistory>()
+                    .Where(x => x.ContractId == contractSetting.ContractId && x.Action == HistoryAction.SendMail)
+                    .Where(x => !string.IsNullOrEmpty(x.MailContent)).FirstOrDefault();
+                    var mailContent = JsonSerializer.Deserialize<MailPreviewInfoDto>(firstContent.MailContent);
+                    await _contractManager.SendMail(new Contracts.Dto.SendMailDto { ContractId = contractSetting.ContractId, MailContent = mailContent });
+                }
+
+                await CompleteContract(contractSetting.ContractId);
+
+                await ContractHubService.SendContractUpdatedEvent(contractId);
+
+                return true;
             }
-
-            var signatureBase64 = GetSignatureBase64();
-            contractSetting.IsComplete = true;
-            contractSetting.UpdateDate = Clock.Provider.Now;
-            contractSetting.LastModificationTime = Clock.Provider.Now;
-
-            await InsertSigningResult(contractSetting.ContractId, guid, input.SignResult, signMethod, signatureBase64, contractSetting.SignerEmail);
-
-            await UpdateSignedSignature(input.ContractSettingId);
-
-            var history = new CreaContractHistoryDto
+            finally
             {
-                Action = HistoryAction.Sign,
-                AuthorEmail = contractSetting.SignerEmail,
-                ContractId = contractSetting.ContractId,
-                ContractStatus = ContractStatus.Inprogress,
-                TimeAt = DateTimeUtils.GetNow(),
-                Note = $"{contractSetting.SignerEmail} signedTheDocument"
-            };
-            await _contractHistoryManager.Create(history);
-
-            CurrentUnitOfWork.SaveChanges();
-
-            var signers = await WorkScope.GetAll<ContractSetting>()
-                            .Include(x => x.Contract)
-                            .Include(x => x.Contract.User)
-                            .Where(x => x.ContractId == contractSetting.ContractId && x.ContractRole == ContractRole.Signer && !x.IsComplete)
-                            .ToListAsync();
-
-            var isOrder = signers.Any(x => x.ProcesOrder != 1);
-            if (isOrder)
-            {
-                var firstContent = WorkScope.GetAll<ContractHistory>()
-                .Where(x => x.ContractId == contractSetting.ContractId && x.Action == HistoryAction.SendMail)
-                .Where(x => !string.IsNullOrEmpty(x.MailContent)).FirstOrDefault();
-                var mailContent = JsonSerializer.Deserialize<MailPreviewInfoDto>(firstContent.MailContent);
-                await _contractManager.SendMail(new Contracts.Dto.SendMailDto { ContractId = contractSetting.ContractId, MailContent = mailContent });
+                semaphore.Release();
             }
-
-            await CompleteContract(contractSetting.ContractId);
-
-            return true;
         }
 
         public async Task<bool> InsertSigningResultForInput(InputSigningResultDto input)
         {
             var contractSetting = await WorkScope.GetAll<ContractSetting>()
-            .Where(x => x.Id == input.ContractSettingId)
-            .FirstOrDefaultAsync();
-            //var signatureType = await WorkScope.GetAll<SignerSignatureSetting>()
-            //    .Where(x => x.ContractSetting.ContractId == contractSetting.ContractId)
-            //    .Where(x => x.ContractSettingId == input.ContractSettingId)
-            //    .Select(x => x.SignatureType)
-            //    .FirstOrDefaultAsync();
+                .Where(x => x.Id == input.ContractSettingId)
+                .FirstOrDefaultAsync();
 
-            var signMethod = SignMethod.UsbToken;
-            var signatureBase64 = GetSignatureBase64();
+            var contractId = contractSetting.ContractId;
+            var semaphore = ContractLockManager.GetLock(contractId);
+            await semaphore.WaitAsync();
+            try
+            {
+                await CheckConcurrencyStamp(contractId, input.ConcurrencyStamp);
 
-            var guid = Guid.NewGuid();
+                var signMethod = SignMethod.UsbToken;
+                var signatureBase64 = GetSignatureBase64();
 
-            await InsertSigningResult(contractSetting.ContractId, guid, input.SignResult, signMethod, signatureBase64, contractSetting.SignerEmail);
-            return true;
+                var guid = Guid.NewGuid();
+
+                await InsertSigningResult(contractSetting.ContractId, guid, input.SignResult, signMethod, signatureBase64, contractSetting.SignerEmail);
+
+                await ContractHubService.SendContractUpdatedEvent(contractId);
+
+                return true;
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
         public async Task<string> SignDigitalSignature(SignFromCertDto input)
@@ -361,104 +417,117 @@ namespace EC.Manager.ContractSignings
 
         public async Task<string> SignMultiple(SignMultipleDto input)
         {
-            string contractBase64 = "";
-
-            if (!String.IsNullOrEmpty(input.ContractBase64))
+            var semaphore = ContractLockManager.GetLock(input.ContractId);
+            await semaphore.WaitAsync();
+            try
             {
-                contractBase64 = input.ContractBase64;
-            }
-            else
-            {
-                contractBase64 = WorkScope.GetAll<ContractSigning>()
-                .Where(x => x.ContractId == input.ContractId)
-                .OrderByDescending(x => x.TimeAt)
-                .Select(x => x.SigningResult)
-                .FirstOrDefault();
+                await CheckConcurrencyStamp(input.ContractId, input.ConcurrencyStamp);
 
-                if (contractBase64 == default)
+                string contractBase64 = "";
+
+                if (!String.IsNullOrEmpty(input.ContractBase64))
                 {
-                    contractBase64 = await WorkScope.GetAll<Entities.Contract>()
-                           .Where(x => x.Id == input.ContractId)
-                           .Select(x => x.FileBase64)
-                           .FirstOrDefaultAsync();
-                    if (string.IsNullOrEmpty(contractBase64))
+                    contractBase64 = input.ContractBase64;
+                }
+                else
+                {
+                    contractBase64 = WorkScope.GetAll<ContractSigning>()
+                    .Where(x => x.ContractId == input.ContractId)
+                    .OrderByDescending(x => x.TimeAt)
+                    .Select(x => x.SigningResult)
+                    .FirstOrDefault();
+
+                    if (contractBase64 == default)
+                    {
+                        contractBase64 = await WorkScope.GetAll<Entities.Contract>()
+                               .Where(x => x.Id == input.ContractId)
+                               .Select(x => x.FileBase64)
+                               .FirstOrDefaultAsync();
+                        if (string.IsNullOrEmpty(contractBase64))
+                        {
+                            contractBase64 = await _fileStoringManager.DownloadLatestContractBase64(input.ContractId);
+                        }
+                    }
+                    else if (string.IsNullOrEmpty(contractBase64))
                     {
                         contractBase64 = await _fileStoringManager.DownloadLatestContractBase64(input.ContractId);
                     }
                 }
-                else if (string.IsNullOrEmpty(contractBase64))
+
+                var contractSettingId = await WorkScope.GetAll<SignerSignatureSetting>()
+                    .Where(x => x.Id == input.SignSignatures.FirstOrDefault().SignerSignatureSettingId)
+                    .Select(x => x.ContractSettingId)
+                    .FirstOrDefaultAsync();
+
+                var contractSetting = await WorkScope.GetAll<ContractSetting>()
+                    .Where(x => x.Id == contractSettingId)
+                    .FirstOrDefaultAsync();
+
+                var contract = await WorkScope.GetAsync<Entities.Contract>(contractSetting.ContractId);
+
+                foreach (var item in input.SignSignatures)
                 {
-                    contractBase64 = await _fileStoringManager.DownloadLatestContractBase64(input.ContractId);
+                    var guid = Guid.NewGuid();
+
+                    var signMethod = GetSignMethod(item.SignatureType);
+
+                    contractBase64 = await SignProcess(item, contractBase64, guid);
+
+                    await InsertSigningResult(contractSetting.ContractId, guid, contractBase64, signMethod, item.SignartureBase64, contractSetting.SignerEmail);
                 }
+
+                SigningDto newSignature = input.SignSignatures.FirstOrDefault(x => x.IsNewSignature.Value);
+
+                if (newSignature != default)
+                {
+                    await CreateUserSignature(newSignature.SignartureBase64, newSignature.SignatureType, contractSetting.SignerEmail, newSignature.SetDefault);
+                }
+
+                contractSetting.Status = ContractSettingStatus.Confirmed;
+                contractSetting.IsComplete = true;
+                contractSetting.UpdateDate = Clock.Provider.Now;
+                contract.LastModificationTime = Clock.Provider.Now;
+
+                await CurrentUnitOfWork.SaveChangesAsync();
+
+                await UpdateSignedSignature(contractSettingId);
+
+                var history = new CreaContractHistoryDto
+                {
+                    Action = HistoryAction.Sign,
+                    AuthorEmail = contractSetting.SignerEmail,
+                    ContractId = contractSetting.ContractId,
+                    ContractStatus = ContractStatus.Inprogress,
+                    TimeAt = DateTimeUtils.GetNow(),
+                    Note = $"{contractSetting.SignerEmail} signedTheDocument"
+                };
+                await _contractHistoryManager.Create(history);
+                var signers = await WorkScope.GetAll<ContractSetting>()
+                    .Include(x => x.Contract)
+                    .Include(x => x.Contract.User)
+                    .Where(x => x.ContractId == contractSetting.ContractId && x.ContractRole == ContractRole.Signer && !x.IsComplete && x.IsSendMail == false)
+                    .ToListAsync();
+
+                var isOrder = signers.Any(x => x.ProcesOrder != 1);
+
+                if (isOrder && signers.Count > 0)
+                {
+                    var firstContent = WorkScope.GetAll<ContractHistory>()
+                    .Where(x => x.ContractId == contractSetting.ContractId && x.Action == HistoryAction.SendMail)
+                    .Where(x => !string.IsNullOrEmpty(x.MailContent)).FirstOrDefault();
+                    var mailContent = JsonSerializer.Deserialize<MailPreviewInfoDto>(firstContent.MailContent);
+                    await _contractManager.SendMail(new Contracts.Dto.SendMailDto { ContractId = contractSetting.ContractId, MailContent = mailContent });
+                }
+                await CompleteContract(contractSetting.ContractId);
+
+                await ContractHubService.SendContractUpdatedEvent(input.ContractId);
+
+                return contractBase64;
             }
-
-            var contractSettingId = await WorkScope.GetAll<SignerSignatureSetting>()
-                .Where(x => x.Id == input.SignSignatures.FirstOrDefault().SignerSignatureSettingId)
-                .Select(x => x.ContractSettingId)
-                .FirstOrDefaultAsync();
-
-            var contractSetting = await WorkScope.GetAll<ContractSetting>()
-                .Where(x => x.Id == contractSettingId)
-                .FirstOrDefaultAsync();
-
-            var contract = await WorkScope.GetAsync<Entities.Contract>(contractSetting.ContractId);
-
-            foreach (var item in input.SignSignatures)
+            finally
             {
-                var guid = Guid.NewGuid();
-
-                var signMethod = GetSignMethod(item.SignatureType);
-
-                contractBase64 = await SignProcess(item, contractBase64, guid);
-
-                await InsertSigningResult(contractSetting.ContractId, guid, contractBase64, signMethod, item.SignartureBase64, contractSetting.SignerEmail);
+                semaphore.Release();
             }
-
-            SigningDto newSignature = input.SignSignatures.FirstOrDefault(x => x.IsNewSignature.Value);
-
-            if (newSignature != default)
-            {
-                await CreateUserSignature(newSignature.SignartureBase64, newSignature.SignatureType, contractSetting.SignerEmail, newSignature.SetDefault);
-            }
-
-            contractSetting.Status = ContractSettingStatus.Confirmed;
-            contractSetting.IsComplete = true;
-            contractSetting.UpdateDate = Clock.Provider.Now;
-            contract.LastModificationTime = Clock.Provider.Now;
-
-            await CurrentUnitOfWork.SaveChangesAsync();
-
-            await UpdateSignedSignature(contractSettingId);
-
-            var history = new CreaContractHistoryDto
-            {
-                Action = HistoryAction.Sign,
-                AuthorEmail = contractSetting.SignerEmail,
-                ContractId = contractSetting.ContractId,
-                ContractStatus = ContractStatus.Inprogress,
-                TimeAt = DateTimeUtils.GetNow(),
-                Note = $"{contractSetting.SignerEmail} signedTheDocument"
-            };
-            await _contractHistoryManager.Create(history);
-            var signers = await WorkScope.GetAll<ContractSetting>()
-                .Include(x => x.Contract)
-                .Include(x => x.Contract.User)
-                .Where(x => x.ContractId == contractSetting.ContractId && x.ContractRole == ContractRole.Signer && !x.IsComplete && x.IsSendMail == false)
-                .ToListAsync();
-
-            var isOrder = signers.Any(x => x.ProcesOrder != 1);
-
-            if (isOrder && signers.Count > 0)
-            {
-                var firstContent = WorkScope.GetAll<ContractHistory>()
-                .Where(x => x.ContractId == contractSetting.ContractId && x.Action == HistoryAction.SendMail)
-                .Where(x => !string.IsNullOrEmpty(x.MailContent)).FirstOrDefault();
-                var mailContent = JsonSerializer.Deserialize<MailPreviewInfoDto>(firstContent.MailContent);
-                await _contractManager.SendMail(new Contracts.Dto.SendMailDto { ContractId = contractSetting.ContractId, MailContent = mailContent });
-            }
-            await CompleteContract(contractSetting.ContractId);
-
-            return contractBase64;
         }
         public async Task<string> SignProcess(SigningDto input, string contractBase64, Guid guid)
         {

@@ -10,6 +10,7 @@ export interface ContractSignerSignatureSettingDto {
   status: number;
   signatureDefault: string;
   signatureSettings: SignatureSettings[];
+  concurrencyStamp?: string;
 }
 
 export interface ContractSignatureSettingDto {

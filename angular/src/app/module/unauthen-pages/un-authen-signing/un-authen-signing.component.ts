@@ -23,6 +23,7 @@ import {
   ElementRef,
   Injector,
   OnInit,
+  OnDestroy,
   QueryList,
   ViewChild,
   ViewChildren,
@@ -30,6 +31,7 @@ import {
 } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { DomSanitizer } from "@angular/platform-browser";
+import { HubConnection, HubConnectionBuilder } from "@aspnet/signalr";
 import * as pdfjsLib from "pdfjs-dist/webpack";
 import { ContractRole, ContractStatus } from "@shared/AppEnums";
 import { SignatureSettings } from "@app/service/model/design-contract.dto";
@@ -56,8 +58,9 @@ import * as FileSaver from "file-saver";
 })
 export class UnAuthenSigningComponent
   extends AppComponentBase
-  implements OnInit
+  implements OnInit, OnDestroy
 {
+  private hubConnection: HubConnection;
   private contractSettingId: number = 0;
   private contracId: number = 0;
   private tenantName = "";
@@ -178,6 +181,39 @@ export class UnAuthenSigningComponent
     this.updateScale();
     this.getSignatureSetting();
     this.screenWidth = window.innerWidth;
+    this.initSignalR();
+  }
+
+  ngOnDestroy(): void {
+    if (this.hubConnection) {
+      this.hubConnection.stop();
+    }
+  }
+
+  initSignalR(): void {
+    const token = abp.auth.getToken();
+    const url = AppConsts.remoteServiceBaseUrl + "/signalr-contract";
+    console.log("Initializing SignalR to: " + url + " with token: " + (token ? "Yes" : "No"));
+
+    this.hubConnection = new HubConnectionBuilder()
+      .withUrl(url, token ? { accessTokenFactory: () => token } : {})
+      .build();
+
+    this.hubConnection
+      .start()
+      .then(() => {
+        console.log("SignalR connected successfully. Joining contract group: Contract-" + this.contracId);
+        this.hubConnection.send("JoinContract", this.contracId);
+      })
+      .catch((err) => console.log("Error while starting connection: " + err));
+
+    this.hubConnection.on("ContractUpdated", (contractId: number) => {
+      console.log("Received ContractUpdated event for contractId: " + contractId);
+      if (contractId === this.contracId) {
+        abp.notify.info("Tài liệu vừa được cập nhật chữ ký mới. Hệ thống đang đồng bộ dữ liệu...");
+        this.getSignatureSetting();
+      }
+    });
   }
 
   @HostListener("window:resize")
@@ -399,6 +435,7 @@ export class UnAuthenSigningComponent
                       let signingResult = {
                         contractSettingId: contract.contractSettingId,
                         signResult: rs.result,
+                        concurrencyStamp: contract.concurrencyStamp,
                       };
                       this.contractSigningService
                         .insertSigningResultAndComplete(signingResult)
@@ -525,6 +562,7 @@ export class UnAuthenSigningComponent
                         contractId: this.contracId,
                         signSignatures: signature,
                         contractBase64: value,
+                        concurrencyStamp: contract.concurrencyStamp,
                       };
                       return this.contractSigningService.signMultiple(
                         signatureElectronicPayload
@@ -536,6 +574,7 @@ export class UnAuthenSigningComponent
                       let signingResult = {
                         contractSettingId: contract.contractSettingId,
                         signResult: rs.result,
+                        concurrencyStamp: contract.concurrencyStamp,
                       };
                       return this.contractSigningService.insertSigningResult(
                         signingResult
@@ -624,6 +663,7 @@ export class UnAuthenSigningComponent
                         contractSettingId: contract.contractSettingId,
                         signResult: rs,
                         hasDigital: true,
+                        concurrencyStamp: contract.concurrencyStamp,
                       };
                       return this.contractSigningService.insertSigningResultAndComplete(
                         signingResult
@@ -688,6 +728,7 @@ export class UnAuthenSigningComponent
                   signSignatures: signature,
                   contractBase64: contract.base64Pdf,
                   showSignDate: contract.showSignDate,
+                  concurrencyStamp: contract.concurrencyStamp,
                 } as SignMultipleDto;
 
                 this.contractSigningService
@@ -739,6 +780,7 @@ export class UnAuthenSigningComponent
               let signingResult = {
                 contractSettingId: this.contractSettingId,
                 signResult: rs.result,
+                concurrencyStamp: this.contractInfo.concurrencyStamp,
               };
               this.contractSigningService
                 .insertSigningResultAndComplete(signingResult)
@@ -805,6 +847,7 @@ export class UnAuthenSigningComponent
                 contractId: this.contracId,
                 signSignatures: signatureElectronic,
                 contractBase64: value,
+                concurrencyStamp: this.contractInfo.concurrencyStamp,
               };
               return this.contractSigningService.signMultiple(
                 signatureElectronicPayload
@@ -816,6 +859,7 @@ export class UnAuthenSigningComponent
               let signingResult = {
                 contractSettingId: this.contractSettingId,
                 signResult: rs.result,
+                concurrencyStamp: this.contractInfo.concurrencyStamp,
               };
               return this.contractSigningService.insertSigningResult(
                 signingResult
@@ -890,6 +934,7 @@ export class UnAuthenSigningComponent
                 contractSettingId: this.contractSettingId,
                 signResult: rs,
                 hasDigital: true,
+                concurrencyStamp: this.contractInfo.concurrencyStamp,
               };
               return this.contractSigningService.insertSigningResultAndComplete(
                 signingResult
@@ -929,6 +974,7 @@ export class UnAuthenSigningComponent
           contractId: this.contracId,
           signSignatures: signatureElectronic,
           contractBase64: this.contractInfo.contractBase64,
+          concurrencyStamp: this.contractInfo.concurrencyStamp,
         } as SignMultipleDto;
 
         this.contractSigningService

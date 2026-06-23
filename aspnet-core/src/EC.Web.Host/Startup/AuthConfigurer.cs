@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -57,21 +57,26 @@ namespace EC.Web.Host.Startup
         private static Task QueryStringTokenResolver(MessageReceivedContext context)
         {
             if (!context.HttpContext.Request.Path.HasValue ||
-                !context.HttpContext.Request.Path.Value.StartsWith("/signalr"))
+                !context.HttpContext.Request.Path.Value.StartsWith("/signalr", StringComparison.OrdinalIgnoreCase))
             {
                 // We are just looking for signalr clients
                 return Task.CompletedTask;
             }
 
             var qsAuthToken = context.HttpContext.Request.Query["enc_auth_token"].FirstOrDefault();
-            if (qsAuthToken == null)
+            if (qsAuthToken != null)
             {
-                // Cookie value does not matches to querystring value
-                return Task.CompletedTask;
+                // Set auth token from cookie
+                context.Token = SimpleStringCipher.Instance.Decrypt(qsAuthToken);
             }
-
-            // Set auth token from cookie
-            context.Token = SimpleStringCipher.Instance.Decrypt(qsAuthToken);
+            else
+            {
+                var accessToken = context.HttpContext.Request.Query["access_token"].FirstOrDefault();
+                if (accessToken != null)
+                {
+                    context.Token = accessToken;
+                }
+            }
             return Task.CompletedTask;
         }
     }
