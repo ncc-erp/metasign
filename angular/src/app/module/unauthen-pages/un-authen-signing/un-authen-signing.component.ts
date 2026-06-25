@@ -31,7 +31,8 @@ import {
 } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { DomSanitizer } from "@angular/platform-browser";
-import { HubConnection, HubConnectionBuilder } from "@aspnet/signalr";
+import { Subscription } from "rxjs";
+import { ContractSignalrService } from "@app/service/api/contract-signalr.service";
 import * as pdfjsLib from "pdfjs-dist/webpack";
 import { ContractRole, ContractStatus } from "@shared/AppEnums";
 import { SignatureSettings } from "@app/service/model/design-contract.dto";
@@ -58,9 +59,8 @@ import * as FileSaver from "file-saver";
 })
 export class UnAuthenSigningComponent
   extends AppComponentBase
-  implements OnInit, OnDestroy
-{
-  private hubConnection: HubConnection;
+  implements OnInit, OnDestroy {
+  private signalrSub: Subscription;
   private contractSettingId: number = 0;
   private contracId: number = 0;
   private tenantName = "";
@@ -128,7 +128,8 @@ export class UnAuthenSigningComponent
     private domSanitizer: DomSanitizer,
     private contractPublicService: ContractPublicService,
     private desktopAppServiceService: DesktopAppServiceService,
-    private contractFileStoringService: ContractFileStoringService
+    private contractFileStoringService: ContractFileStoringService,
+    private contractSignalrService: ContractSignalrService
   ) {
     super(injector);
     this.matIconRegistry.addSvgIcon(
@@ -181,39 +182,21 @@ export class UnAuthenSigningComponent
     this.updateScale();
     this.getSignatureSetting();
     this.screenWidth = window.innerWidth;
-    this.initSignalR();
-  }
 
-  ngOnDestroy(): void {
-    if (this.hubConnection) {
-      this.hubConnection.stop();
-    }
-  }
-
-  initSignalR(): void {
-    const token = abp.auth.getToken();
-    const url = AppConsts.remoteServiceBaseUrl + "/signalr-contract";
-    console.log("Initializing SignalR to: " + url + " with token: " + (token ? "Yes" : "No"));
-
-    this.hubConnection = new HubConnectionBuilder()
-      .withUrl(url, token ? { accessTokenFactory: () => token } : {})
-      .build();
-
-    this.hubConnection
-      .start()
-      .then(() => {
-        console.log("SignalR connected successfully. Joining contract group: Contract-" + this.contracId);
-        this.hubConnection.send("JoinContract", this.contracId);
-      })
-      .catch((err) => console.log("Error while starting connection: " + err));
-
-    this.hubConnection.on("ContractUpdated", (contractId: number) => {
-      console.log("Received ContractUpdated event for contractId: " + contractId);
-      if (contractId === this.contracId) {
+    this.contractSignalrService.init(this.contracId);
+    this.signalrSub = this.contractSignalrService.contractUpdated$.subscribe((id) => {
+      if (id === this.contracId) {
         abp.notify.info("Tài liệu vừa được cập nhật chữ ký mới. Hệ thống đang đồng bộ dữ liệu...");
         this.getSignatureSetting();
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.signalrSub) {
+      this.signalrSub.unsubscribe();
+    }
+    this.contractSignalrService.stop();
   }
 
   @HostListener("window:resize")
@@ -528,7 +511,7 @@ export class UnAuthenSigningComponent
                       contract.signature.forEach((data) => {
                         if (
                           data.signatureType ===
-                            ContractSettingType.Electronic ||
+                          ContractSettingType.Electronic ||
                           data.signatureType === ContractSettingType.Stamp
                         ) {
                           signature.push(data);
@@ -539,7 +522,7 @@ export class UnAuthenSigningComponent
                           return (
                             data.signatureType === ContractSettingType.Stamp ||
                             data.signatureType ===
-                              ContractSettingType.Electronic
+                            ContractSettingType.Electronic
                           );
                         })
                         .sort(
@@ -1036,7 +1019,7 @@ export class UnAuthenSigningComponent
       });
       return; // Important: stop execution if no JWT
     }
-    
+
     localStorage.setItem("notSignNow", "1");
     let currentLogin = this.parseJwt(jwt);
     let type = localStorage.getItem("typeLoginSigning");
@@ -1499,9 +1482,9 @@ export class UnAuthenSigningComponent
             ...signature,
             valueInput:
               signature.signatureType === ContractSettingType.DatePicker ||
-              signature.signatureType === ContractSettingType.Text
+                signature.signatureType === ContractSettingType.Text
                 ? this.contractfiles[index1]?.signatureSettings[index2]
-                    .valueInput
+                  .valueInput
                 : valueSignature?.signartureBase64,
           };
         }),
