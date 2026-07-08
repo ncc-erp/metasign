@@ -33,7 +33,6 @@ using System.Threading.Tasks;
 using static EC.Constants.Enum;
 using System.Collections.Concurrent;
 using System.Threading;
-using EC.SignalR;
 
 namespace EC.Manager.ContractSignings
 {
@@ -51,7 +50,6 @@ namespace EC.Manager.ContractSignings
         private readonly SignatureUserManager _signatureUserManager;
         private readonly SignServerWebService _signServerWebService;
         private readonly SignServerWorkerManager _signServerWorkerManager;
-        public IContractHubService ContractHubService { get; set; }
         public ContractSigningManager(IWorkScope workScope,
             SignServerWebService signServerWebService,
             SignServerWorkerManager signServerWorkerManager,
@@ -64,8 +62,7 @@ namespace EC.Manager.ContractSignings
             IWebHostEnvironment webHostEnvironment,
             EmailManager emailManager,
             NotificationManager notificationManager,
-            FileStoringManager fileStoringManager,
-            IContractHubService contractHubService = null) : base(workScope)
+            FileStoringManager fileStoringManager) : base(workScope)
         {
             _signServerWebService = signServerWebService;
             _signServerWorkerManager = signServerWorkerManager;
@@ -79,7 +76,6 @@ namespace EC.Manager.ContractSignings
             _hostingEnvironment = webHostEnvironment;
             _notificationManager = notificationManager;
             _fileStoringManager = fileStoringManager;
-            ContractHubService = contractHubService ?? NullContractHubService.Instance;
         }
 
         public static class ContractLockManager
@@ -102,7 +98,7 @@ namespace EC.Manager.ContractSignings
 
                 if (dbCount.ToString() != clientStamp)
                 {
-                    throw new UserFriendlyException("Hợp đồng đã được ký hoặc thay đổi bởi người khác. Vui lòng tải lại trang để cập nhật nội dung mới nhất.");
+                    throw new UserFriendlyException("The contract has been signed or modified by another user. Please refresh the page to load the latest version.");
                 }
             }
         }
@@ -331,8 +327,6 @@ namespace EC.Manager.ContractSignings
 
                 await CompleteContract(contractSetting.ContractId);
 
-                await ContractHubService.SendContractUpdatedEvent(contractId);
-
                 return true;
             }
             finally
@@ -360,8 +354,6 @@ namespace EC.Manager.ContractSignings
                 var guid = Guid.NewGuid();
 
                 await InsertSigningResult(contractSetting.ContractId, guid, input.SignResult, signMethod, signatureBase64, contractSetting.SignerEmail);
-
-                await ContractHubService.SendContractUpdatedEvent(contractId);
 
                 return true;
             }
@@ -519,8 +511,6 @@ namespace EC.Manager.ContractSignings
                     await _contractManager.SendMail(new Contracts.Dto.SendMailDto { ContractId = contractSetting.ContractId, MailContent = mailContent });
                 }
                 await CompleteContract(contractSetting.ContractId);
-
-                await ContractHubService.SendContractUpdatedEvent(input.ContractId);
 
                 return contractBase64;
             }

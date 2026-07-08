@@ -32,7 +32,6 @@ import {
 import { ActivatedRoute, Router } from "@angular/router";
 import { DomSanitizer } from "@angular/platform-browser";
 import { Subscription } from "rxjs";
-import { ContractSignalrService } from "@app/service/api/contract-signalr.service";
 import * as pdfjsLib from "pdfjs-dist/webpack";
 import { ContractRole, ContractStatus } from "@shared/AppEnums";
 import { SignatureSettings } from "@app/service/model/design-contract.dto";
@@ -60,7 +59,6 @@ import * as FileSaver from "file-saver";
 export class UnAuthenSigningComponent
   extends AppComponentBase
   implements OnInit, OnDestroy {
-  private signalrSub: Subscription;
   private contractSettingId: number = 0;
   private contracId: number = 0;
   private tenantName = "";
@@ -128,8 +126,7 @@ export class UnAuthenSigningComponent
     private domSanitizer: DomSanitizer,
     private contractPublicService: ContractPublicService,
     private desktopAppServiceService: DesktopAppServiceService,
-    private contractFileStoringService: ContractFileStoringService,
-    private contractSignalrService: ContractSignalrService
+    private contractFileStoringService: ContractFileStoringService
   ) {
     super(injector);
     this.matIconRegistry.addSvgIcon(
@@ -182,21 +179,9 @@ export class UnAuthenSigningComponent
     this.updateScale();
     this.getSignatureSetting();
     this.screenWidth = window.innerWidth;
-
-    this.contractSignalrService.init(this.contracId);
-    this.signalrSub = this.contractSignalrService.contractUpdated$.subscribe((id) => {
-      if (id === this.contracId) {
-        abp.notify.info("Tài liệu vừa được cập nhật chữ ký mới. Hệ thống đang đồng bộ dữ liệu...");
-        this.getSignatureSetting();
-      }
-    });
   }
 
   ngOnDestroy(): void {
-    if (this.signalrSub) {
-      this.signalrSub.unsubscribe();
-    }
-    this.contractSignalrService.stop();
   }
 
   @HostListener("window:resize")
